@@ -41,7 +41,7 @@ draw() {
   echo "Select scripts to run (arrows: move, space: select, enter: run):"
   # CheckAll пункт
   if [ "$CUR" -eq 0 ]; then
-    printf "${YELLOW}>"
+    printf "${YELLOW}>${NC}"
   else
     printf " "
   fi
@@ -61,7 +61,7 @@ draw() {
   # Список скриптов
   for idx in $(seq 0 $((SCRIPTS_COUNT-1))); do
     if [ "$CUR" -eq $((idx+1)) ]; then
-      printf "${YELLOW}>"
+      printf "${YELLOW}>${NC}"
     else
       printf " "
     fi
@@ -78,38 +78,32 @@ draw() {
 # Чтение клавиш
 while :; do
   draw
-  read -rsn1 key
-  if [ "$key" = $'\x1b' ]; then
+  IFS= read -rsn1 key
+  if [[ $key == $'\x1b' ]]; then
     read -rsn2 -t 0.1 key2
     key="$key$key2"
     case "$key" in
-      $'\x1b[A') # up
-        CUR=$(( (CUR-1+SCRIPTS_COUNT+1)%(SCRIPTS_COUNT+1) ))
-        ;;
-      $'\x1b[B') # down
-        CUR=$(( (CUR+1)%(SCRIPTS_COUNT+1) ))
-        ;;
+      $'\x1b[A') CUR=$(( (CUR-1+SCRIPTS_COUNT+1)%(SCRIPTS_COUNT+1) )) ;;
+      $'\x1b[B') CUR=$(( (CUR+1)%(SCRIPTS_COUNT+1) )) ;;
     esac
-  elif [ "$key" = " " ]; then
-    if [ "$CUR" -eq 0 ]; then
-      # CheckAll
+  elif [[ $key == " " ]]; then
+    if (( CUR == 0 )); then
       all_selected=1
-      for idx in $(seq 0 $((SCRIPTS_COUNT-1))); do
-        if [ "${SELECTED[$idx]}" -eq 0 ]; then
+      for idx in "${!SELECTED[@]}"; do
+        if [[ ${SELECTED[$idx]} -eq 0 ]]; then
           all_selected=0
           break
         fi
       done
-      new_val=1
-      [ "$all_selected" -eq 1 ] && new_val=0
-      for idx in $(seq 0 $((SCRIPTS_COUNT-1))); do
+      new_val=$((1-all_selected))
+      for idx in "${!SELECTED[@]}"; do
         SELECTED[$idx]=$new_val
       done
     else
-      SELECTED[$((CUR-1))]=$((1 - ${SELECTED[$((CUR-1))]}))
+      idx=$((CUR-1))
+      SELECTED[$idx]=$((1 - ${SELECTED[$idx]}))
     fi
-    continue # redraw after space
-  elif [ "$key" = "" ]; then
+  elif [[ $key == "" ]]; then
     break
   fi
 done
