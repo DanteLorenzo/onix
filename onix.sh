@@ -165,7 +165,8 @@ for script in $TO_RUN; do
   else
     fail=$((fail+1))
   fi
-  read -p "Нажмите Enter для продолжения..." dummy
+  printf "${YELLOW}Press Enter to continue...${NC}\n"
+  read dummy
   i=$((i+1))
 done
 
