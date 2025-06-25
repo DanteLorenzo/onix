@@ -23,7 +23,9 @@ LOGO='
 '
 
 SCRIPTS_DIR="scripts"
-find "$SCRIPTS_DIR" -maxdepth 1 -type f -perm /111 | sort
+# Делаем все файлы в scripts исполняемыми
+chmod -f +x "$SCRIPTS_DIR"/* 2>/dev/null
+mapfile -t SCRIPTS_ARR < <(find "$SCRIPTS_DIR" -maxdepth 1 -type f -perm /111 | sort)
 SCRIPTS_COUNT=${#SCRIPTS_ARR[@]}
 [ "$SCRIPTS_COUNT" -eq 0 ] && echo "No executable scripts found in $SCRIPTS_DIR" && exit 1
 
