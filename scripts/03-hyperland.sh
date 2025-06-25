@@ -13,7 +13,7 @@ if [ $? -eq 0 ]; then
   log_success "Hyprland and dependencies installation complete."
   
   # Copy config folders to ~/.config, overwriting if they exist
-  for folder in alacritty hyprland hyprpaper waybar wofi; do
+  for folder in alacritty hypr hyprpaper waybar wofi; do
     src_dir="$(dirname "$0")/../configs/$folder"
     dest_dir="$HOME/.config/$folder"
     rm -rf "$dest_dir"
