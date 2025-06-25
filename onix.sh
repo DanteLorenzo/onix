@@ -23,16 +23,12 @@ LOGO='
 '
 
 SCRIPTS_DIR="scripts"
-SCRIPTS=$(find "$SCRIPTS_DIR" -maxdepth 1 -type f -perm +111 | sort)
-SCRIPTS_COUNT=$(echo "$SCRIPTS" | wc -l)
+mapfile -t SCRIPTS_ARR < <(find "$SCRIPTS_DIR" -maxdepth 1 -type f -perm +111 | sort)
+SCRIPTS_COUNT=${#SCRIPTS_ARR[@]}
 [ "$SCRIPTS_COUNT" -eq 0 ] && echo "No executable scripts found in $SCRIPTS_DIR" && exit 1
 
-# Массивы для выбора
-i=0
-for s in $SCRIPTS; do
-  SCRIPTS_ARR[$i]="$s"
+for ((i=0; i<SCRIPTS_COUNT; i++)); do
   SELECTED[$i]=0
-  i=$((i+1))
 done
 
 CUR=0
