@@ -4,7 +4,7 @@
 source "$(dirname "$0")/../utils/logging.sh"
 
 log_info "Installing Hyprland and dependencies with pacman..."
-sudo pacman -Sy --needed --noconfirm hyprland kitty
+sudo pacman -Sy --needed --noconfirm hyprland kitty sddm
 # libxcb xcb-proto xcb-util libx11 libxfixes libxcomposite xorg-xinput libxrender wayland-protocols xcb-util-keysyms xcb-util-wm cairo polkit meson seatd libxkbcommon
 
 #     hyprpaper waybar wofi alacritty
