@@ -132,6 +132,9 @@ done
 
 # After script selection, prompt for sudo password and cache it
 sudo -v || { echo "Sudo authentication failed."; exit 1; }
+# Start background process to keep sudo session alive
+while true; do sudo -n true; sleep 60; done 2>/dev/null &
+SUDO_PID=$!
 
 # Run with progress bar and logs
 success=0
@@ -164,6 +167,9 @@ for script in $TO_RUN; do
   fi
   i=$((i+1))
 done
+
+# Kill the background sudo keeper
+kill $SUDO_PID
 
 clear
 printf "${CYAN}%s${NC}\n\n" "$LOGO"
