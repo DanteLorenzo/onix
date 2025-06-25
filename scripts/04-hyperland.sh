@@ -4,12 +4,9 @@
 source "$(dirname "$0")/../utils/logging.sh"
 
 log_info "Installing Hyprland and dependencies with pacman..."
-sudo pacman -S --needed --noconfirm base-devel gcc cmake hyprland kitty git 
+sudo pacman -Rs --needed --noconfirm  cmake hyprland kitty git mesa gdb ninja libxcb xcb-proto xcb-util libx11 libxfixes libxcomposite xorg-xinput libxrender wayland-protocols xcb-util-keysyms xcb-util-wm cairo polkit meson seatd libxkbcommon vulkan-radeon
 
-#     hyprpaper waybar wofi alacritty gdb ninja   libxcb xcb-proto xcb-util \
-#   xcb-util-keysyms libxfixes libx11 libxcomposite xorg-xinput libxrender \
-#   pixman wayland-protocols cairo pango seatd libxkbcommon xcb-util-wm \
-#   xorg-xwayland cmake mesa meson polkit
+#     hyprpaper waybar wofi alacritty
 if [ $? -eq 0 ]; then
   log_success "Hyprland and dependencies installation complete."
   
