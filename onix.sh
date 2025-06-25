@@ -108,6 +108,7 @@ while :; do
     else
       SELECTED[$((CUR-1))]=$((1 - ${SELECTED[$((CUR-1))]}))
     fi
+    continue # redraw after space
   elif [ "$key" = "" ]; then
     break
   fi
@@ -117,7 +118,11 @@ done
 TO_RUN=""
 for idx in $(seq 0 $((SCRIPTS_COUNT-1))); do
   if [ "${SELECTED[$idx]}" -eq 1 ]; then
-    TO_RUN="$TO_RUN ${SCRIPTS_ARR[$idx]}"
+    if [ -z "$TO_RUN" ]; then
+      TO_RUN="${SCRIPTS_ARR[$idx]}"
+    else
+      TO_RUN="$TO_RUN ${SCRIPTS_ARR[$idx]}"
+    fi
   fi
 done
 
