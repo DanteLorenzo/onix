@@ -159,13 +159,13 @@ for script in $TO_RUN; do
   done
   printf "] $i/$total\n"
   printf "${BLUE}Running: %s${NC}\n\n" "$script"
-  read -p "Press Enter to start this script..." dummy
   sh "$script"
   if [ $? -eq 0 ]; then
     success=$((success+1))
   else
     fail=$((fail+1))
   fi
+  read -p "Нажмите Enter для продолжения..." dummy
   i=$((i+1))
 done
 
