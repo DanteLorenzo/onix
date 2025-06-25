@@ -21,7 +21,7 @@ sudo awk '!/^GRUB_THEME/ && !/^GRUB_FONT/' /etc/default/grub.bak | \
   sudo tee /etc/default/grub > /dev/null
 
 echo 'GRUB_THEME="/boot/grub/themes/AmeliTheme.txt"' | sudo tee -a /etc/default/grub > /dev/null
-echo 'GRUB_FONT="/boot/grub/fonts/terminus-28.pf2"' | sudo tee -a /etc/default/grub > /dev/null
+echo 'GRUB_FONT="/boot/grub/fonts/terminus-30.pf2"' | sudo tee -a /etc/default/grub > /dev/null
 
 # Обновляем GRUB
 log_info "Updating GRUB..."
