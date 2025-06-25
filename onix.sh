@@ -35,6 +35,9 @@ done
 
 CUR=0
 
+# В самом начале clear
+clear
+
 draw() {
   printf "\033[H"
   printf "${CYAN}%s${NC}\n\n" "$LOGO"
@@ -46,8 +49,8 @@ draw() {
     printf " "
   fi
   all_selected=1
-  for idx in $(seq 0 $((SCRIPTS_COUNT-1))); do
-    if [ "${SELECTED[$idx]}" -eq 0 ]; then
+  for idx in "${!SELECTED[@]}"; do
+    if [[ ${SELECTED[$idx]} -eq 0 ]]; then
       all_selected=0
       break
     fi
@@ -59,7 +62,7 @@ draw() {
   fi
   printf "CheckAll\n"
   # Список скриптов
-  for idx in $(seq 0 $((SCRIPTS_COUNT-1))); do
+  for idx in "${!SCRIPTS_ARR[@]}"; do
     if [ "$CUR" -eq $((idx+1)) ]; then
       printf "${YELLOW}>${NC}"
     else
@@ -88,6 +91,7 @@ while :; do
     esac
   elif [[ $key == " " ]]; then
     if (( CUR == 0 )); then
+      # CheckAll
       all_selected=1
       for idx in "${!SELECTED[@]}"; do
         if [[ ${SELECTED[$idx]} -eq 0 ]]; then
@@ -99,7 +103,7 @@ while :; do
       for idx in "${!SELECTED[@]}"; do
         SELECTED[$idx]=$new_val
       done
-    else
+    elif (( CUR > 0 )); then
       idx=$((CUR-1))
       SELECTED[$idx]=$((1 - ${SELECTED[$idx]}))
     fi
