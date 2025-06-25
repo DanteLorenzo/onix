@@ -36,7 +36,7 @@ done
 CUR=0
 
 draw() {
-  clear
+  printf "\033[H"
   printf "${CYAN}%s${NC}\n\n" "$LOGO"
   echo "Select scripts to run (arrows: move, space: select, enter: run):"
   # CheckAll пункт
