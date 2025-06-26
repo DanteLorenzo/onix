@@ -87,3 +87,18 @@ window#waybar {
 
 
 /* Keyboard layout */
+#keyboard-state {
+    padding: 0 10px;
+    margin: 0 4px;
+    border-radius: 5px;
+    background-color: #4c566a;
+    color: #eceff4;
+}
+
+#keyboard-state.us {
+    background-color: #5e81ac;
+}
+
+#keyboard-state.ru {
+    background-color: #bf616a;
+}
