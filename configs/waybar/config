@@ -9,7 +9,7 @@
 	
     "modules-left": ["cpu", "memory"],
     "modules-center": [],
-    "modules-right": ["keyboard-state", "custom/pipewire"],
+    "modules-right": ["custom/keyboard", "custom/pipewire"],
 
 
     "cpu": {
@@ -55,15 +55,11 @@
 	// },
 
 
-	"keyboard-state": {
-        "numlock": true,
-        "capslock": true,
-        "format": "{name} {icon}",
-        "format-pressed": "{name} {icon}",
-        "states": {
-            "ru": "RU",
-            "us": "EN"
-        }
+	"custom/keyboard": {
+        "exec": "hyprctl devices -j | jq -r '.keyboards[] | select(.name == \"at-translated-set-2-keyboard\") | .active_keymap' | cut -c-2 | tr 'a-z' 'A-Z'",
+        "interval": 1,
+        "format": "{}",
+        "on-click": "hyprctl switchxkblayout at-translated-set-2-keyboard next"
     },
 
 
