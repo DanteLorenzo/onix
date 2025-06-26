@@ -5,7 +5,7 @@ source "$(dirname "$0")/../utils/logging.sh"
 
 # Base
 log_info "Installing base packages with pacman..."
-sudo pacman -S --needed --noconfirm base-devel gcc cmake git mesa gdb nano vim ninja vulkan-radeon timeshift firefox pipewire wireplumber pipewire-pulse pipewire-alsa
+sudo pacman -S --needed --noconfirm base-devel gcc cmake git mesa gdb nano vim ninja vulkan-radeon timeshift firefox pipewire wireplumber pipewire-pulse pipewire-alsa xorg-xkbcomp xorg-xkbcommon
 
 # Fonts
 sudo pacman -S --noconfirm ttf-nerd-fonts-symbols ttf-font-awesome noto-fonts noto-fonts-emoji
