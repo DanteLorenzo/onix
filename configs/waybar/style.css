@@ -48,7 +48,6 @@ window#waybar {
 #custom-weather,
 #tray,
 #language,
-#pulseaudio,
 #clock {
 	padding: 0 10px;
 	margin: 0 6px;
@@ -71,4 +70,17 @@ window#waybar {
 	background-color: @bg;
 	color: @cyan;
 	font-weight: bold;
+}
+
+/* Pipewire */
+#custom-pipewire {
+    padding: 0 10px;
+}
+
+#custom-pipewire.unmuted {
+    color: @color11; /* or any color you prefer */
+}
+
+#custom-pipewire.muted {
+    color: @color1; /* muted color */
 }

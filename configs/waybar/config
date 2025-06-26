@@ -4,7 +4,8 @@
 	"height": 27,
 	"width": 1200,
 	"margin-top": 10,
-	
+	"font-family": "JetBrainsMono Nerd Font, FontAwesome, Noto Sans, sans-serif",
+	"font-size": "12px",
 	
     "modules-left": ["cpu", "memory", "custom/cmus"],
     "modules-center": ["custom/menu", "custom/sep", "hyprland/workspaces", "custom/sep", "hyprland/window"],
@@ -73,23 +74,26 @@
 	},
 
 
-    "pulseaudio": {
-		"scroll-step": 5,
-		"format": "{icon}  {volume}%",
-		"format-icons": {
-			"default": ["", "", ""]
-		},
-		"on-click": "pavucontrol"
+	"custom/pipewire": {
+    	"format": "{icon} {volume}%",
+    	"format-icons": {
+        	"headphone": "",
+        	"hands-free": "",
+        	"headset": "",
+        	"phone": "",
+        	"portable": "",
+        	"car": "",
+        	"default": ["", "", ""]
+    	},
+    	"format-muted": " Muted",
+    	"on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
+    	"on-click-right": "pavucontrol",
+    	"on-scroll-up": "pactl set-sink-volume @DEFAULT_SINK@ +5%",
+    	"on-scroll-down": "pactl set-sink-volume @DEFAULT_SINK@ -5%",
+    	"tooltip": false,
+    	"exec": "~/.config/waybar/scripts/pipewire.sh",
+    	"return-type": "json"
 	},
-
-
-	"custom/weather": {
-	"format": "{}",
-	"interval": 10,
-	"exec": "~/.config/hypr/themes/hypr_deep_blue/scripts/weather.sh",
-	"tooltip": false
-	},
-
 
 	"custom/cmus": {
 	"format": "{icon}    {}",
