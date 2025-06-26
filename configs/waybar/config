@@ -7,9 +7,9 @@
 	"font-family": "JetBrainsMono Nerd Font, FontAwesome, Noto Sans, sans-serif",
 	"font-size": "12px",
 	
-    "modules-left": ["cpu", "memory", "custom/cmus"],
-    "modules-center": ["custom/menu", "custom/sep", "hyprland/workspaces", "custom/sep", "hyprland/window"],
-    "modules-right": ["tray", "custom/weather", "pulseaudio", "hyprland/language",  "clock"],
+    "modules-left": ["cpu", "memory"],
+    "modules-center": [],
+    "modules-right": ["keyboard-state", "custom/pipewire"],
 
 
     "cpu": {
@@ -24,35 +24,35 @@
 	},
 
 
-	"hyprland/window": {
-		"format": "{class}",
-		"separate-outputs": false
-	},
+	// "hyprland/window": {
+	// 	"format": "{class}",
+	// 	"separate-outputs": false
+	// },
 
 
-	"custom/menu": {
-		"format": "{icon}",
-		"format-icons": "󰣇",
-		"on-click": "wofi --show drun -c ~/.config/hypr/themes/hypr_arch/wofi/config -s /home/owl/.config/hypr/themes/hypr_arch/wofi/style.css",
-		"escape": true,
-		"tooltip": false
-	},
+	// "custom/menu": {
+	// 	"format": "{icon}",
+	// 	"format-icons": "󰣇",
+	// 	"on-click": "wofi --show drun -c ~/.config/hypr/themes/hypr_arch/wofi/config -s /home/owl/.config/hypr/themes/hypr_arch/wofi/style.css",
+	// 	"escape": true,
+	// 	"tooltip": false
+	// },
 
 
-	"hyprland/workspaces": {
-		"format": "{icon}",
-		"on-click": "activate",
-		"format-icons": {
-			"1": "󰖟",
-			"2": "󰳫",
-			"3": "",
-			"4": "",
-			"5": "",
-			"6": "󰊗",
-			"7": ""
-			},
-		"tooltip": false
-	},
+	// "hyprland/workspaces": {
+	// 	"format": "{icon}",
+	// 	"on-click": "activate",
+	// 	"format-icons": {
+	// 		"1": "󰖟",
+	// 		"2": "󰳫",
+	// 		"3": "",
+	// 		"4": "",
+	// 		"5": "",
+	// 		"6": "󰊗",
+	// 		"7": ""
+	// 		},
+	// 	"tooltip": false
+	// },
 
 
 	"keyboard-state": {
