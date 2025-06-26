@@ -7,9 +7,9 @@
 	"font-family": "JetBrainsMono Nerd Font, FontAwesome, Noto Sans, sans-serif",
 	"font-size": "12px",
 	
-    "modules-left": ["cpu", "memory"],
+    "modules-left": ["cpu", "memory", "battery", "network"],
     "modules-center": [],
-    "modules-right": ["custom/keyboard", "custom/pipewire"],
+    "modules-right": ["keyboard", "custom/pipewire"],
 
 
     "cpu": {
@@ -23,6 +23,26 @@
 		"tooltip": false
 	},
 
+	"battery": {
+        "format": "{icon} {capacity}%",
+        "format-icons": ["", "", "", "", ""]
+    },
+
+	"network": {
+        "format-wifi": " {essid}",
+        "format-ethernet": " {ipaddr}",
+        "format-disconnected": "⚠ Disconnected"
+    },
+
+	"keyboard": {
+    "format": "{layout}",
+    "format-alt": "{variant}",
+    "tooltip": false,
+    "interval": 1,
+    "numlock": true,
+    "capslock": true,
+    "scrolllock": true
+},
 	"custom/keyboard": {
         "exec": "hyprctl devices -j | jq -r '.keyboards[] | select(.name == \"at-translated-set-2-keyboard\") | .active_keymap' | cut -c-2 | tr 'a-z' 'A-Z'",
         "interval": 0.6,
@@ -60,18 +80,6 @@
 	// 		},
 	// 	"tooltip": false
 	// },
-
-
-	"keyboard-state": {
-        "numlock": true,
-        "capslock": true,
-        "format": "{name} {icon}",
-        "format-pressed": "{name} {icon}",
-        "states": {
-            "ru": "RU",
-            "us": "EN"
-        }
-    },
 
 
 	// "tray": {
