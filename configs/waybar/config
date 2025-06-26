@@ -9,7 +9,7 @@
 	
     "modules-left": ["cpu", "memory", "battery", "network"],
     "modules-center": [],
-    "modules-right": ["keyboard", "custom/pipewire"],
+    "modules-right": ["keyboard"],
 
 
     "cpu": {
