@@ -9,7 +9,7 @@
 	
     "modules-left": ["cpu", "memory"],
     "modules-center": [],
-    "modules-right": ["keyboard-state", "custom/pipewire"],
+    "modules-right": ["keyboard", "custom/pipewire"],
 
 
     "cpu": {
@@ -21,6 +21,15 @@
 	"memory": {
 		"format": "  {}%",
 		"tooltip": false
+	},
+
+	"keyboard": {
+    	"format": "{layout}",
+    	"format-icons": {
+        	"us": "US",
+        	"ru": "RU"
+    	},
+    	"on-click": "hyprctl switchxkblayout at-translated-set-2-keyboard next"
 	},
 
 
