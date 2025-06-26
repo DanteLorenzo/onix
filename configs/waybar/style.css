@@ -84,3 +84,48 @@ window#waybar {
 #custom-pipewire.muted {
     color: @color1; /* muted color */
 }
+
+
+/* Keyboard layout */
+#custom-keyboard {
+    /* Base styling */
+    padding: 0 10px;
+    margin: 0 4px;
+    border-radius: 6px;
+    background-color: rgba(40, 42, 54, 0.8); /* Dracula background */
+    color: #f8f8f2;
+    font-weight: bold;
+    font-family: "Fira Code", "Font Awesome", sans-serif;
+    min-width: 36px;
+    text-align: center;
+    
+    /* Smooth transition for background color */
+    transition: background-color 0.3s ease;
+}
+
+/* Language-specific styles */
+#custom-keyboard.EN {
+    background-color: rgba(68, 71, 90, 0.9); /* Dracula selection */
+    color: #50fa7b; /* Green for English */
+}
+
+#custom-keyboard.RU {
+    background-color: rgba(68, 71, 90, 0.9);
+    color: #ff79c6; /* Pink for Russian */
+}
+
+#custom-keyboard.UK {
+    background-color: rgba(68, 71, 90, 0.9);
+    color: #8be9fd; /* Cyan for Ukrainian */
+}
+
+/* Hover effect */
+#custom-keyboard:hover {
+    background-color: rgba(98, 114, 164, 0.9);
+}
+
+/* Active/click effect */
+#custom-keyboard:active {
+    background-color: rgba(139, 233, 253, 0.9);
+    color: #282a36;
+}

@@ -55,11 +55,12 @@
 	},
 
 
-	"hyprland/language": {
-	    "format": "{}",
-	    "format-en": "EN",
-	    "format-ru": "RU"
-	},
+	"custom/keyboard": {
+        "exec": "hyprctl devices -j | jq -r '.keyboards[] | select(.name == \"at-translated-set-2-keyboard\") | .active_keymap' | cut -c-2 | tr 'a-z' 'A-Z'",
+        "interval": 1,
+        "format": "{}",
+        "on-click": "hyprctl switchxkblayout at-translated-set-2-keyboard next"
+    },
 
 
 	"tray": {
