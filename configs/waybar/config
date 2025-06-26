@@ -4,8 +4,7 @@
 	"height": 27,
 	"width": 1200,
 	"margin-top": 10,
-	"font-family": "JetBrainsMono Nerd Font, FontAwesome, Noto Sans, sans-serif",
-	"font-size": "12px",
+	
 	
     "modules-left": ["cpu", "memory", "custom/cmus"],
     "modules-center": ["custom/menu", "custom/sep", "hyprland/workspaces", "custom/sep", "hyprland/window"],
