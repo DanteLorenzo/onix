@@ -24,34 +24,28 @@
 	},
 
 	"battery": {
-	    "format": "{icon} {capacity}%",
-	    "format-alt": "{time}",
-	    "format-charging": " {capacity}%",
-	    "format-full": " {capacity}%",
-	    "format-icons": {
-	        "default": ["", "", "", "", ""],
-	        "charging": ["", "", "", "", ""],
-	        "full": ""
-	    },
-	    "states": {
-	        "warning": 20,
-	        "critical": 10
-	    },
-	    "tooltip": true,
-	    "tooltip-format": "{capacity}% ({time})\n{power}W\n{estimate}",
-	    "estimate-time": true,
-	    "interval": 5
-	},
+	    "format": "{icon}  {capacity}%",
+	    "format-charging": "󰂄  {capacity}%",
+	    "format-icons": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
+	    "tooltip-format": "Battery is at {capacity}%" 
+	  },
 
-	"network": {
-        "format-wifi": " {essid}",
-        "format-ethernet": " {ipaddr}",
-        "format-disconnected": "⚠ Disconnected"
-    },
+		"network": {
+	    "interface": "wlo1",
+	    "format": "{ifname}",
+	    "format-wifi": "{icon}  {essid}",
+	    "format-ethernet": "󰈀  {ipaddr}/{cidr}",
+	    "format-disconnected": "󰤭  Disconnected",
+	    "max-length": 50,
+	    "format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
+	    "tooltip-format": "Connected to {essid}"
+	  },
 
 	"clock": {
-        "format-alt": "{:%a, %d. %b  %H:%M}"
-    },
+		"format": "󰥔  {:%I:%M %p}",
+		"format-alt": "󰥔  {:%a, %d. %b  %I:%M %p}",
+		"tooltip-format": "Date: {:%Y-%m-%d}"
+	  },
 
 	"pulseaudio": {
 	    "format": "{icon}  {volume}%",

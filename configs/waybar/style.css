@@ -1,104 +1,92 @@
+@import url("/home/$USER/.config/waybar/colors.css");
+
 * {
-	border-radius: 20;
-	border: none;
-	font-family: JetBrainsMono-Bold, Symbols Nerd Font;
-	font-weight: normal;
-	font-size: 13px;
-	padding: 0px 0px;
-	margin: 0px 5px;
+  font-family: "DM Sans", "JetBrainsMono Nerd Font Propo", sans-serif;
+  font-size: 16px;
+  border-radius: 50px;
+  font-weight: bold;
 }
 
-@define-color bg #262a32;
-@define-color fg #d8dee8;
-@define-color gr #545d70;
-@define-color red #f7768e;
-@define-color green #b9f27c;
-@define-color blue #4b4e6f;
-@define-color cyan #0db9d7;
-
 window#waybar {
-	background-color: rgba(43, 48, 59, 0.0);
-    color: #ffffff;
-    transition-property: background-color;
-    transition-duration: .5s;
+  background-color: transparent;
+  color: @foreground;
+}
+
+.modules-right {
+  margin-right: 12px;
+}
+
+#workspaces {
+  background-color: @surface_container_low;
+  padding: 2px 2px 2px 2px;
+  border-radius: 50px;
+  margin-left: 12px;
+}
+
+#workspaces button.active {
+  background-color: @primary_fixed_dim;
+  color: @on_primary_fixed;
+  padding: 5px 24px;
+}
+
+#workspaces button.active:hover {
+  color: @primary_fixed_dim;
+  background: inherit;
+}
+
+#workspaces button.empty {
+  color: @outline_variant;
 }
 
 #workspaces button {
-	color: @gr;
-	background-color: @bg;
-	padding: 4px 0px;
-	margin: 0px 7px;
+  background-color: transparent;
+  color: @outline;
+  transition: margin 150ms ease-in-out, padding 150ms ease-in-out;
+  transition: background-color 0.3s ease, color 0.3s ease, padding 0.2s ease;
 }
+
 #workspaces button:hover {
-	color: @fg;
+  background: @surface_container_high;
 }
-#workspaces button.active {
-	color: @fg;
-}
+
 #workspaces button.urgent {
-	color: @red;
+  background-color: @error;
+  color: @on_error;
 }
 
-
+#battery,
+#pulseaudio,
+#backlight,
+#custom-pacman,
+#network,
+#clock,
+#custom-weather,
+#custom-media,
+#window,
 #cpu,
 #memory,
-#window,
-#custom-media,
-#custom-cmus,
-#custom-weather,
+#disk,
 #tray,
-#language,
-#clock {
-	padding: 0 10px;
-	margin: 0 6px;
-	color: @fg;
-	background-color: @bg;
-}
-
-#custom-menu {
-	background-color: @bg;
-	color: @cyan;
-	padding: 0px 10px;
-	margin: 0px 10px;
-}
-
-#custom-sep {
-	color: rgba(0, 0, 0, 0.0);
-}
-
-#window {
-	background-color: @bg;
-	color: @cyan;
-	font-weight: bold;
-}
-
-/* Pipewire */
-#custom-pipewire {
-    padding: 0 10px;
-}
-
-#custom-pipewire.unmuted {
-    color: @color11; /* or any color you prefer */
-}
-
-#custom-pipewire.muted {
-    color: @color1; /* muted color */
+#custom-launcher,
+#custom-notification,
+#power-profiles-daemon {
+  color: @primary;
+  background-color: @surface_container;
+  padding: 0 15px 0 15px;
+  margin: 0 0 0 12px;
 }
 
 
-/* Keyboard layout */
-#keyboard-state {
-    padding: 0 10px;
-    margin: 0 4px;
-    border-radius: 5px;
-    background-color: #4c566a;
-    color: #eceff4;
+#window.hidden {
+    opacity: 0;
+    min-width: 0;
+    min-height: 0;
+    padding: 0;
+    margin: 0;
+    border: none;
 }
 
-#keyboard-state.us {
-    background-color: #5e81ac;
+window#waybar.empty #window {
+    background-color: transparent;
 }
 
-#keyboard-state.ru {
-    background-color: #bf616a;
-}
