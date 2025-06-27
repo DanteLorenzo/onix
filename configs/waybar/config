@@ -24,9 +24,24 @@
 	},
 
 	"battery": {
-        "format": "{icon} {capacity}%",
-        "format-icons": ["", "", "", "", ""]
-    },
+	    "format": "{icon} {capacity}%",
+	    "format-alt": "{time}",
+	    "format-charging": " {capacity}%",
+	    "format-full": " {capacity}%",
+	    "format-icons": {
+	        "default": ["", "", "", "", ""],
+	        "charging": ["", "", "", "", ""],
+	        "full": ""
+	    },
+	    "states": {
+	        "warning": 20,
+	        "critical": 10
+	    },
+	    "tooltip": true,
+	    "tooltip-format": "{capacity}% ({time})\n{power}W\n{estimate}",
+	    "estimate-time": true,
+	    "interval": 5
+	},
 
 	"network": {
         "format-wifi": " {essid}",
@@ -39,21 +54,21 @@
     },
 
 	"pulseaudio": {
-    "format": "{icon}  {volume}%",
-    "format-muted": "",  // Только иконка (без "Muted")
-    "format-icons": {
-        "default": ["", "", ""],
-        "muted": ""
-    },
-    "scroll-step": 1,
-    "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",  // Мьютим через wpctl (PipeWire)
-    "on-click-right": "pavucontrol",  // Открываем pavucontrol
-    "on-scroll-up": "wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 1%+",  // +1% (не больше 100%)
-    "on-scroll-down": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 1%-",  // -1%
-    "tooltip": true,
-    "tooltip-format": "{desc}",
-    "smooth-scrolling-threshold": 1
-}
+	    "format": "{icon}  {volume}%",
+	    "format-muted": " Muted",
+	    "format-icons": {
+	        "default": ["", "", ""],
+	        "muted": ""
+	    },
+	    "scroll-step": 1,
+	    "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+	    "on-click-right": "pavucontrol",
+	    "on-scroll-up": "wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 1%+",
+	    "on-scroll-down": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 1%-",
+	    "tooltip": true,
+	    "tooltip-format": "{desc}",
+	    "smooth-scrolling-threshold": 1
+	}
 
 
 	
