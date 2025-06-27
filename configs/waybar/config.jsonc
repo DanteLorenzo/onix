@@ -53,23 +53,31 @@
 	    "format-muted": "",
 	    "format-icons": {
 	        "headphone": "",
-	        "default": ["", "", ""]
+	        "default": ["", "", ""],
+	        "muted": ""
 	    },
 	    "scroll-step": 1,
-	    "on-click-left": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",  // Четкое указание ЛКМ
-	    "on-click-right": "pavucontrol",  // ПКМ - панель управления
-	    "on-scroll-up": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 1%+ -l 1.0",
-	    "on-scroll-down": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 1%- -l 1.0",
+	    "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+	    "on-click-right": "pavucontrol",
+	    "on-click-middle": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 100%",
+	    "on-scroll-up": "wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 5%+",
+	    "on-scroll-down": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-",
+	    "smooth-scrolling-threshold": 0.3,
 	    "tooltip": false
 	},
 	"pulseaudio#microphone": {
 	    "format": "{format_source}",
 	    "format-source": " {volume}%",
 	    "format-source-muted": "",
-	    "on-click-left": "wpctl set-mute @DEFAULT_SOURCE@ toggle",  // Четкое указание ЛКМ
-	    "on-click-right": "pavucontrol",  // ПКМ - панель управления
-	    "on-scroll-up": "wpctl set-volume @DEFAULT_SOURCE@ 1%+ -l 1.0",
-	    "on-scroll-down": "wpctl set-volume @DEFAULT_SOURCE@ 1%- -l 1.0",
+	    "format-icons": {
+	        "default": [""],
+	        "muted": ""
+	    },
+	    "on-click": "wpctl set-mute @DEFAULT_SOURCE@ toggle",
+	    "on-click-right": "pavucontrol",
+	    "on-scroll-up": "wpctl set-volume -l 1.0 @DEFAULT_SOURCE@ 5%+",
+	    "on-scroll-down": "wpctl set-volume @DEFAULT_SOURCE@ 5%-",
+	    "smooth-scrolling-threshold": 0.3,
 	    "tooltip": false
 	},
 
