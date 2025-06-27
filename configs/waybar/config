@@ -7,7 +7,7 @@
 	"font-family": "JetBrainsMono Nerd Font, FontAwesome, Noto Sans, sans-serif",
 	"font-size": "12px",
 	
-    "modules-left": ["cpu", "memory"],
+    "modules-left": ["cpu", "memory", "hyprland/workspaces"],
     "modules-center": ["clock"],
     "modules-right": ["keyboard", "battery", "network"],
 
@@ -37,6 +37,18 @@
 	"clock": {
         "format-alt": "{:%a, %d. %b  %H:%M}"
     },
+
+	"hyprland/workspaces": {
+    "format": "{name}",
+    "on-click": "activate",
+    "active-only": false,
+    "all-outputs": true,
+    "format-icons": {
+      "default": "",
+      "active": "",
+      "urgent": ""
+    }
+  },
 
 "keyboard": {
     "format": "{layout}",
