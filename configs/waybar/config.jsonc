@@ -23,29 +23,29 @@
 		"tooltip": false
 	},
 
-	"battery": {
-	    "format": "{icon}  {capacity}%",
-	    "format-charging": "󰂄  {capacity}%",
-	    "format-icons": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
-	    "tooltip-format": "Battery is at {capacity}%" 
-	  },
+	// "battery": {
+	//     "format": "{icon}  {capacity}%",
+	//     "format-charging": "󰂄  {capacity}%",
+	//     "format-icons": ["󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"],
+	//     "tooltip-format": "Battery is at {capacity}%" 
+	// },
 
-		"network": {
-	    "interface": "wlo1",
-	    "format": "{ifname}",
-	    "format-wifi": "{icon}  {essid}",
-	    "format-ethernet": "󰈀  {ipaddr}/{cidr}",
-	    "format-disconnected": "󰤭  Disconnected",
-	    "max-length": 50,
-	    "format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
-	    "tooltip-format": "Connected to {essid}"
-	  },
+	// "network": {
+	//     "interface": "wlo1",
+	//     "format": "{ifname}",
+	//     "format-wifi": "{icon}  {essid}",
+	//     "format-ethernet": "󰈀  {ipaddr}/{cidr}",
+	//     "format-disconnected": "󰤭  Disconnected",
+	//     "max-length": 50,
+	//     "format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
+	//     "tooltip-format": "Connected to {essid}"
+	// },
 
 	"clock": {
 		"format": "󰥔  {:%I:%M %p}",
 		"format-alt": "󰥔  {:%a, %d. %b  %I:%M %p}",
 		"tooltip-format": "Date: {:%Y-%m-%d}"
-	  },
+	},
 
 	"pulseaudio": {
 	    "format": "{icon}  {volume}%",
