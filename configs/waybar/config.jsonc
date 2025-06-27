@@ -46,30 +46,30 @@
 		"format-alt": "󰥔  {:%a, %d. %b  %I:%M %p}",
 		"tooltip-format": "Date: {:%Y-%m-%d}"
 	},
-	
+
 	"pulseaudio#volume": {
-	    "scroll-step": 5,
 	    "format": "{icon} {volume}%",
 	    "format-bluetooth": " {icon} {volume}%",
-	    "format-muted": "",  // Только иконка (без "Мут")
-	    "tooltip-format": "{desc}",
+	    "format-muted": "",
 	    "format-icons": {
 	        "headphone": "",
 	        "default": ["", "", ""]
 	    },
-	    "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",  // Клик — мьют/анмьют
-	    "on-click-right": "pwvucontrol",  // Правый клик — открыть pwvucontrol
+	    "scroll-step": 1,
+	    "on-click-left": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",  // Четкое указание ЛКМ
+	    "on-click-right": "pavucontrol",  // ПКМ - панель управления
+	    "on-scroll-up": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 1%+ -l 1.0",
+	    "on-scroll-down": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 1%- -l 1.0",
 	    "tooltip": false
 	},
-
 	"pulseaudio#microphone": {
 	    "format": "{format_source}",
 	    "format-source": " {volume}%",
-	    "format-source-muted": "",  // Только иконка (без "Мут")
-	    "on-click": "pwvucontrol",
-	    "on-click-right": "wpctl set-mute @DEFAULT_SOURCE@ toggle",
-	    "on-scroll-up": "wpctl set-volume @DEFAULT_SOURCE@ 10%- -l 1.0",  // Уменьшение громкости
-	    "on-scroll-down": "wpctl set-volume @DEFAULT_SOURCE@ 10%+ -l 1.0",  // Увеличение громкости
+	    "format-source-muted": "",
+	    "on-click-left": "wpctl set-mute @DEFAULT_SOURCE@ toggle",  // Четкое указание ЛКМ
+	    "on-click-right": "pavucontrol",  // ПКМ - панель управления
+	    "on-scroll-up": "wpctl set-volume @DEFAULT_SOURCE@ 1%+ -l 1.0",
+	    "on-scroll-down": "wpctl set-volume @DEFAULT_SOURCE@ 1%- -l 1.0",
 	    "tooltip": false
 	},
 
