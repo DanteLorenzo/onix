@@ -7,9 +7,9 @@
 	"font-family": "JetBrainsMono Nerd Font, FontAwesome, Noto Sans, sans-serif",
 	"font-size": "12px",
 	
-    "modules-left": ["cpu", "memory", "hyprland/workspaces"],
+    "modules-left": ["cpu", "memory"],
     "modules-center": ["clock"],
-    "modules-right": ["keyboard", "battery", "network"],
+    "modules-right": ["pulseaudio","battery", "network"],
 
 
     "cpu": {
@@ -38,49 +38,49 @@
         "format-alt": "{:%a, %d. %b  %H:%M}"
     },
 
-	"hyprland/workspaces": {
-    "format": "{name}",
-    "on-click": "activate",
-    "active-only": false,
-    "all-outputs": true,
-    "format-icons": {
-      "default": "",
-      "active": "",
-      "urgent": ""
-    }
-  },
+	"pulseaudio": {
+		"scroll-step": 5,
+		"format": "{icon}  {volume}%",
+		"format-icons": {
+			"default": ["", "", ""]
+		},
+		"on-click": "pavucontrol"
+	}
 
-"keyboard": {
-    "format": "{layout}",
-    "tooltip": true,
-    "tooltip-format": "Layout: {layout}\nCaps Lock: {caps}\nNum Lock: {num}",
-    "interval": 1,
-    "exec": "hyprctl devices -j | jq -r '.keyboards[] | select(.name == \"at-translated-set-2-keyboard\") | .active_keymap' | sed 's/ .*//'",
-    "exec-if": "which hyprctl && which jq",
-    "on-click": "hyprctl switchxkblayout at-translated-set-2-keyboard next",
-    "on-click-right": "hyprctl switchxkblayout at-translated-set-2-keyboard prev",
-    "states": {
-      "caps": {
-        "format": "{layout} (CAPS)",
-        "tooltip-format": "Layout: {layout}\nCaps Lock: ON\nNum Lock: {num}"
-      },
-      "num": {
-        "format": "{layout} (NUM)",
-        "tooltip-format": "Layout: {layout}\nCaps Lock: {caps}\nNum Lock: ON"
-      },
-      "caps:num": {
-        "format": "{layout} (CAPS+NUM)",
-        "tooltip-format": "Layout: {layout}\nCaps Lock: ON\nNum Lock: ON"
-      }
-    }
-  },
+
 	
-	"custom/keyboard": {
-        "exec": "hyprctl devices -j | jq -r '.keyboards[] | select(.name == \"at-translated-set-2-keyboard\") | .active_keymap' | cut -c-2 | tr 'a-z' 'A-Z'",
-        "interval": 0.6,
-        "format": "{}",
-        "on-click": "hyprctl switchxkblayout at-translated-set-2-keyboard next"
-    },
+
+// "keyboard": {
+//     "format": "{layout}",
+//     "tooltip": true,
+//     "tooltip-format": "Layout: {layout}\nCaps Lock: {caps}\nNum Lock: {num}",
+//     "interval": 1,
+//     "exec": "hyprctl devices -j | jq -r '.keyboards[] | select(.name == \"at-translated-set-2-keyboard\") | .active_keymap' | sed 's/ .*//'",
+//     "exec-if": "which hyprctl && which jq",
+//     "on-click": "hyprctl switchxkblayout at-translated-set-2-keyboard next",
+//     "on-click-right": "hyprctl switchxkblayout at-translated-set-2-keyboard prev",
+//     "states": {
+//       "caps": {
+//         "format": "{layout} (CAPS)",
+//         "tooltip-format": "Layout: {layout}\nCaps Lock: ON\nNum Lock: {num}"
+//       },
+//       "num": {
+//         "format": "{layout} (NUM)",
+//         "tooltip-format": "Layout: {layout}\nCaps Lock: {caps}\nNum Lock: ON"
+//       },
+//       "caps:num": {
+//         "format": "{layout} (CAPS+NUM)",
+//         "tooltip-format": "Layout: {layout}\nCaps Lock: ON\nNum Lock: ON"
+//       }
+//     }
+//   },
+	
+	// "custom/keyboard": {
+    //     "exec": "hyprctl devices -j | jq -r '.keyboards[] | select(.name == \"at-translated-set-2-keyboard\") | .active_keymap' | cut -c-2 | tr 'a-z' 'A-Z'",
+    //     "interval": 0.6,
+    //     "format": "{}",
+    //     "on-click": "hyprctl switchxkblayout at-translated-set-2-keyboard next"
+    // },
 
 
 	// "hyprland/window": {
@@ -126,26 +126,26 @@
 	// },
 
 
-	"custom/pipewire": {
-    	"format": "{icon} {volume}%",
-    	"format-icons": {
-        	"headphone": "",
-        	"hands-free": "",
-        	"headset": "",
-        	"phone": "",
-        	"portable": "",
-        	"car": "",
-        	"default": ["", "", ""]
-    	},
-    	"format-muted": " Muted",
-    	"on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
-    	"on-click-right": "pavucontrol",
-    	"on-scroll-up": "pactl set-sink-volume @DEFAULT_SINK@ +5%",
-    	"on-scroll-down": "pactl set-sink-volume @DEFAULT_SINK@ -5%",
-    	"tooltip": false,
-    	"exec": "~/.config/waybar/scripts/pipewire.sh",
-    	"return-type": "json"
-	},
+	// "custom/pipewire": {
+    // 	"format": "{icon} {volume}%",
+    // 	"format-icons": {
+    //     	"headphone": "",
+    //     	"hands-free": "",
+    //     	"headset": "",
+    //     	"phone": "",
+    //     	"portable": "",
+    //     	"car": "",
+    //     	"default": ["", "", ""]
+    // 	},
+    // 	"format-muted": " Muted",
+    // 	"on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
+    // 	"on-click-right": "pavucontrol",
+    // 	"on-scroll-up": "pactl set-sink-volume @DEFAULT_SINK@ +5%",
+    // 	"on-scroll-down": "pactl set-sink-volume @DEFAULT_SINK@ -5%",
+    // 	"tooltip": false,
+    // 	"exec": "~/.config/waybar/scripts/pipewire.sh",
+    // 	"return-type": "json"
+	// },
 
 	// "custom/cmus": {
 	// "format": "{icon}    {}",
