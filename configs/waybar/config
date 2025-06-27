@@ -7,9 +7,9 @@
 	"font-family": "JetBrainsMono Nerd Font, FontAwesome, Noto Sans, sans-serif",
 	"font-size": "12px",
 	
-    "modules-left": ["cpu", "memory", "battery", "network"],
-    "modules-center": [],
-    "modules-right": ["keyboard"],
+    "modules-left": ["cpu", "memory"],
+    "modules-center": ["clock"],
+    "modules-right": ["keyboard", "battery", "network"],
 
 
     "cpu": {
@@ -32,6 +32,10 @@
         "format-wifi": " {essid}",
         "format-ethernet": " {ipaddr}",
         "format-disconnected": "⚠ Disconnected"
+    },
+
+	"clock": {
+        "format-alt": "{:%a, %d. %b  %H:%M}"
     },
 
 "keyboard": {
