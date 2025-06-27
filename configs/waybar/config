@@ -40,7 +40,7 @@
 
 	"pulseaudio": {
     "format": "{icon}  {volume}%",
-    "format-muted": "  Muted",
+    "format-muted": "",  // Только иконка (🔇)
     "format-icons": {
         "default": ["", "", ""],
         "muted": ""
@@ -48,11 +48,11 @@
     "scroll-step": 5,
     "on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
     "on-click-right": "pavucontrol",
-    "on-scroll-up": "pactl set-sink-volume @DEFAULT_SINK@ +5%",
+    "on-scroll-up": "pactl set-sink-volume @DEFAULT_SINK@ +5% && pactl set-sink-volume @DEFAULT_SINK@ 100% --",  // Ограничение до 100%
     "on-scroll-down": "pactl set-sink-volume @DEFAULT_SINK@ -5%",
     "tooltip": true,
     "tooltip-format": "{desc}"
-	}
+}
 
 
 	
