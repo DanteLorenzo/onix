@@ -40,18 +40,19 @@
 
 	"pulseaudio": {
     "format": "{icon}  {volume}%",
-    "format-muted": "",  // Только иконка (🔇)
+    "format-muted": "",  // Только иконка (без "Muted")
     "format-icons": {
         "default": ["", "", ""],
         "muted": ""
     },
-    "scroll-step": 5,
-    "on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
-    "on-click-right": "pavucontrol",
-    "on-scroll-up": "pactl set-sink-volume @DEFAULT_SINK@ +5% && pactl set-sink-volume @DEFAULT_SINK@ 100% --",  // Ограничение до 100%
-    "on-scroll-down": "pactl set-sink-volume @DEFAULT_SINK@ -5%",
+    "scroll-step": 1,
+    "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",  // Мьютим через wpctl (PipeWire)
+    "on-click-right": "pavucontrol",  // Открываем pavucontrol
+    "on-scroll-up": "wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 1%+",  // +1% (не больше 100%)
+    "on-scroll-down": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 1%-",  // -1%
     "tooltip": true,
-    "tooltip-format": "{desc}"
+    "tooltip-format": "{desc}",
+    "smooth-scrolling-threshold": 1
 }
 
 
