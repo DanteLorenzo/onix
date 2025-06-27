@@ -39,12 +39,19 @@
     },
 
 	"pulseaudio": {
-		"scroll-step": 5,
-		"format": "{icon}  {volume}%",
-		"format-icons": {
-			"default": ["", "", ""]
-		},
-		"on-click": "pavucontrol"
+    "format": "{icon}  {volume}%",
+    "format-muted": "  Muted",
+    "format-icons": {
+        "default": ["", "", ""],
+        "muted": ""
+    },
+    "scroll-step": 5,
+    "on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
+    "on-click-right": "pavucontrol",
+    "on-scroll-up": "pactl set-sink-volume @DEFAULT_SINK@ +5%",
+    "on-scroll-down": "pactl set-sink-volume @DEFAULT_SINK@ -5%",
+    "tooltip": true,
+    "tooltip-format": "{desc}"
 	}
 
 
