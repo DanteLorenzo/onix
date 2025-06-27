@@ -9,7 +9,7 @@
 	
     "modules-left": ["cpu", "memory"],
     "modules-center": ["clock"],
-    "modules-right": ["pulseaudio","battery", "network"],
+    "modules-right": ["hyprland/language","pulseaudio#volume","pulseaudio#microphone","battery", "network"],
 
 
     "cpu": {
@@ -62,7 +62,45 @@
 	    "tooltip": true,
 	    "tooltip-format": "{desc}",
 	    "smooth-scrolling-threshold": 1
-	}
+	},
+
+	"pulseaudio#volume": {
+		"scroll-step": 5,
+		"format": "{icon} {volume}%",
+		"format-bluetooth": " {icon} {volume}%",
+		"format-muted": "  Мут",
+		"tooltip-format": "{desc}",
+		"format-icons": {
+			"headphone": " ",
+			"default": [
+				"",
+				"",
+				""
+			]
+		},
+		"on-click": "pwvucontrol",
+		"on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
+		"tooltip": false
+	},
+	"pulseaudio#microphone": {
+		"format": "{format_source}",
+		"format-source": " {volume}%",
+		"format-source-muted": "  Мут",
+		"on-click": "pwvucontrol",
+		"on-click-right": "wpctl set-mute @DEFAULT_SOURCE@ toggle",
+		"on-scroll-up": "wpctl set-volume @DEFAULT_SOURCE@ 10%+ -l 1.0",
+		"on-scroll-down": "wpctl set-volume @DEFAULT_SOURCE@ 10%- -l 1.0",
+		"tooltip": false
+	},
+
+	"hyprland/language": {
+		"format": "{}",
+		"format-en": "EN",
+		"format-ru": "RU",
+		"on-scroll-up": "hyprctl switchxkblayout all next",
+		"on-scroll-down": "hyprctl switchxkblayout all prev",
+	},
+
 
 
 	
