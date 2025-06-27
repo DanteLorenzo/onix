@@ -46,51 +46,31 @@
 		"format-alt": "󰥔  {:%a, %d. %b  %I:%M %p}",
 		"tooltip-format": "Date: {:%Y-%m-%d}"
 	},
-
-	"pulseaudio": {
-	    "format": "{icon}  {volume}%",
-	    "format-muted": " Muted",
-	    "format-icons": {
-	        "default": ["", "", ""],
-	        "muted": ""
-	    },
-	    "scroll-step": 1,
-	    "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
-	    "on-click-right": "pavucontrol",
-	    "on-scroll-up": "wpctl set-volume -l 1.0 @DEFAULT_AUDIO_SINK@ 1%+",
-	    "on-scroll-down": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 1%-",
-	    "tooltip": true,
-	    "tooltip-format": "{desc}",
-	    "smooth-scrolling-threshold": 1
-	},
-
+	
 	"pulseaudio#volume": {
-		"scroll-step": 5,
-		"format": "{icon} {volume}%",
-		"format-bluetooth": " {icon} {volume}%",
-		"format-muted": "  Мут",
-		"tooltip-format": "{desc}",
-		"format-icons": {
-			"headphone": " ",
-			"default": [
-				"",
-				"",
-				""
-			]
-		},
-		"on-click": "pwvucontrol",
-		"on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",
-		"tooltip": false
+	    "scroll-step": 5,
+	    "format": "{icon} {volume}%",
+	    "format-bluetooth": " {icon} {volume}%",
+	    "format-muted": "",  // Только иконка (без "Мут")
+	    "tooltip-format": "{desc}",
+	    "format-icons": {
+	        "headphone": "",
+	        "default": ["", "", ""]
+	    },
+	    "on-click": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle",  // Клик — мьют/анмьют
+	    "on-click-right": "pwvucontrol",  // Правый клик — открыть pwvucontrol
+	    "tooltip": false
 	},
+
 	"pulseaudio#microphone": {
-		"format": "{format_source}",
-		"format-source": " {volume}%",
-		"format-source-muted": "  Мут",
-		"on-click": "pwvucontrol",
-		"on-click-right": "wpctl set-mute @DEFAULT_SOURCE@ toggle",
-		"on-scroll-up": "wpctl set-volume @DEFAULT_SOURCE@ 10%+ -l 1.0",
-		"on-scroll-down": "wpctl set-volume @DEFAULT_SOURCE@ 10%- -l 1.0",
-		"tooltip": false
+	    "format": "{format_source}",
+	    "format-source": " {volume}%",
+	    "format-source-muted": "",  // Только иконка (без "Мут")
+	    "on-click": "pwvucontrol",
+	    "on-click-right": "wpctl set-mute @DEFAULT_SOURCE@ toggle",
+	    "on-scroll-up": "wpctl set-volume @DEFAULT_SOURCE@ 10%- -l 1.0",  // Уменьшение громкости
+	    "on-scroll-down": "wpctl set-volume @DEFAULT_SOURCE@ 10%+ -l 1.0",  // Увеличение громкости
+	    "tooltip": false
 	},
 
 	"hyprland/language": {
