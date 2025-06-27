@@ -41,11 +41,11 @@
 	//     "tooltip-format": "Connected to {essid}"
 	// },
 
-	"clock": {
-		"format": "󰥔  {:%I:%M %p}",
-		"format-alt": "󰥔  {:%a, %d. %b  %I:%M %p}",
-		"tooltip-format": "Date: {:%Y-%m-%d}"
-	},
+	// "clock": {
+	// 	"format": "󰥔  {:%I:%M %p}",
+	// 	"format-alt": "󰥔  {:%a, %d. %b  %I:%M %p}",
+	// 	"tooltip-format": "Date: {:%Y-%m-%d}"
+	// },
 
 	"pulseaudio": {
 	    "format": "{icon}  {volume}%",
