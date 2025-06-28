@@ -7,7 +7,7 @@ log_info "Installing Hyprland and dependencies with pacman..."
 sudo pacman -Sy --needed --noconfirm hyprland kitty waybar hyprpaper bc brightnessctl dunst pipewire wireplumber pipewire-pulse pipewire-alsa pavucontrol alacritty
 # libxcb xcb-proto xcb-util libx11 libxfixes libxcomposite xorg-xinput libxrender wayland-protocols xcb-util-keysyms xcb-util-wm cairo polkit meson seatd libxkbcommon
 
-#     hyprpaper waybar wofi alacritty
+#   wofi
 if [ $? -eq 0 ]; then
   log_success "Hyprland and dependencies installation complete."
   
