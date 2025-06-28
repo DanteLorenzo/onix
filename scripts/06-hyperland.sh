@@ -20,6 +20,9 @@ if [ $? -eq 0 ]; then
     cp -r "$src_dir" "$HOME/.config/"
     log_info "Copied $folder config to ~/.config/"
   done
+  # After copying all folders, make all .sh scripts in ~/.config/*/scripts/ executable
+  find "$HOME/.config" -type f -path '*/scripts/*.sh' -exec chmod +x {} \;
+  log_info "Set executable permissions for all scripts in ~/.config/*/scripts/"
 else
   log_error "Hyprland and dependencies installation failed."
 fi
