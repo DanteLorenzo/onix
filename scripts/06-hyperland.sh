@@ -8,6 +8,7 @@ sudo pacman -Sy --needed --noconfirm hyprland kitty waybar hyprpaper bc brightne
 # libxcb xcb-proto xcb-util libx11 libxfixes libxcomposite xorg-xinput libxrender wayland-protocols xcb-util-keysyms xcb-util-wm cairo polkit meson seatd libxkbcommon
 
 #   wofi
+
 if [ $? -eq 0 ]; then
   log_success "Hyprland and dependencies installation complete."
   
@@ -23,7 +24,7 @@ else
   log_error "Hyprland and dependencies installation failed."
 fi
 
-# Перезагрузка конфига Hyprland
+# Reload Hyprland config if Hyprland is running
 if pgrep -x "Hyprland" > /dev/null; then
   hyprctl reload
   log_info "Hyprland config reloaded."

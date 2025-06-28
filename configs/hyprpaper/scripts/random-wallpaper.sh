@@ -25,6 +25,3 @@ echo "wallpaper = ,$RANDOM_WALLPAPER" >> "$CONFIG_FILE"
 # Restart hyprpaper to apply changes
 pkill hyprpaper
 hyprpaper -c "$CONFIG_FILE" &
-
-# Optional: Send a notification with the new wallpaper
-notify-send "Wallpaper Changed" "New wallpaper: $(basename "$RANDOM_WALLPAPER")" -i "$RANDOM_WALLPAPER"
