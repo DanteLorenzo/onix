@@ -9,7 +9,7 @@
 	
     "modules-left": ["clock", "cpu", "memory"],
     "modules-center": ["hyprland/workspaces"],
-    "modules-right": ["custom/keyboard":,"pulseaudio#volume","pulseaudio#microphone","battery", "network"],
+    "modules-right": ["custom/keyboard","pulseaudio#volume","pulseaudio#microphone","battery", "network"],
 
 
     // "cpu": {
