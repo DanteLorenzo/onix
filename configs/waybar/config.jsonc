@@ -9,7 +9,7 @@
 	
     "modules-left": ["clock", "cpu", "memory"],
     "modules-center": ["hyprland/workspaces"],
-    "modules-right": ["custom/keyboard","pulseaudio#volume","pulseaudio#microphone","battery", "network"],
+    "modules-right": ["custom/hyprland-lang","pulseaudio#volume","pulseaudio#microphone","battery", "network"],
 
 
     // "cpu": {
@@ -40,7 +40,8 @@
             "warning": 70,
             "critical": 90
         },
-        "tooltip": true
+        "tooltip": true,
+		"tooltip-format": "RAM: {used:0.1f}GiB/{total:0.1f}GiB ({percentage}%)\nSwap: {swapUsed:0.1f}GiB/{swapTotal:0.1f}GiB"
     },
 
 	"battery": {
@@ -124,7 +125,16 @@
     		}
     },
 
-
+"custom/hyprland-lang": {
+    "exec": "hyprctl devices -j | jq -r '.keyboards[] | select(.name == \"at-translated-set-2-keyboard\") | .active_keymap' | cut -c1-2 | tr 'a-z' 'A-Z'",
+    "interval": 0.5,
+    "return-type": "json",
+    "on-click": "hyprctl switchxkblayout at-translated-set-2-keyboard next",
+    "format": "{}",
+    "format-en": "EN",
+    "format-ru": "RU",
+    "tooltip": false
+  }
 
 	
 
@@ -153,12 +163,7 @@
 //     }
 //   },
 	
-	"custom/keyboard": {
-        "exec": "hyprctl devices -j | jq -r '.keyboards[] | select(.name == \"at-translated-set-2-keyboard\") | .active_keymap' | cut -c-2 | tr 'a-z' 'A-Z'",
-        "interval": 0.6,
-        "format": "{}",
-        "on-click": "hyprctl switchxkblayout at-translated-set-2-keyboard next"
-    },
+
 
 
 	// "hyprland/window": {
