@@ -9,19 +9,43 @@
 	
     "modules-left": ["cpu", "memory"],
     "modules-center": ["hyprland/workspaces", "clock"],
-    "modules-right": ["hyprland/language","pulseaudio#volume","pulseaudio#microphone","battery", "network"],
+    "modules-right": ["custom/lang","pulseaudio#volume","pulseaudio#microphone","battery", "network"],
 
 
-    "cpu": {
-		"format": "  {usage}%",
-		"tooltip": false
+    // "cpu": {
+	// 	"format": "  {usage}%",
+	// 	"tooltip": false
+    // },
+
+
+	// "memory": {
+	// 	"format": "  {}%",
+	// 	"tooltip": false
+	// },
+
+	"cpu": {
+        "format": " {usage}%",
+        "interval": 2,
+        "states": {
+            "warning": 70,
+            "critical": 90
+        },
+        "tooltip": true,
+        "tooltip-format": "CPU: {usage}%\n\nТемпературы:\n{avg_frequency} GHz\nЯдро 1: {frequency0}\nЯдро 2: {frequency1}\nЯдро 3: {frequency2}\nЯдро 4: {frequency3}",
+        "on-click": "alacritty -e htop"
     },
 
-
-	"memory": {
-		"format": "  {}%",
-		"tooltip": false
-	},
+    "memory": {
+        "format": " {percentage}%",
+        "interval": 2,
+        "states": {
+            "warning": 70,
+            "critical": 90
+        },
+        "tooltip": true,
+        "tooltip-format": "RAM: {used:0.1f}GiB/{total:0.1f}GiB ({percentage}%)\nSwap: {swapUsed:0.1f}GiB/{swapTotal:0.1f}GiB",
+        "on-click": "alacritty -e htop"
+    },
 
 	"battery": {
         "states": {
@@ -48,19 +72,9 @@
 	},
 
 	"clock": {
-        	"format": "{:%I:%M %p}",
-        	"rotate": 0,
-        	"format-alt": "{  %d·%m·%y}",
-        	"tooltip-format": "<span>{calendar}</span>",
-        	"calendar": {
-            		"mode": "month",
-            		"format": {
-                	    "months": "<span color='#ff6699'><b>{}</b></span>",
-                        "days": "<span color='#cdd6f4'><b>{}</b></span>",
-                	    "weekdays": "<span color='#7CD37C'><b>{}</b></span>",
-                	    "today": "<span color='#ffcc66'><b>{}</b></span>"
-            	}
-            }
+        "format": "{:%a, %d %b %Y | %H:%M}",
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
+        "interval": 1
     },
 
 	"pulseaudio#volume": {
@@ -97,13 +111,12 @@
 	    "tooltip": false
 	},
 
-	"hyprland/language": {
-		"format": "{}",
-		"format-en": "EN",
-		"format-ru": "RU",
-		"on-scroll-up": "hyprctl switchxkblayout all next",
-		"on-scroll-down": "hyprctl switchxkblayout all prev",
-	},
+	"custom/lang": {
+    "exec": "hyprctl devices -j | jq -r '.keyboards[] | .active_keymap' | head -n 1 | cut -c1-2 | tr 'a-z' 'A-Z'",
+    "interval": 1,
+    "format": " {}",
+    "on-click": "hyprctl switchxkblayout %(keyboard)s next"
+},
 
 	"hyprland/workspaces": {
 		"format": "{name} : {icon}",
@@ -173,20 +186,6 @@
 	// },
 
 
-	// "hyprland/workspaces": {
-	// 	"format": "{icon}",
-	// 	"on-click": "activate",
-	// 	"format-icons": {
-	// 		"1": "󰖟",
-	// 		"2": "󰳫",
-	// 		"3": "",
-	// 		"4": "",
-	// 		"5": "",
-	// 		"6": "󰊗",
-	// 		"7": ""
-	// 		},
-	// 	"tooltip": false
-	// },
 
 
 	// "tray": {
@@ -201,26 +200,7 @@
 	// },
 
 
-	// "custom/pipewire": {
-    // 	"format": "{icon} {volume}%",
-    // 	"format-icons": {
-    //     	"headphone": "",
-    //     	"hands-free": "",
-    //     	"headset": "",
-    //     	"phone": "",
-    //     	"portable": "",
-    //     	"car": "",
-    //     	"default": ["", "", ""]
-    // 	},
-    // 	"format-muted": " Muted",
-    // 	"on-click": "pactl set-sink-mute @DEFAULT_SINK@ toggle",
-    // 	"on-click-right": "pavucontrol",
-    // 	"on-scroll-up": "pactl set-sink-volume @DEFAULT_SINK@ +5%",
-    // 	"on-scroll-down": "pactl set-sink-volume @DEFAULT_SINK@ -5%",
-    // 	"tooltip": false,
-    // 	"exec": "~/.config/waybar/scripts/pipewire.sh",
-    // 	"return-type": "json"
-	// },
+
 
 	// "custom/cmus": {
 	// "format": "{icon}    {}",
