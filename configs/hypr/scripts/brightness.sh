@@ -23,9 +23,9 @@ fi
 
 # Perform brightness adjustment
 if [[ "$1" == "inc" ]]; then
-  brightnessctl set +10% > /dev/null
+  brightnessctl set +5% > /dev/null
   notify_brightness
 elif [[ "$1" == "dec" ]]; then
-  brightnessctl set 10%- > /dev/null
+  brightnessctl set 5%- > /dev/null
   notify_brightness
 fi

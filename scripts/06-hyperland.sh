@@ -4,7 +4,7 @@
 source "$(dirname "$0")/../utils/logging.sh"
 
 log_info "Installing Hyprland and dependencies with pacman..."
-sudo pacman -Sy --needed --noconfirm hyprland kitty waybar hyprpaper bc brightnessctl dunst pipewire wireplumber pipewire-pulse pipewire-alsa pavucontrol alacritty
+sudo pacman -Sy --needed --noconfirm hyprland kitty waybar hyprpaper bc brightnessctl dunst libnotify pipewire wireplumber pipewire-pulse pipewire-alsa pavucontrol alacritty
 # libxcb xcb-proto xcb-util libx11 libxfixes libxcomposite xorg-xinput libxrender wayland-protocols xcb-util-keysyms xcb-util-wm cairo polkit meson seatd libxkbcommon
 
 #   wofi
