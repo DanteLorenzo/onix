@@ -2,7 +2,7 @@
 
 # Directory containing wallpapers
 WALLPAPERS_DIR="$HOME/Pictures/Wallpapers"
-# Create directory if it doesn’t exist
+# Create directory if it doesn't exist
 mkdir -p "$WALLPAPERS_DIR"
 
 # Find all image files (jpg/png/jpeg) in the directory
@@ -14,8 +14,8 @@ if [ ${#WALLPAPERS[@]} -eq 0 ]; then
     exit 1
 fi
 
-# Select a random wallpaper
-RANDOM_WALLPAPER="${WALLPAPERS[RANDOM % ${#WALLPAPERS[@]}]"
+# Select a random wallpaper (fixed the array indexing syntax)
+RANDOM_WALLPAPER="${WALLPAPERS[$RANDOM % ${#WALLPAPERS[@]}]}"
 
 # Generate a temporary hyprpaper config
 CONFIG_FILE="/tmp/hyprpaper.conf"
