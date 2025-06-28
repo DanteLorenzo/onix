@@ -69,7 +69,7 @@
 
 	"clock": {
 	    "format": "{:%H:%M}",
-	    "tooltip-format": "<big>{:%A, %d %B %Y}</big>\n<tt><small>{calendar}</small></tt>",
+	    "tooltip-format": "<span font='12px'>{:%A, %d %B %Y}</span>\n\n<span font='10px' face='monospace'>{calendar}</span>",
 	    "interval": 1,
 	    "on-click": "hyprctl dispatch exec gsimplecal"  // Optional click action
 	},
@@ -108,11 +108,12 @@
 	    "tooltip": false
 	},
 
-	"custom/lang": {
-    "exec": "hyprctl devices -j | jq -r '.keyboards[] | .active_keymap' | head -n 1 | cut -c1-2 | tr 'a-z' 'A-Z'",
+"custom/lang": {
+    "exec": "hyprctl devices -j | jq -r '.keyboards[0].active_keymap' | cut -c1-2 | tr 'a-z' 'A-Z'",
     "interval": 1,
+    "return-type": "json",
     "format": " {}",
-    "on-click": "hyprctl switchxkblayout %(keyboard)s next"
+    "on-click": "hyprctl switchxkblayout $(hyprctl devices -j | jq -r '.keyboards[0].name') next"
 },
 
 	"hyprland/workspaces": {
