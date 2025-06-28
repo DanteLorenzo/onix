@@ -131,10 +131,13 @@
     },
 
 	"hyprland/language": {
-		    "format": "{}",
-		    "format-en": "EN",
-		    "format-ru": "RU",
-		},
+        "format": "{}",
+        "format-en": "EN",
+        "format-ru": "RU",
+        "on-click": "hyprctl keyword input:kb_layout $(hyprctl devices -j | jq -r '.keyboards[] | select(.name == \"at-translated-set-2-keyboard\") | .active_keymap' | grep -q 'ru' && echo 'us' || echo 'ru')",
+        "interval": 0.5,
+        "tooltip": false
+    }
 
 
 	
