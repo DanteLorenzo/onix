@@ -22,11 +22,6 @@
 	// 	"format": "  {}%",
 	// 	"tooltip": false
 	// },
-	"tray": {
-		"icon-size": 16,
-		"spacing": 16
-	},
-
 
 	"cpu": {
         "format": " {usage}%",
@@ -130,13 +125,12 @@
     		}
     },
 
-	"hyprland/language": {
+"hyprland/language": {
         "format": "{}",
         "format-en": "EN",
         "format-ru": "RU",
-        "on-click": "hyprctl keyword input:kb_layout $(hyprctl devices -j | jq -r '.keyboards[] | select(.name == \"at-translated-set-2-keyboard\") | .active_keymap' | grep -q 'ru' && echo 'us' || echo 'ru')",
-        "interval": 0.5,
-        "tooltip": false
+        "on-click": "hyprctl switchxkblayout at-translated-set-2-keyboard next",
+        "interval": 0.5
     }
 
 
