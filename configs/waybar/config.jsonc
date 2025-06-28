@@ -7,9 +7,9 @@
 	"font-family": "JetBrainsMono Nerd Font, FontAwesome, Noto Sans, sans-serif",
 	"font-size": "12px",
 	
-    "modules-left": ["clock", "cpu", "memory"],
+    "modules-left": ["clock", "cpu", "memory", "tray"],
     "modules-center": ["hyprland/workspaces"],
-    "modules-right": ["custom/hyprland-lang","pulseaudio#volume","pulseaudio#microphone","battery", "network"],
+    "modules-right": ["hyprland/language","pulseaudio#volume","pulseaudio#microphone","battery", "network"],
 
 
     // "cpu": {
@@ -22,6 +22,11 @@
 	// 	"format": "  {}%",
 	// 	"tooltip": false
 	// },
+	"tray": {
+		"icon-size": 16,
+		"spacing": 16
+	},
+
 
 	"cpu": {
         "format": " {usage}%",
@@ -125,16 +130,12 @@
     		}
     },
 
-"custom/hyprland-lang": {
-    "exec": "hyprctl devices -j | jq -r '.keyboards[] | select(.name == \"at-translated-set-2-keyboard\") | .active_keymap' | cut -c1-2 | tr 'a-z' 'A-Z'",
-    "interval": 0.5,
-    "return-type": "json",
-    "on-click": "hyprctl switchxkblayout at-translated-set-2-keyboard next",
-    "format": "{}",
-    "format-en": "EN",
-    "format-ru": "RU",
-    "tooltip": false
-  }
+	"hyprland/language": {
+		    "format": "{}",
+		    "format-en": "EN",
+		    "format-ru": "RU",
+		},
+
 
 	
 
