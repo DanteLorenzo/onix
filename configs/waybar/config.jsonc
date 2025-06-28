@@ -31,8 +31,7 @@
             "critical": 90
         },
         "tooltip": true,
-        "tooltip-format": "CPU: {usage}%\n\nТемпературы:\n{avg_frequency} GHz\nЯдро 1: {frequency0}\nЯдро 2: {frequency1}\nЯдро 3: {frequency2}\nЯдро 4: {frequency3}",
-        "on-click": "alacritty -e htop"
+        "tooltip-format": "CPU: {usage}%\n\nТемпературы:\n{avg_frequency} GHz\nЯдро 1: {frequency0}\nЯдро 2: {frequency1}\nЯдро 3: {frequency2}\nЯдро 4: {frequency3}"
     },
 
     "memory": {
@@ -43,8 +42,7 @@
             "critical": 90
         },
         "tooltip": true,
-        "tooltip-format": "RAM: {used:0.1f}GiB/{total:0.1f}GiB ({percentage}%)\nSwap: {swapUsed:0.1f}GiB/{swapTotal:0.1f}GiB",
-        "on-click": "alacritty -e htop"
+        "tooltip-format": "RAM: {used:0.1f}GiB/{total:0.1f}GiB ({percentage}%)\nSwap: {swapUsed:0.1f}GiB/{swapTotal:0.1f}GiB"
     },
 
 	"battery": {
@@ -72,10 +70,11 @@
 	},
 
 	"clock": {
-        "format": "{:%a, %d %b %Y | %H:%M}",
-        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>",
-        "interval": 1
-    },
+	    "format": " {:%H:%M}",
+	    "tooltip-format": "<big>{:%A, %d %B %Y}</big>\n<tt><small>{calendar}</small></tt>",
+	    "interval": 1,
+	    "on-click": "hyprctl dispatch exec gsimplecal"  // Optional click action
+	},
 
 	"pulseaudio#volume": {
 	    "format": "{icon} {volume}%",

@@ -49,7 +49,8 @@ window#waybar {
 #tray,
 #language,
 #pulseaudio,
-#clock {
+#clock
+#battery {
 	padding: 0 10px;
 	margin: 0 6px;
 	color: @fg;
