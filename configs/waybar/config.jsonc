@@ -31,7 +31,7 @@
             "critical": 90
         },
         "tooltip": true,
-        "tooltip-format": "CPU: {usage}%\n\nТемпературы:\n{avg_frequency} GHz\nЯдро 1: {frequency0}\nЯдро 2: {frequency1}\nЯдро 3: {frequency2}\nЯдро 4: {frequency3}"
+        "tooltip-format": "CPU: {usage}%\n\nTemperatures:\n{avg_frequency} GHz\nCore 1: {frequency0}\nCore 2: {frequency1}\nCore 3: {frequency2}\nCore 4: {frequency3}"
     },
 
     "memory": {
