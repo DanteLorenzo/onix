@@ -7,9 +7,9 @@
 	"font-family": "JetBrainsMono Nerd Font, FontAwesome, Noto Sans, sans-serif",
 	"font-size": "12px",
 	
-    "modules-left": ["cpu", "memory"],
-    "modules-center": ["hyprland/workspaces", "clock"],
-    "modules-right": ["custom/lang","pulseaudio#volume","pulseaudio#microphone","battery", "network"],
+    "modules-left": ["clock", "cpu", "memory"],
+    "modules-center": ["hyprland/workspaces"],
+    "modules-right": ["custom/keyboard":,"pulseaudio#volume","pulseaudio#microphone","battery", "network"],
 
 
     // "cpu": {
@@ -57,7 +57,7 @@
     },
 
 	"network": {
-	    "interface": "wlo1",
+	    "interface": "wlan0",
 	    "format": "{ifname}",
 	    "format-wifi": "{icon}  {essid}",
 	    "format-ethernet": "󰈀  {ipaddr}/{cidr}",
@@ -70,8 +70,7 @@
 	"clock": {
 	    "format": "{:%H:%M}",
 	    "tooltip-format": "<span font='12px'>{:%A, %d %B %Y}</span>\n\n<span font='10px' face='monospace'>{calendar}</span>",
-	    "interval": 1,
-	    "on-click": "hyprctl dispatch exec gsimplecal"  // Optional click action
+	    "interval": 1
 	},
 
 	"pulseaudio#volume": {
@@ -108,13 +107,6 @@
 	    "tooltip": false
 	},
 
-"custom/lang": {
-    "exec": "hyprctl devices -j | jq -r '.keyboards[0].active_keymap' | cut -c1-2 | tr 'a-z' 'A-Z'",
-    "interval": 1,
-    "return-type": "json",
-    "format": " {}",
-    "on-click": "hyprctl switchxkblayout $(hyprctl devices -j | jq -r '.keyboards[0].name') next"
-},
 
 	"hyprland/workspaces": {
 		"format": "{name} : {icon}",
@@ -161,12 +153,12 @@
 //     }
 //   },
 	
-	// "custom/keyboard": {
-    //     "exec": "hyprctl devices -j | jq -r '.keyboards[] | select(.name == \"at-translated-set-2-keyboard\") | .active_keymap' | cut -c-2 | tr 'a-z' 'A-Z'",
-    //     "interval": 0.6,
-    //     "format": "{}",
-    //     "on-click": "hyprctl switchxkblayout at-translated-set-2-keyboard next"
-    // },
+	"custom/keyboard": {
+        "exec": "hyprctl devices -j | jq -r '.keyboards[] | select(.name == \"at-translated-set-2-keyboard\") | .active_keymap' | cut -c-2 | tr 'a-z' 'A-Z'",
+        "interval": 0.6,
+        "format": "{}",
+        "on-click": "hyprctl switchxkblayout at-translated-set-2-keyboard next"
+    },
 
 
 	// "hyprland/window": {
