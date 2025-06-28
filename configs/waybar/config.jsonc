@@ -8,7 +8,7 @@
 	"font-size": "12px",
 	
     "modules-left": ["cpu", "memory"],
-    "modules-center": ["clock"],
+    "modules-center": ["hyprland/workspaces", "clock"],
     "modules-right": ["hyprland/language","pulseaudio#volume","pulseaudio#microphone","battery", "network"],
 
 
@@ -42,10 +42,20 @@
 	},
 
 	"clock": {
-		"format": "󰥔  {:%I:%M %p}",
-		"format-alt": "󰥔  {:%a, %d. %b  %I:%M %p}",
-		"tooltip-format": "Date: {:%Y-%m-%d}"
-	},
+        	"format": "{:%I:%M %p}",
+        	"rotate": 0,
+        	"format-alt": "{  %d·%m·%y}",
+        	"tooltip-format": "<span>{calendar}</span>",
+        	"calendar": {
+            		"mode": "month",
+            		"format": {
+                	    "months": "<span color='#ff6699'><b>{}</b></span>",
+                        "days": "<span color='#cdd6f4'><b>{}</b></span>",
+                	    "weekdays": "<span color='#7CD37C'><b>{}</b></span>",
+                	    "today": "<span color='#ffcc66'><b>{}</b></span>"
+            	}
+            }
+    },
 
 	"pulseaudio#volume": {
 	    "format": "{icon} {volume}%",
@@ -88,6 +98,22 @@
 		"on-scroll-up": "hyprctl switchxkblayout all next",
 		"on-scroll-down": "hyprctl switchxkblayout all prev",
 	},
+
+	"hyprland/workspaces": {
+		"format": "{name} : {icon}",
+		"format-icons": {
+			"1": "",
+			"2": "",
+			"3": "",
+			"4": "",
+			"5": "",
+			"active": "",
+			"default": ""
+    		},
+        "persistent-workspaces": {
+      		"eDP-1": [1, 2, 3, 4, 5]
+    		}
+    },
 
 
 
