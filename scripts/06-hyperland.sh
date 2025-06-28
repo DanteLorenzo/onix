@@ -23,3 +23,11 @@ else
   log_error "Hyprland and dependencies installation failed."
 fi
 
+# Перезагрузка конфига Hyprland
+if pgrep -x "Hyprland" > /dev/null; then
+  hyprctl reload
+  log_info "Hyprland config reloaded."
+else
+  log_info "Hyprland is not running, config not reloaded."
+fi
+
