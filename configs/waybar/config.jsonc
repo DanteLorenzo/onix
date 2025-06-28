@@ -68,7 +68,7 @@
 	},
 
 	"clock": {
-	    "format": " {:%H:%M}",
+	    "format": "{:%H:%M}",
 	    "tooltip-format": "<big>{:%A, %d %B %Y}</big>\n<tt><small>{calendar}</small></tt>",
 	    "interval": 1,
 	    "on-click": "hyprctl dispatch exec gsimplecal"  // Optional click action
