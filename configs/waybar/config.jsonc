@@ -7,7 +7,7 @@
 	"font-family": "JetBrainsMono Nerd Font, FontAwesome, Noto Sans, sans-serif",
 	"font-size": "12px",
 	
-    "modules-left": ["clock", "cpu", "memory", "tray"],
+    "modules-left": ["clock", "cpu", "memory", "temperature", "tray"],
     "modules-center": ["hyprland/workspaces"],
     "modules-right": ["hyprland/language","pulseaudio#volume","pulseaudio#microphone","battery", "network"],
 
@@ -44,6 +44,19 @@
 		"tooltip-format": "RAM: {used:0.1f}GiB/{total:0.1f}GiB ({percentage}%)\nSwap: {swapUsed:0.1f}GiB/{swapTotal:0.1f}GiB"
     },
 
+	"temperature": {
+      "thermal-zone": 2,
+      "hwmon-path": "/sys/class/hwmon/hwmon2/temp1_input",
+      "critical-threshold": 80,
+      "format-critical": "{icon} {temperatureC}°C",
+      "format": "{icon} {temperatureC}°C",
+      "format-icons": [
+        "",
+        "",
+        ""
+      ]
+    },
+
 	"battery": {
         "states": {
             "warning": 30,
@@ -53,25 +66,21 @@
         "format-charging": " {capacity}%",
         "format-plugged": " {capacity}%",
         "format-alt": "{time} {icon}",
-        "format-icons": ["", "", "", "", ""],
-        "interval": 4
+        "format-icons": ["", "", "", "", ""]
     },
 
 	"network": {
-	    "interface": "wlan0",
-	    "format": "{ifname}",
-	    "format-wifi": "{icon}  {essid}",
-	    "format-ethernet": "󰈀  {ipaddr}/{cidr}",
-	    "format-disconnected": "󰤭  Disconnected",
-	    "max-length": 50,
-	    "format-icons": ["󰤯", "󰤟", "󰤢", "󰤥", "󰤨"],
-	    "tooltip-format": "Connected to {essid}"
-	},
+      "format-wifi": "{essid} ({signalStrength}%) ",
+      "format-ethernet": " {ifname}",
+      "tooltip-format": " {ifname} via {gwaddr}",
+      "format-linked": " {ifname} (No IP)",
+      "format-disconnected": "Disconnected ⚠ {ifname}",
+      "format-alt": " {ifname}: {ipaddr}/{cidr}"
+    },
 
 	"clock": {
-	    //"format": "{:%H:%M}",
-	    "tooltip-format": "<big>{:%d %B}</big>/n<tt><big>{calendar}</big></tt>",
-	    "format-alt": "{:%d-%m-%Y}"
+	    "format": "{:%H:%M}",
+	    "tooltip-format": "<span font='12px'>{:%A, %d %B %Y}</span>\n\n<span font='10px' face='monospace'>{calendar}</span>"
 	},
 
 	"pulseaudio#volume": {
