@@ -54,7 +54,7 @@
         "format-plugged": " {capacity}%",
         "format-alt": "{time} {icon}",
         "format-icons": ["", "", "", "", ""],
-        "interval": 5
+        "interval": 4
     },
 
 	"network": {
