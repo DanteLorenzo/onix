@@ -33,4 +33,4 @@ magick convert "$WALLPAPER" \
 sed -i "s|^\(path *= *\).*|\\1$WALLPAPER|" "$HYPRLOCK_CONF"
 
 # Запуск hyprlock с конфигом
-HYPRLOCK_CONFIG="$HYPRLOCK_CONF" hyprlock
+hyprlock -c "$HYPRLOCK_CONF"
