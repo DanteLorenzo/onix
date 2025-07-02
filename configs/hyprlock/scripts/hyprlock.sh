@@ -2,7 +2,7 @@
 
 # Paths
 HYPRPAPER_CONF="$HOME/.config/hyprpaper/tmp.conf"   # Hyprpaper config (source of wallpaper)
-HYPRLOCK_CONF="$HOME/.config/hypr/hyprlock.conf"    # Hyprlock config (destination to modify)
+HYPRLOCK_CONF="$HOME/.config/hyprlock/hyprlock.conf"    # Hyprlock config (destination to modify)
 
 # Extract wallpaper path from hyprpaper.conf
 WALLPAPER=$(grep -m1 '^wallpaper' "$HYPRPAPER_CONF" | awk -F',' '{print $NF}' | tr -d ' ')
