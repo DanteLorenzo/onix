@@ -29,7 +29,6 @@ if [ -f "$CACHED_BLUR" ]; then
 else
     # Optimized blur generation (3x faster)
     magick convert "$WALLPAPER" \
-        -resize 25% \
         -blur 0x8 \
         -resize 400% \
         -gravity center \
