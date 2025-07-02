@@ -18,9 +18,12 @@ fi
 RANDOM_WALLPAPER="${WALLPAPERS[$RANDOM % ${#WALLPAPERS[@]}]}"
 
 # Generate a temporary hyprpaper config
-CONFIG_FILE="/tmp/hyprpaper.conf"
+CONFIG_FILE="~/.config/hyprpaper/hyprpaper_random.conf"
 echo "preload = $RANDOM_WALLPAPER" > "$CONFIG_FILE"
 echo "wallpaper = ,$RANDOM_WALLPAPER" >> "$CONFIG_FILE"
+echo "ipc = true" >> "$CONFIG_FILE"
+echo "splash = true" >> "$CONFIG_FILE"
+
 
 # Restart hyprpaper to apply changes
 pkill hyprpaper
