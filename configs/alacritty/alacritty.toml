@@ -86,11 +86,11 @@ x = 0
 y = 0
 
 [font.italic]
-family = "FiraCode Nerd Font SemBd"
+family = "Hack Nerd Font SemBd"
 style = "Italic"
 
 [font.normal]
-family = "FiraCode Nerd Font"
+family = "Hack Nerd Font"
 style = "Regular"
 
 [font.offset]
