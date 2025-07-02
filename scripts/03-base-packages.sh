@@ -11,7 +11,7 @@ sudo pacman -S --needed --noconfirm base-devel gcc cmake git mesa gdb nano vim n
 sudo systemctl enable bluetooth.service --now
 
 # Fonts
-sudo pacman -S --needed --noconfirm ttf-nerd-fonts-symbols ttf-font-awesome noto-fonts noto-fonts-emoji ttf-font-hack
+sudo pacman -S --needed --noconfirm ttf-nerd-fonts-symbols ttf-font-awesome noto-fonts noto-fonts-emoji ttf-hack-nerd
 
 if [ $? -eq 0 ]; then
   log_success "Base packages installation complete."
