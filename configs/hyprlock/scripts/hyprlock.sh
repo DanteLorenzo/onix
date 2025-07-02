@@ -1,36 +1,39 @@
 #!/bin/bash
 
-# Путь до временного конфига hyprpaper
+# Path to temporary hyprpaper config
 HYPRPAPER_CONF="$HOME/.config/hyprpaper/tmp.conf"
 
-# Путь до конфигурации Hyprlock
-HYPRLOCK_CONF="$HOME/.config/hyprlock/hyprlock.conf"
+# Path to Hyprlock configuration
+HYPRLOCK_CONF="$HOME/.config/hypr/hyprlock.conf"  # Note: Corrected path to standard hyprlock location
 
-# Папка конфигурации
-CONFIG_DIR="$HOME/.config/hyprlock"
+# Configuration directory
+CONFIG_DIR="$HOME/.config/hypr"
 BLURBOX="$CONFIG_DIR/blurbox.png"
 
-# Получаем путь к обоям из hyprpaper config
-WALLPAPER=$(grep -m1 '^wallpaper' "$HYPRPAPER_CONF" | cut -d',' -f2)
+# Get wallpaper path from hyprpaper config (handling both formats)
+WALLPAPER=$(grep -m1 '^wallpaper' "$HYPRPAPER_CONF" | awk -F',' '{print $NF}' | tr -d ' ')
 
-# Проверка на существование файла обоев
+# Verify wallpaper exists
 if [ ! -f "$WALLPAPER" ]; then
-  echo "❌ Обои не найдены: $WALLPAPER"
+  echo "❌ Wallpaper not found: $WALLPAPER"
   exit 1
 fi
 
-# Генерация размытого квадрата
+# Generate blurred box
 magick convert "$WALLPAPER" \
-    -resize 1920x1080 \
+    -resize 1920x1080^ \
     -gravity center \
+    -extent 1920x1080 \
     -crop 900x900+0+0 +repage \
     -blur 0x8 \
     -fill white -colorize 10% \
     "$BLURBOX"
 
-# Автоматически подменяем путь к background.path в hyprlock.conf
-# (на случай если ты хочешь, чтобы фон тоже совпадал с текущими обоями)
-sed -i "s|^\(path *= *\).*|\\1$WALLPAPER|" "$HYPRLOCK_CONF"
+# Update hyprlock config (improved sed command)
+sed -i "/^background {/,/^}/ {
+    s|^\([[:space:]]*path[[:space:]]*=[[:space:]]*\).*|\1$WALLPAPER|
+    s|^\([[:space:]]*blur_passes[[:space:]]*=[[:space:]]*\).*|\13|
+}" "$HYPRLOCK_CONF"
 
-# Запуск hyprlock с конфигом
+# Launch hyprlock
 hyprlock -c "$HYPRLOCK_CONF"
