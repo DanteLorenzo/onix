@@ -20,7 +20,7 @@ if [ ! -f "$WALLPAPER" ]; then
 fi
 
 # Генерация размытого квадрата
-convert "$WALLPAPER" \
+magick convert "$WALLPAPER" \
     -resize 1920x1080 \
     -gravity center \
     -crop 900x900+0+0 +repage \
