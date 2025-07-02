@@ -8,7 +8,7 @@ log_info "Installing base packages with pacman..."
 sudo pacman -S --needed --noconfirm base-devel gcc cmake git mesa gdb nano vim ninja vulkan-radeon timeshift xorg-xkbcomp jq btop htop networkmanager
 
 # Fonts
-sudo pacman -S --needed --noconfirm ttf-nerd-fonts-symbols ttf-font-awesome noto-fonts noto-fonts-emoji
+sudo pacman -S --needed --noconfirm ttf-nerd-fonts-symbols ttf-font-awesome noto-fonts noto-fonts-emoji ttf-font-hack
 
 if [ $? -eq 0 ]; then
   log_success "Base packages installation complete."

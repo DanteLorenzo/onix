@@ -78,7 +78,7 @@ text = "#1E1E2E"
 size = 12
 
 [font.bold]
-family = "FiraCode Nerd Font Propo"
+family = "Hack Nerd Font Propo"
 style = "Bold"
 
 [font.glyph_offset]
