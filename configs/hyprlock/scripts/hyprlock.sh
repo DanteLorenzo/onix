@@ -4,7 +4,7 @@
 HYPRPAPER_CONF="$HOME/.config/hyprpaper/tmp.conf"
 
 # Путь до конфигурации Hyprlock
-HYPRLOCK_CONF="$HOME/.config/hyprlock/tmp.conf"
+HYPRLOCK_CONF="$HOME/.config/hyprlock/hyprlock.conf"
 
 # Папка конфигурации
 CONFIG_DIR="$HOME/.config/hyprlock"
