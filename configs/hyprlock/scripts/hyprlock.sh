@@ -7,11 +7,6 @@ CONFIG_DIR="$HOME/.config/hyprlock"
 BLURBOX="$CONFIG_DIR/blurbox.png"
 CACHE_DIR="$HOME/.cache/hyprlock_blur"
 
-# Screen
-SCREEN_SIZE=$(hyprctl monitors -j | jq -r '.[0].width,.[0].height')
-SCREEN_WIDTH=$(echo "$SCREEN_SIZE" | head -n1)
-SCREEN_HEIGHT=$(echo "$SCREEN_SIZE" | tail -n1)
-
 # Create cache directory if it doesn't exist
 mkdir -p "$CACHE_DIR"
 
@@ -34,14 +29,10 @@ if [ -f "$CACHED_BLUR" ]; then
 else
     # Optimized blur generation (3x faster)
     magick convert "$WALLPAPER" \
-        -resize "${SCREEN_WIDTH}x${SCREEN_HEIGHT}^" \
+        -resize 2880x1800
+        -blur 0x1 \
         -gravity center \
-        -extent "${SCREEN_WIDTH}x${SCREEN_HEIGHT}" \
-        -resize 25% \
-        -blur 0x8 \
-        -resize 400% \
-        -gravity center \
-        -crop "${BLUR_SIZE}x${BLUR_SIZE}+0+0" +repage \
+        -crop 900x900+0+0 +repage \
         -fill white -colorize 10% \
         "$CACHED_BLUR"
     cp "$CACHED_BLUR" "$BLURBOX"
