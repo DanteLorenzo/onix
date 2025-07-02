@@ -27,3 +27,6 @@ else
     log_error "Source folder ./pic does not exist"
 fi
 
+# Copy all cursor themes to /usr/share/icons/ under sudo
+sudo cp -r ./cursors/* /usr/share/icons/
+
