@@ -68,6 +68,14 @@
       "format-disconnected": "Disconnected ⚠ {ifname}",
       "format-alt": " {ifname}: {ipaddr}/{cidr}"
     },
+	
+	"network#vpn": {
+		"interval": 5,
+		"interface": "tun0",
+		"format": "\uf3ed",
+		"format-disconnected": "",
+		"tooltip-format": "VPN Connected: {ipaddr}"
+	},
 
 	"clock": {
         "format": "{:%H:%M} ",
