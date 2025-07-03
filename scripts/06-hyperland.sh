@@ -4,7 +4,7 @@
 source "$(dirname "$0")/../utils/logging.sh"
 
 log_info "Installing Hyprland and dependencies with pacman..."
-sudo pacman -Sy --needed --noconfirm hyprland kitty waybar hyprpaper bc brightnessctl dunst libnotify pavucontrol alacritty nautilus fastfetch hyprlock hyprcursor hypridle
+sudo pacman -Sy --needed --noconfirm hyprland kitty waybar hyprpaper bc brightnessctl dunst libnotify pavucontrol alacritty nautilus fastfetch hyprlock hyprcursor hypridle sddm qt6-svg qt6-virtualkeyboard qt6-multimedia-ffmpeg
 # libxcb xcb-proto xcb-util libx11 libxfixes libxcomposite xorg-xinput libxrender wayland-protocols xcb-util-keysyms xcb-util-wm cairo polkit meson seatd libxkbcommon
 
 #   wofi
@@ -13,7 +13,7 @@ if [ $? -eq 0 ]; then
   log_success "Hyprland and dependencies installation complete."
   
   # Copy config folders to ~/.config, overwriting if they exist
-  for folder in alacritty hypr hyprpaper waybar hyprlock hypridle; do
+  for folder in alacritty hypr hyprpaper waybar hyprlock hypridle dunst; do
     src_dir="$(dirname "$0")/../configs/$folder"
     dest_dir="$HOME/.config/$folder"
     rm -rf "$dest_dir"
