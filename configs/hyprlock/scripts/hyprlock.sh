@@ -8,19 +8,19 @@ BLURBOX="$CONFIG_DIR/blurbox.png"
 CACHE_DIR="$HOME/.cache/hyprlock_blur"
 AVATAR_DIR="$HOME/Pictures/Avatars"
 
-# Create cache directory if it doesn't exist
+# Create cache directory
 mkdir -p "$CACHE_DIR"
 
-# Extract wallpaper path
+# Get current wallpaper
 WALLPAPER=$(grep -m1 '^wallpaper' "$HYPRPAPER_CONF" | awk -F',' '{print $NF}' | tr -d ' ')
 
-# Check if wallpaper exists
+# Verify wallpaper exists
 if [ ! -f "$WALLPAPER" ]; then
   echo "❌ Error: Wallpaper not found: $WALLPAPER"
   exit 1
 fi
 
-# Generate blurred wallpaper box
+# Generate blurred version if needed
 WALLPAPER_HASH=$(md5sum "$WALLPAPER" | awk '{print $1}')
 CACHED_BLUR="$CACHE_DIR/${WALLPAPER_HASH}_900x900.png"
 
@@ -38,10 +38,10 @@ else
     cp "$CACHED_BLUR" "$BLURBOX"
 fi
 
-# Update wallpaper path in hyprlock config
+# Update wallpaper path
 sed -i "/^background {/,/}/ s|^\([[:space:]]*path[[:space:]]*=[[:space:]]*\).*|\1$WALLPAPER|" "$HYPRLOCK_CONF"
 
-# Update avatar image if directory exists
+# Update avatar (only the second image block)
 if [ -d "$AVATAR_DIR" ]; then
     shopt -s nullglob
     AVATAR_FILES=("$AVATAR_DIR"/*.{png,jpg,jpeg,PNG,JPG,JPEG})
@@ -49,13 +49,14 @@ if [ -d "$AVATAR_DIR" ]; then
     
     if [ ${#AVATAR_FILES[@]} -gt 0 ]; then
         RANDOM_AVATAR="${AVATAR_FILES[RANDOM % ${#AVATAR_FILES[@]}]}"
-        # More precise matching for avatar section
-        sed -i "/^image {/,/}/ {
-            /size = 200/ {
-                n
-                s|^\([[:space:]]*path[[:space:]]*=[[:space:]]*\).*|\1$RANDOM_AVATAR|
+        # Count image blocks and modify only the second one
+        awk -v new_avatar="$RANDOM_AVATAR" '
+            /^image {/ { block++ }
+            block == 2 && /path =/ {
+                sub(/path =.*/, "path = " new_avatar)
             }
-        }" "$HYPRLOCK_CONF"
+            { print }
+        ' "$HYPRLOCK_CONF" > "$HYPRLOCK_CONF.tmp" && mv "$HYPRLOCK_CONF.tmp" "$HYPRLOCK_CONF"
     else
         echo "⚠ Warning: No avatar files found in $AVATAR_DIR"
     fi
