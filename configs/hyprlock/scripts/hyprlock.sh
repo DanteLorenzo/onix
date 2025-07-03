@@ -19,18 +19,22 @@ if [ ! -f "$WALLPAPER" ]; then
   exit 1
 fi
 
-# Get screen resolution (assuming single monitor for simplicity)
-SCREEN_RES=$(hyprctl monitors | grep -oP '\d+x\d+' | head -n1)
-SCREEN_WIDTH=$(echo $SCREEN_RES | cut -d'x' -f1)
-SCREEN_HEIGHT=$(echo $SCREEN_RES | cut -d'x' -f2)
+# Get wallpaper dimensions
+WALLPAPER_DIM=$(magick identify -format "%wx%h" "$WALLPAPER")
+WALLPAPER_WIDTH=${WALLPAPER_DIM%x*}
+WALLPAPER_HEIGHT=${WALLPAPER_DIM#*x}
 
 # Calculate center position for 900x900 crop
-CROP_X=$(( (SCREEN_WIDTH - 900) / 2 ))
-CROP_Y=$(( (SCREEN_HEIGHT - 900) / 2 ))
+CROP_X=$(( (WALLPAPER_WIDTH - 900) / 2 ))
+CROP_Y=$(( (WALLPAPER_HEIGHT - 900) / 2 ))
 
-# Create hash for caching (now includes screen resolution in hash)
-WALLPAPER_HASH=$(echo "$(md5sum "$WALLPAPER")_${SCREEN_RES}_900x900" | md5sum | awk '{print $1}')
-CACHED_BLUR="$CACHE_DIR/$WALLPAPER_HASH.png"
+# Ensure crop coordinates are not negative
+CROP_X=$(( CROP_X > 0 ? CROP_X : 0 ))
+CROP_Y=$(( CROP_Y > 0 ? CROP_Y : 0 ))
+
+# Create hash for caching
+WALLPAPER_HASH=$(md5sum "$WALLPAPER" | awk '{print $1}')
+CACHED_BLUR="$CACHE_DIR/${WALLPAPER_HASH}_900x900.png"
 
 # Use cached version if available
 if [ -f "$CACHED_BLUR" ]; then
@@ -38,7 +42,8 @@ if [ -f "$CACHED_BLUR" ]; then
 else
     # Generate the exact 900x900 crop from the center, then apply blur
     magick convert "$WALLPAPER" \
-        -crop 900x900+${CROP_X}+${CROP_Y} +repage \
+        -gravity center \
+        -crop 900x900+0+0 +repage \
         -resize 25% \
         -blur 0x8 \
         -resize 400% \
