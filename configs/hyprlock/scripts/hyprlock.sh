@@ -62,8 +62,8 @@ if [ -d "$AVATAR_DIR" ]; then
     
     if [ ${#AVATAR_FILES[@]} -gt 0 ]; then
         RANDOM_AVATAR="${AVATAR_FILES[RANDOM % ${#AVATAR_FILES[@]}]}"
-        # Update only the profile photo section in hyprlock config
-        sed -i "/# Profie-Photo/,/image {/,/}/ s|^\([[:space:]]*path[[:space:]]*=[[:space:]]*\).*|\1$RANDOM_AVATAR|" "$HYPRLOCK_CONF"
+        # Update only the profile photo path using line number range
+        sed -i "/^image {/,/}/ s|^\([[:space:]]*path[[:space:]]*=[[:space:]]*\).*|\1$RANDOM_AVATAR|" "$HYPRLOCK_CONF"
     else
         echo "⚠ Warning: No avatar files found in $AVATAR_DIR"
     fi
@@ -72,7 +72,7 @@ else
 fi
 
 # Update wallpaper path in hyprlock config (only in background section)
-sed -i "/background {/,/}/ s|^\([[:space:]]*path[[:space:]]*=[[:space:]]*\).*|\1$WALLPAPER|" "$HYPRLOCK_CONF"
+sed -i "/^background {/,/}/ s|^\([[:space:]]*path[[:space:]]*=[[:space:]]*\).*|\1$WALLPAPER|" "$HYPRLOCK_CONF"
 
 # Launch hyprlock
 hyprlock -c "$HYPRLOCK_CONF"
