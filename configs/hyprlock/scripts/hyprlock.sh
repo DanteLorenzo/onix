@@ -43,7 +43,7 @@ else
     # Generate the exact 900x900 crop from the center, then apply blur
     magick convert "$WALLPAPER" \
         -gravity center \
-        -crop 1600x1600+0+0 +repage \
+        -crop 900x900+0+0 +repage \
         -resize 25% \
         -blur 0x9 \
         -resize 400% \
