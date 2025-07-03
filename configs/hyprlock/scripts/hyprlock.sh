@@ -19,21 +19,29 @@ if [ ! -f "$WALLPAPER" ]; then
   exit 1
 fi
 
-# Create hash for caching
-WALLPAPER_HASH=$(md5sum "$WALLPAPER" | awk '{print $1}')
+# Get screen resolution (assuming single monitor for simplicity)
+SCREEN_RES=$(hyprctl monitors | grep -oP '\d+x\d+' | head -n1)
+SCREEN_WIDTH=$(echo $SCREEN_RES | cut -d'x' -f1)
+SCREEN_HEIGHT=$(echo $SCREEN_RES | cut -d'x' -f2)
+
+# Calculate center position for 900x900 crop
+CROP_X=$(( (SCREEN_WIDTH - 900) / 2 ))
+CROP_Y=$(( (SCREEN_HEIGHT - 900) / 2 ))
+
+# Create hash for caching (now includes screen resolution in hash)
+WALLPAPER_HASH=$(echo "$(md5sum "$WALLPAPER")_${SCREEN_RES}_900x900" | md5sum | awk '{print $1}')
 CACHED_BLUR="$CACHE_DIR/$WALLPAPER_HASH.png"
 
 # Use cached version if available
 if [ -f "$CACHED_BLUR" ]; then
     cp "$CACHED_BLUR" "$BLURBOX"
 else
-    # Optimized blur generation (3x faster)
+    # Generate the exact 900x900 crop from the center, then apply blur
     magick convert "$WALLPAPER" \
+        -crop 900x900+${CROP_X}+${CROP_Y} +repage \
         -resize 25% \
         -blur 0x8 \
         -resize 400% \
-        -gravity center \
-        -crop 900x900+0+0 +repage \
         -fill white -colorize 10% \
         "$CACHED_BLUR"
     cp "$CACHED_BLUR" "$BLURBOX"
