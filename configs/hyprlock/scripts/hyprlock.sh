@@ -6,6 +6,7 @@ HYPRLOCK_CONF="$HOME/.config/hyprlock/hyprlock.conf"
 CONFIG_DIR="$HOME/.config/hyprlock"
 BLURBOX="$CONFIG_DIR/blurbox.png"
 CACHE_DIR="$HOME/.cache/hyprlock_blur"
+AVATAR_DIR="$HOME/Pictures/Avatars"
 
 # Create cache directory if it doesn't exist
 mkdir -p "$CACHE_DIR"
@@ -52,7 +53,21 @@ else
     cp "$CACHED_BLUR" "$BLURBOX"
 fi
 
-# Update hyprlock config
+# Select random avatar if directory exists
+if [ -d "$AVATAR_DIR" ]; then
+    AVATAR_FILES=("$AVATAR_DIR"/*.{png,jpg,jpeg})
+    if [ ${#AVATAR_FILES[@]} -gt 0 ]; then
+        RANDOM_AVATAR="${AVATAR_FILES[RANDOM % ${#AVATAR_FILES[@]}]}"
+        # Update avatar path in hyprlock config
+        sed -i "/image {/,/}/ s|^\([[:space:]]*path[[:space:]]*=[[:space:]]*\).*|\1$RANDOM_AVATAR|" "$HYPRLOCK_CONF"
+    else
+        echo "⚠ Warning: No avatar files found in $AVATAR_DIR"
+    fi
+else
+    echo "⚠ Warning: Avatar directory not found: $AVATAR_DIR"
+fi
+
+# Update wallpaper path in hyprlock config
 sed -i "/background {/,/}/ s|^\([[:space:]]*path[[:space:]]*=[[:space:]]*\).*|\1$WALLPAPER|" "$HYPRLOCK_CONF"
 
 # Launch hyprlock
