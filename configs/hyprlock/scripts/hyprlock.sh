@@ -20,28 +20,13 @@ if [ ! -f "$WALLPAPER" ]; then
   exit 1
 fi
 
-# Get wallpaper dimensions
-WALLPAPER_DIM=$(magick identify -format "%wx%h" "$WALLPAPER")
-WALLPAPER_WIDTH=${WALLPAPER_DIM%x*}
-WALLPAPER_HEIGHT=${WALLPAPER_DIM#*x}
-
-# Calculate center position for 900x900 crop
-CROP_X=$(( (WALLPAPER_WIDTH - 900) / 2 ))
-CROP_Y=$(( (WALLPAPER_HEIGHT - 900) / 2 ))
-
-# Ensure crop coordinates are not negative
-CROP_X=$(( CROP_X > 0 ? CROP_X : 0 ))
-CROP_Y=$(( CROP_Y > 0 ? CROP_Y : 0 ))
-
-# Create hash for caching
+# Generate blurred wallpaper box
 WALLPAPER_HASH=$(md5sum "$WALLPAPER" | awk '{print $1}')
 CACHED_BLUR="$CACHE_DIR/${WALLPAPER_HASH}_900x900.png"
 
-# Use cached version if available
 if [ -f "$CACHED_BLUR" ]; then
     cp "$CACHED_BLUR" "$BLURBOX"
 else
-    # Generate the exact 900x900 crop from the center, then apply blur
     magick convert "$WALLPAPER" \
         -gravity center \
         -crop 900x900+0+0 +repage \
@@ -53,26 +38,30 @@ else
     cp "$CACHED_BLUR" "$BLURBOX"
 fi
 
-# Select random avatar if directory exists
+# Update wallpaper path in hyprlock config
+sed -i "/^background {/,/}/ s|^\([[:space:]]*path[[:space:]]*=[[:space:]]*\).*|\1$WALLPAPER|" "$HYPRLOCK_CONF"
+
+# Update avatar image if directory exists
 if [ -d "$AVATAR_DIR" ]; then
-    # Create array of avatar files (case insensitive)
     shopt -s nullglob
     AVATAR_FILES=("$AVATAR_DIR"/*.{png,jpg,jpeg,PNG,JPG,JPEG})
     shopt -u nullglob
     
     if [ ${#AVATAR_FILES[@]} -gt 0 ]; then
         RANDOM_AVATAR="${AVATAR_FILES[RANDOM % ${#AVATAR_FILES[@]}]}"
-        # Update only the profile photo path using line number range
-        sed -i "/^image {/,/}/ s|^\([[:space:]]*path[[:space:]]*=[[:space:]]*\).*|\1$RANDOM_AVATAR|" "$HYPRLOCK_CONF"
+        # More precise matching for avatar section
+        sed -i "/^image {/,/}/ {
+            /size = 200/ {
+                n
+                s|^\([[:space:]]*path[[:space:]]*=[[:space:]]*\).*|\1$RANDOM_AVATAR|
+            }
+        }" "$HYPRLOCK_CONF"
     else
         echo "⚠ Warning: No avatar files found in $AVATAR_DIR"
     fi
 else
     echo "⚠ Warning: Avatar directory not found: $AVATAR_DIR"
 fi
-
-# Update wallpaper path in hyprlock config (only in background section)
-sed -i "/^background {/,/}/ s|^\([[:space:]]*path[[:space:]]*=[[:space:]]*\).*|\1$WALLPAPER|" "$HYPRLOCK_CONF"
 
 # Launch hyprlock
 hyprlock -c "$HYPRLOCK_CONF"
