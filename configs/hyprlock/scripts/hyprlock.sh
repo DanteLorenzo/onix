@@ -45,7 +45,7 @@ else
         -gravity center \
         -crop 900x900+0+0 +repage \
         -resize 25% \
-        -blur 0x8 \
+        -blur 0x1 \
         -resize 400% \
         -fill white -colorize 10% \
         "$CACHED_BLUR"
