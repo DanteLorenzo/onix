@@ -46,7 +46,7 @@ else
         -crop 900x900+0+0 +repage \
         -resize 25% \
         -blur 0x1 \
-        -resize 200% \
+        -resize 150% \
         -fill white -colorize 10% \
         "$CACHED_BLUR"
     cp "$CACHED_BLUR" "$BLURBOX"
