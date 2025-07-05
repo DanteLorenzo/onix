@@ -21,18 +21,20 @@ log_success "Dark mode enabled successfully"
 # 2. Set keyboard shortcuts
 log_info "Configuring keyboard shortcuts..."
 
-# Initialize custom keybindings array
+# Clear existing custom keybindings
 gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "[]"
 
 # Windows + C to close window
 gsettings set org.gnome.desktop.wm.keybindings close "['<Super>c']"
 
-# Windows + Q to open terminal (custom keybinding)
+# Create custom keybinding for terminal (Super+Q)
 TERMINAL_KEYBINDING_PATH="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
+
+# First create the binding path
+dconf write "$TERMINAL_KEYBINDING_PATH" "{'name':'Terminal','command':'gnome-terminal','binding':'<Super>q'}"
+
+# Then add it to the custom-keybindings array
 gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['$TERMINAL_KEYBINDING_PATH']"
-gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding "$TERMINAL_KEYBINDING_PATH" name 'Terminal'
-gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding "$TERMINAL_KEYBINDING_PATH" command 'gnome-terminal'
-gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding "$TERMINAL_KEYBINDING_PATH" binding '<Super>q'
 
 log_success "Keyboard shortcuts configured:"
 log_success "  - Super+C: Close window"
@@ -56,10 +58,7 @@ log_success "Launchbar cleaned - only Firefox remains"
 
 # Additional useful GNOME tweaks
 log_info "Applying additional GNOME tweaks..."
-
-# Enable minimize on click
 gsettings set org.gnome.desktop.wm.preferences button-layout 'appmenu:minimize,maximize,close'
-
 log_success "Additional GNOME tweaks applied"
 
 log_success "GNOME customization completed successfully!"
