@@ -21,14 +21,18 @@ log_success "Dark mode enabled successfully"
 # 2. Set keyboard shortcuts
 log_info "Configuring keyboard shortcuts..."
 
+# Initialize custom keybindings array
+gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "[]"
+
 # Windows + C to close window
 gsettings set org.gnome.desktop.wm.keybindings close "['<Super>c']"
 
-# Windows + T to open terminal
-gsettings set org.gnome.settings-daemon.plugins.media-keys terminal "['<Super>t']"
-gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ name 'Terminal'
-gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ command 'gnome-terminal'
-gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ binding '<Super>q'
+# Windows + Q to open terminal (custom keybinding)
+TERMINAL_KEYBINDING_PATH="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
+gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['$TERMINAL_KEYBINDING_PATH']"
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding "$TERMINAL_KEYBINDING_PATH" name 'Terminal'
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding "$TERMINAL_KEYBINDING_PATH" command 'gnome-terminal'
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding "$TERMINAL_KEYBINDING_PATH" binding '<Super>q'
 
 log_success "Keyboard shortcuts configured:"
 log_success "  - Super+C: Close window"
@@ -48,15 +52,5 @@ log_success "Hot corner disabled"
 # Additional useful GNOME tweaks
 log_info "Applying additional GNOME tweaks..."
 
-# # Disable animations for better performance
-# gsettings set org.gnome.desktop.interface enable-animations false
-
-# # Set favorite apps
-# gsettings set org.gnome.shell favorite-apps "['org.gnome.Nautilus.desktop', 'firefox.desktop', 'org.gnome.Terminal.desktop']"
-
 # Enable minimize on click
-gsettings set org.gnome.desktop.wm.preferences button-layout 'appmenu:minimize,maximize,close'
-
-log_success "Additional GNOME tweaks applied"
-
-log_success "GNOME customization completed successfully!"
+gsettings set org.gnome.desktop.wm.preferences button-layout 'appmenu:minimize,maximize,close
