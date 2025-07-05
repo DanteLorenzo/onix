@@ -3,6 +3,7 @@
 # Include logging functions
 source "$(dirname "$0")/../utils/logging.sh"
 
+# Display an informational message about the start of the setup
 log_info "Starting GNOME customization..."
 
 # Check if GNOME is installed
@@ -20,26 +21,24 @@ log_success "Dark mode enabled successfully"
 # 2. Set keyboard shortcuts
 log_info "Configuring keyboard shortcuts..."
 
-# Clear existing custom keybindings
+# Initialize custom keybindings array
 gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "[]"
 
 # Windows + C to close window
 gsettings set org.gnome.desktop.wm.keybindings close "['<Super>c']"
 
-# Create custom keybinding for terminal (Super+Q)
-TERMINAL_KEYBINDING_PATH="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0"
-
-# Create the keybinding (without trailing slash)
-dconf write "$TERMINAL_KEYBINDING_PATH" "{'name':'Terminal','command':'gnome-terminal','binding':'<Super>q'}"
-
-# Add to custom-keybindings array (with slash in the array element)
-gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['$TERMINAL_KEYBINDING_PATH/']"
+# Windows + Q to open terminal (custom keybinding)
+TERMINAL_KEYBINDING_PATH="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
+gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['$TERMINAL_KEYBINDING_PATH']"
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding "$TERMINAL_KEYBINDING_PATH" name 'Terminal'
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding "$TERMINAL_KEYBINDING_PATH" command 'gnome-terminal'
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding "$TERMINAL_KEYBINDING_PATH" binding '<Super>q'
 
 log_success "Keyboard shortcuts configured:"
 log_success "  - Super+C: Close window"
 log_success "  - Super+Q: Open terminal"
 
-# 3. Set up 5 workspaces
+# 3. Set up 5 workspaces (without names)
 log_info "Configuring 5 workspaces..."
 gsettings set org.gnome.mutter dynamic-workspaces false
 gsettings set org.gnome.desktop.wm.preferences num-workspaces 5
@@ -55,9 +54,12 @@ log_info "Cleaning launchbar and setting Firefox as only app..."
 gsettings set org.gnome.shell favorite-apps "['firefox.desktop']"
 log_success "Launchbar cleaned - only Firefox remains"
 
-# Additional GNOME tweaks
+# Additional useful GNOME tweaks
 log_info "Applying additional GNOME tweaks..."
+
+# Enable minimize on click
 gsettings set org.gnome.desktop.wm.preferences button-layout 'appmenu:minimize,maximize,close'
+
 log_success "Additional GNOME tweaks applied"
 
 log_success "GNOME customization completed successfully!"
