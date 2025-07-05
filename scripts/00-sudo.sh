@@ -1,7 +1,15 @@
 #!/bin/bash
 
+# Get script directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # Include logging functions
-source "$(dirname "$0")/../utils/logging.sh"
+if [ -f "$SCRIPT_DIR/../utils/logging.sh" ]; then
+    source "$SCRIPT_DIR/../utils/logging.sh"
+else
+    echo "ERROR: Could not find logging.sh"
+    exit 1
+fi
 
 # --- Function to add user to sudo ---
 add_user_to_sudo() {
@@ -50,5 +58,4 @@ if [[ $EUID -eq 0 ]] && [[ -n "$SUDO_USER" ]]; then
     exit 0
 fi
 
-# --- Next steps (if needed) ---
 log_info "You can now run commands with sudo."

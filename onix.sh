@@ -22,14 +22,23 @@ LOGO='
   \|____|                                                         
 '
 
-SCRIPTS_DIR="scripts"
+# Get the script's absolute directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+SCRIPTS_DIR="$SCRIPT_DIR/scripts"
+UTILS_DIR="$SCRIPT_DIR/utils"
+
 # Make all files in scripts executable
-chmod -f +x "$SCRIPTS_DIR"/* 2>/dev/null
+find "$SCRIPTS_DIR" -type f -exec chmod +x {} \; 2>/dev/null
+
+# Find all executable scripts
 mapfile -t SCRIPTS_ARR < <(find "$SCRIPTS_DIR" -maxdepth 1 -type f -perm /111 | sort)
 SCRIPTS_COUNT=${#SCRIPTS_ARR[@]}
-[ "$SCRIPTS_COUNT" -eq 0 ] && echo "No executable scripts found in $SCRIPTS_DIR" && exit 1
+
+[ "$SCRIPTS_COUNT" -eq 0 ] && echo -e "${RED}No executable scripts found in $SCRIPTS_DIR${NC}" && exit 1
 
 # Initialize selection array
+SELECTED=()
 for ((i=0; i<SCRIPTS_COUNT; i++)); do
   SELECTED[$i]=0
 done
@@ -43,13 +52,15 @@ clear
 draw() {
   printf "\033[H"
   printf "${CYAN}%s${NC}\n\n" "$LOGO"
-  echo "Select scripts to run (arrows: move, space: select, enter: run):"
+  echo -e "Select scripts to run (arrows: move, space: select, enter: run):"
+  
   # CheckAll item
   if [ "$CUR" -eq 0 ]; then
     printf "${YELLOW}>${NC}"
   else
     printf " "
   fi
+  
   all_selected=1
   for idx in "${!SELECTED[@]}"; do
     if [[ ${SELECTED[$idx]} -eq 0 ]]; then
@@ -57,12 +68,14 @@ draw() {
       break
     fi
   done
+  
   if [ "$all_selected" -eq 1 ]; then
     printf "[${GREEN}x${NC}] "
   else
     printf "[ ] "
   fi
   printf "CheckAll\n"
+  
   # Script list
   for idx in "${!SCRIPTS_ARR[@]}"; do
     if [ "$CUR" -eq $((idx+1)) ]; then
@@ -70,11 +83,13 @@ draw() {
     else
       printf " "
     fi
+    
     if [ "${SELECTED[$idx]}" -eq 1 ]; then
       printf "[${GREEN}x${NC}] "
     else
       printf "[ ] "
     fi
+    
     script_name=$(basename "${SCRIPTS_ARR[$idx]}")
     printf "%s\n" "$script_name"
   done
@@ -116,29 +131,25 @@ while :; do
 done
 
 # Collect selected scripts
-TO_RUN=""
+TO_RUN=()
 for idx in "${!SCRIPTS_ARR[@]}"; do
   if [ "${SELECTED[$idx]}" -eq 1 ]; then
-    if [ -z "$TO_RUN" ]; then
-      TO_RUN="${SCRIPTS_ARR[$idx]}"
-    else
-      TO_RUN="$TO_RUN ${SCRIPTS_ARR[$idx]}"
-    fi
+    TO_RUN+=("${SCRIPTS_ARR[$idx]}")
   fi
 done
 
-[ -z "$TO_RUN" ] && echo "Nothing selected." && exit 0
+[ ${#TO_RUN[@]} -eq 0 ] && echo -e "${YELLOW}Nothing selected.${NC}" && exit 0
 
 # Run with progress bar and logs
 success=0
 fail=0
 i=1
 bar_width=30
-total=$(echo "$TO_RUN" | wc -w)
+total=${#TO_RUN[@]}
 
 # Check if we're running the sudo script
 SUDO_SCRIPT_PRESENT=0
-for script in $TO_RUN; do
+for script in "${TO_RUN[@]}"; do
   if [[ "$(basename "$script")" == "00-sudo.sh" ]]; then
     SUDO_SCRIPT_PRESENT=1
     break
@@ -152,7 +163,7 @@ if [ $SUDO_SCRIPT_PRESENT -eq 1 ]; then
   printf "${BLUE}Running sudo configuration first...${NC}\n\n"
   
   # Find the sudo script
-  for script in $TO_RUN; do
+  for script in "${TO_RUN[@]}"; do
     if [[ "$(basename "$script")" == "00-sudo.sh" ]]; then
       SUDO_SCRIPT="$script"
       break
@@ -179,11 +190,11 @@ if [ $SUDO_SCRIPT_PRESENT -eq 1 ]; then
   fi
   
   printf "${YELLOW}Press Enter to continue with other scripts...${NC}\n"
-  read dummy
+  read -r
 fi
 
 # Now run the remaining scripts
-for script in $TO_RUN; do
+for script in "${TO_RUN[@]}"; do
   # Skip the sudo script if we already ran it
   [[ "$(basename "$script")" == "00-sudo.sh" ]] && continue
   
@@ -203,14 +214,12 @@ for script in $TO_RUN; do
     fi
   done
   printf "] $i/$total\n"
-  printf "${BLUE}Running: %s${NC}\n\n" "$script"
+  printf "${BLUE}Running: %s${NC}\n\n" "$(basename "$script")"
   
-  # Run the script with sudo if it's not the sudo script
+  # Run the script with sudo if we have privileges
   if sudo -n true 2>/dev/null; then
-    # We have sudo privileges, use them
     sudo bash "$script"
   else
-    # Try without sudo
     bash "$script"
   fi
   
@@ -221,7 +230,7 @@ for script in $TO_RUN; do
   fi
   
   printf "${YELLOW}Press Enter to continue...${NC}\n"
-  read dummy
+  read -r
   i=$((i+1))
 done
 
