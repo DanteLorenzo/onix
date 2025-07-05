@@ -1,4 +1,4 @@
 #!/bin/bash
 
 
-sudo pacman -S --needed --noconfirm  telegram-desktop gimp blender dbeaver  
+sudo pacman -S --needed --noconfirm  telegram-desktop gimp blender dbeaver keepassxc

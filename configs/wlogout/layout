@@ -1,0 +1,6 @@
+{
+  "label": "logout",
+  "action": "sleep 1; hyprctl dispatch exit",
+  "text": "Logout",
+  "keybind": "e"
+}

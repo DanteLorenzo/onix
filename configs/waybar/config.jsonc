@@ -9,7 +9,7 @@
 	
     "modules-left": ["clock", "cpu", "memory", "temperature", "tray", "bluetooth"],
     "modules-center": ["hyprland/workspaces"],
-    "modules-right": ["hyprland/language","pulseaudio#volume","pulseaudio#microphone", "network", "battery"],
+    "modules-right": ["hyprland/language","pulseaudio#volume","pulseaudio#microphone", "network", "battery", "custom/power"],
 
 
 	"cpu": {
@@ -68,7 +68,7 @@
       "format-disconnected": "Disconnected ⚠ {ifname}",
       "format-alt": " {ifname}: {ipaddr}/{cidr}"
     },
-	
+
 	"network#vpn": {
 		"interval": 5,
 		"interface": "tun0",
@@ -163,6 +163,12 @@
         "on-click": "hyprctl switchxkblayout at-translated-set-2-keyboard next",
         "interval": 0.5
     },
+
+	"custom/power": {
+	  	"format": " ⏻ ",  // Power symbol (requires Nerd Font)
+	  	"tooltip": false,
+	  	"on-click": "wlogout --protocol layer-shell"
+	}
 
 
 
