@@ -28,22 +28,29 @@ gsettings set org.gnome.desktop.wm.keybindings close "['<Super>c']"
 log_info "Adding custom shortcut for terminal..."
 
 CUSTOM_KEYBINDINGS_PATH="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings"
-CUSTOM0_PATH="${CUSTOM_KEYBINDINGS_PATH}/custom0/"
+CUSTOM0="${CUSTOM_KEYBINDINGS_PATH}/custom0/"
 
-# Add custom0 to the list of keybindings if not already present
-CURRENT_BINDINGS=$(gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings)
-if [[ "$CURRENT_BINDINGS" != *"$CUSTOM0_PATH"* ]]; then
-    NEW_BINDINGS=$(echo "$CURRENT_BINDINGS" | sed "s/]$/, '${CUSTOM0_PATH}']/")
-    gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "$NEW_BINDINGS"
+# Add custom0 to the list of keybindings
+CURRENT=$(gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings)
+if [[ "$CURRENT" != *"$CUSTOM0"* ]]; then
+    if [[ "$CURRENT" == "@as []" ]]; then
+        gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['$CUSTOM0']"
+    else
+        MODIFIED=$(echo "$CURRENT" | sed "s/]$/, '$CUSTOM0']/")
+        gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "$MODIFIED"
+    fi
 fi
 
-gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:custom0/ name 'Terminal'
-gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:custom0/ command 'gnome-terminal'
-gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:custom0/ binding '<Super>q'
+# Set the custom0 keybinding
+gsettings set "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$CUSTOM0" name 'Terminal'
+gsettings set "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$CUSTOM0" command 'gnome-terminal'
+gsettings set "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$CUSTOM0" binding '<Super>q'
 
 log_success "Keyboard shortcuts configured:"
 log_success "  - Super+C: Close window"
 log_success "  - Super+Q: Open terminal"
+
+
 
 # 3. Set up 5 workspaces (without names)
 log_info "Configuring 5 workspaces..."
