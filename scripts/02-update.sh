@@ -5,28 +5,28 @@ source "$(dirname "$0")/../utils/logging.sh"
 
 log_info "Detecting system type..."
 
-if [ -f /etc/debian_version ]; then
-    log_success "Debian-based system detected"
-    log_info "Updating package list..."
-    sudo apt update
+if [ -f /etc/fedora-release ]; then
+    log_success "Fedora system detected"
+    log_info "Updating package lists..."
+    sudo dnf check-update -y
     log_info "Upgrading installed packages..."
-    sudo apt upgrade -y
-    log_info "Performing full system upgrade..."
-    sudo apt full-upgrade -y
-    log_info "Removing unused packages..."
-    sudo apt autoremove -y
-    log_info "Cleaning up cache..."
-    sudo apt clean
-elif [ -f /etc/arch-release ]; then
-    log_success "Arch Linux-based system detected"
-    log_info "Updating system and all packages..."
-    sudo pacman -Syu --noconfirm
+    sudo dnf upgrade -y
     log_info "Cleaning up package cache..."
-    sudo pacman -Sc --noconfirm
+    sudo dnf clean all
+    log_info "Removing unused dependencies..."
+    sudo dnf autoremove -y
+elif [ -f /etc/redhat-release ] && grep -q "CentOS" /etc/redhat-release; then
+    log_success "CentOS system detected"
+    log_info "Updating package lists..."
+    sudo yum check-update -y
+    log_info "Upgrading installed packages..."
+    sudo yum update -y
+    log_info "Cleaning up package cache..."
+    sudo yum clean all
 else
-    log_error "Could not detect system type. This script supports only Debian/Ubuntu and Arch Linux!"
+    log_error "Could not detect system type. This script supports only Fedora and CentOS!"
     exit 1
 fi
 
 log_success "System update complete!"
-exit 0 
+exit 0
