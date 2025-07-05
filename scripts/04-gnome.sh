@@ -21,18 +21,14 @@ log_success "Dark mode enabled successfully"
 # 2. Set keyboard shortcuts
 log_info "Configuring keyboard shortcuts..."
 
-# Initialize custom keybindings array
-gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "[]"
-
 # Windows + C to close window
 gsettings set org.gnome.desktop.wm.keybindings close "['<Super>c']"
 
-# Windows + Q to open terminal (custom keybinding)
-TERMINAL_KEYBINDING_PATH="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
-gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['$TERMINAL_KEYBINDING_PATH']"
-gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding "$TERMINAL_KEYBINDING_PATH" name 'Terminal'
-gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding "$TERMINAL_KEYBINDING_PATH" command 'gnome-terminal'
-gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding "$TERMINAL_KEYBINDING_PATH" binding '<Super>q'
+# Windows + T to open terminal
+gsettings set org.gnome.settings-daemon.plugins.media-keys terminal "['<Super>q']"
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ name 'Terminal'
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ command 'gnome-terminal'
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ binding '<Super>q'
 
 log_success "Keyboard shortcuts configured:"
 log_success "  - Super+C: Close window"
@@ -49,13 +45,14 @@ log_info "Disabling hot corner..."
 gsettings set org.gnome.desktop.interface enable-hot-corners false
 log_success "Hot corner disabled"
 
-# 5. Clean launchbar and set only Firefox
-log_info "Cleaning launchbar and setting Firefox as only app..."
-gsettings set org.gnome.shell favorite-apps "['firefox.desktop']"
-log_success "Launchbar cleaned - only Firefox remains"
-
 # Additional useful GNOME tweaks
 log_info "Applying additional GNOME tweaks..."
+
+# # Disable animations for better performance
+# gsettings set org.gnome.desktop.interface enable-animations false
+
+# # Set favorite apps
+# gsettings set org.gnome.shell favorite-apps "['org.gnome.Nautilus.desktop', 'firefox.desktop', 'org.gnome.Terminal.desktop']"
 
 # Enable minimize on click
 gsettings set org.gnome.desktop.wm.preferences button-layout 'appmenu:minimize,maximize,close'
