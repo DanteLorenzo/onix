@@ -24,12 +24,22 @@ log_info "Configuring keyboard shortcuts..."
 # Windows + C to close window
 gsettings set org.gnome.desktop.wm.keybindings close "['<Super>c']"
 
-# Windows + T to open terminal
-TERMINAL_KEYBINDING_PATH="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
-gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['$TERMINAL_KEYBINDING_PATH']"
-gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding "$TERMINAL_KEYBINDING_PATH" name 'Terminal'
-gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding "$TERMINAL_KEYBINDING_PATH" command 'gnome-terminal'
-gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding "$TERMINAL_KEYBINDING_PATH" binding '<Super>q'
+# Windows + Q to open terminal (custom keybinding)
+log_info "Adding custom shortcut for terminal..."
+
+CUSTOM_KEYBINDINGS_PATH="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings"
+CUSTOM0_PATH="${CUSTOM_KEYBINDINGS_PATH}/custom0/"
+
+# Add custom0 to the list of keybindings if not already present
+CURRENT_BINDINGS=$(gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings)
+if [[ "$CURRENT_BINDINGS" != *"$CUSTOM0_PATH"* ]]; then
+    NEW_BINDINGS=$(echo "$CURRENT_BINDINGS" | sed "s/]$/, '${CUSTOM0_PATH}']/")
+    gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "$NEW_BINDINGS"
+fi
+
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:custom0/ name 'Terminal'
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:custom0/ command 'gnome-terminal'
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:custom0/ binding '<Super>q'
 
 log_success "Keyboard shortcuts configured:"
 log_success "  - Super+C: Close window"
