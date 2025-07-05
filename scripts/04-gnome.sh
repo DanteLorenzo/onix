@@ -49,6 +49,11 @@ log_info "Disabling hot corner..."
 gsettings set org.gnome.desktop.interface enable-hot-corners false
 log_success "Hot corner disabled"
 
+# 5. Clean launchbar and set only Firefox
+log_info "Cleaning launchbar and setting Firefox as only app..."
+gsettings set org.gnome.shell favorite-apps "['firefox.desktop']"
+log_success "Launchbar cleaned - only Firefox remains"
+
 # Additional useful GNOME tweaks
 log_info "Applying additional GNOME tweaks..."
 
