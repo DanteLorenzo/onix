@@ -70,7 +70,7 @@ log_info "Applying additional GNOME tweaks..."
 # gsettings set org.gnome.desktop.interface enable-animations false
 
 # # Set favorite apps
-gsettings set org.gnome.shell favorite-apps "['firefox.desktop', 'org.gnome.Terminal.desktop']"
+gsettings set org.gnome.shell favorite-apps "['firefox-esr.desktop', 'org.gnome.Terminal.desktop']"
 
 # Enable minimize on click
 gsettings set org.gnome.desktop.wm.preferences button-layout 'appmenu:minimize,maximize,close'
