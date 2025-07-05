@@ -21,18 +21,21 @@ log_success "Dark mode enabled successfully"
 # 2. Set keyboard shortcuts
 log_info "Configuring keyboard shortcuts..."
 
+# Create custom keybindings path
+custom_path="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
+gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "['$custom_path']"
+
 # Windows + C to close window
 gsettings set org.gnome.desktop.wm.keybindings close "['<Super>c']"
 
-# Windows + T to open terminal
-gsettings set org.gnome.settings-daemon.plugins.media-keys terminal "['<Super>t']"
-gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ name 'Terminal'
-gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ command 'gnome-terminal'
-gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/ binding '<Super>t'
+# Windows + T to open kitty terminal
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding "$custom_path" name 'Terminal'
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding "$custom_path" command 'alacritty'
+gsettings set org.gnome.settings-daemon.plugins.media-keys.custom-keybinding "$custom_path" binding '<Super>t'
 
 log_success "Keyboard shortcuts configured:"
 log_success "  - Super+C: Close window"
-log_success "  - Super+T: Open terminal"
+log_success "  - Super+Q: Open alacritty terminal"
 
 # 3. Set up 5 workspaces (without names)
 log_info "Configuring 5 workspaces..."
@@ -48,11 +51,11 @@ log_success "Hot corner disabled"
 # Additional useful GNOME tweaks
 log_info "Applying additional GNOME tweaks..."
 
-# # Disable animations for better performance
-# gsettings set org.gnome.desktop.interface enable-animations false
+# Disable animations for better performance
+gsettings set org.gnome.desktop.interface enable-animations false
 
-# # Set favorite apps
-# gsettings set org.gnome.shell favorite-apps "['org.gnome.Nautilus.desktop', 'firefox.desktop', 'org.gnome.Terminal.desktop']"
+# Set favorite apps (including kitty)
+gsettings set org.gnome.shell favorite-apps "['org.gnome.Nautilus.desktop', 'firefox.desktop', 'kitty.desktop']"
 
 # Enable minimize on click
 gsettings set org.gnome.desktop.wm.preferences button-layout 'appmenu:minimize,maximize,close'
