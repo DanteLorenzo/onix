@@ -40,7 +40,6 @@ CUR=0
 clear
 
 # Draw the UI
-
 draw() {
   printf "\033[H"
   printf "${CYAN}%s${NC}\n\n" "$LOGO"
@@ -130,21 +129,67 @@ done
 
 [ -z "$TO_RUN" ] && echo "Nothing selected." && exit 0
 
-# After script selection, prompt for sudo password and cache it
-sudo -v || { echo "Sudo authentication failed."; exit 1; }
-# Start background process to keep sudo session alive
-while true; do sudo -n true; sleep 60; done 2>/dev/null &
-SUDO_PID=$!
-
 # Run with progress bar and logs
 success=0
 fail=0
 i=1
 bar_width=30
 total=$(echo "$TO_RUN" | wc -w)
+
+# Check if we're running the sudo script
+SUDO_SCRIPT_PRESENT=0
 for script in $TO_RUN; do
+  if [[ "$(basename "$script")" == "00-sudo.sh" ]]; then
+    SUDO_SCRIPT_PRESENT=1
+    break
+  fi
+done
+
+# If sudo script is present, run it first separately
+if [ $SUDO_SCRIPT_PRESENT -eq 1 ]; then
   clear
   printf "${CYAN}%s${NC}\n\n" "$LOGO"
+  printf "${BLUE}Running sudo configuration first...${NC}\n\n"
+  
+  # Find the sudo script
+  for script in $TO_RUN; do
+    if [[ "$(basename "$script")" == "00-sudo.sh" ]]; then
+      SUDO_SCRIPT="$script"
+      break
+    fi
+  done
+  
+  # Try pkexec first (graphical sudo), then fall back to sudo
+  if command -v pkexec >/dev/null; then
+    if pkexec bash "$SUDO_SCRIPT"; then
+      printf "${GREEN}Successfully configured sudo privileges${NC}\n"
+      success=$((success+1))
+    else
+      printf "${RED}Failed to configure sudo privileges${NC}\n"
+      fail=$((fail+1))
+    fi
+  else
+    if sudo bash "$SUDO_SCRIPT"; then
+      printf "${GREEN}Successfully configured sudo privileges${NC}\n"
+      success=$((success+1))
+    else
+      printf "${RED}Failed to configure sudo privileges${NC}\n"
+      fail=$((fail+1))
+    fi
+  fi
+  
+  printf "${YELLOW}Press Enter to continue with other scripts...${NC}\n"
+  read dummy
+fi
+
+# Now run the remaining scripts
+for script in $TO_RUN; do
+  # Skip the sudo script if we already ran it
+  [[ "$(basename "$script")" == "00-sudo.sh" ]] && continue
+  
+  clear
+  printf "${CYAN}%s${NC}\n\n" "$LOGO"
+  
   # Progress bar
   printf "Progress: ["
   filled=$(( (i-1)*bar_width/total ))
@@ -159,19 +204,26 @@ for script in $TO_RUN; do
   done
   printf "] $i/$total\n"
   printf "${BLUE}Running: %s${NC}\n\n" "$script"
-  sh "$script"
+  
+  # Run the script with sudo if it's not the sudo script
+  if sudo -n true 2>/dev/null; then
+    # We have sudo privileges, use them
+    sudo bash "$script"
+  else
+    # Try without sudo
+    bash "$script"
+  fi
+  
   if [ $? -eq 0 ]; then
     success=$((success+1))
   else
     fail=$((fail+1))
   fi
+  
   printf "${YELLOW}Press Enter to continue...${NC}\n"
   read dummy
   i=$((i+1))
 done
-
-# Kill the background sudo keeper
-kill $SUDO_PID
 
 clear
 printf "${CYAN}%s${NC}\n\n" "$LOGO"
