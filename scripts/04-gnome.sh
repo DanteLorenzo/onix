@@ -53,4 +53,8 @@ log_success "Hot corner disabled"
 log_info "Applying additional GNOME tweaks..."
 
 # Enable minimize on click
-gsettings set org.gnome.desktop.wm.preferences button-layout 'appmenu:minimize,maximize,close
+gsettings set org.gnome.desktop.wm.preferences button-layout 'appmenu:minimize,maximize,close'
+
+log_success "Additional GNOME tweaks applied"
+
+log_success "GNOME customization completed successfully!"
