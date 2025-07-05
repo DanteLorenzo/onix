@@ -7,7 +7,7 @@ log_info "Installing Hyprland and dependencies with pacman..."
 sudo pacman -Sy --needed --noconfirm hyprland kitty waybar hyprpaper bc brightnessctl dunst libnotify pavucontrol alacritty nautilus fastfetch hyprlock hyprcursor hypridle sddm qt6-svg qt6-virtualkeyboard qt6-multimedia-ffmpeg rofi-wayland qt5-qtwayland
 # libxcb xcb-proto xcb-util libx11 libxfixes libxcomposite xorg-xinput libxrender wayland-protocols xcb-util-keysyms xcb-util-wm cairo polkit meson seatd libxkbcommon
 
-yay -S wlogout
+yay -S --noconfirm wlogout
 
 #   wofi
 
