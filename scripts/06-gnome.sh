@@ -17,7 +17,7 @@ fi
 
 # Set wallpaper and avatar
 set_wallpaper_avatar() {
-    local wallpaper_path="$HOME/Pictures/Wallpapers/default.png"
+    local wallpaper_path="$HOME/Pictures/Wallpapers/default.jpg"
     local avatar_path="$HOME/Pictures/Avatars/default.png"
     
     # Set wallpaper
