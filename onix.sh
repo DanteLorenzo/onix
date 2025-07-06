@@ -22,11 +22,15 @@ LOGO='
   \|____|                                                         
 '
 
+# Prevent running as root
+if [[ $EUID -eq 0 ]]; then
+  echo -e "${RED}Don't run this launcher as root! Run as a normal user.${NC}"
+  exit 1
+fi
+
 # Get the script's absolute directory
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
 SCRIPTS_DIR="$SCRIPT_DIR/scripts"
-UTILS_DIR="$SCRIPT_DIR/utils"
 
 # Make all files in scripts executable
 find "$SCRIPTS_DIR" -type f -exec chmod +x {} \; 2>/dev/null
@@ -45,7 +49,6 @@ done
 
 CUR=0
 
-# Initial clear
 clear
 
 # Draw the UI
@@ -121,7 +124,6 @@ while :; do
         SELECTED[$idx]=$new_val
       done
     elif (( CUR > 0 )); then
-      # Toggle single
       idx=$((CUR-1))
       SELECTED[$idx]=$((1 - ${SELECTED[$idx]}))
     fi
@@ -140,64 +142,14 @@ done
 
 [ ${#TO_RUN[@]} -eq 0 ] && echo -e "${YELLOW}Nothing selected.${NC}" && exit 0
 
-# Run with progress bar and logs
+# Run scripts
 success=0
 fail=0
 i=1
 bar_width=30
 total=${#TO_RUN[@]}
 
-# Check if we're running the sudo script
-SUDO_SCRIPT_PRESENT=0
 for script in "${TO_RUN[@]}"; do
-  if [[ "$(basename "$script")" == "00-sudo.sh" ]]; then
-    SUDO_SCRIPT_PRESENT=1
-    break
-  fi
-done
-
-# If sudo script is present, run it first separately
-if [ $SUDO_SCRIPT_PRESENT -eq 1 ]; then
-  clear
-  printf "${CYAN}%s${NC}\n\n" "$LOGO"
-  printf "${BLUE}Running sudo configuration first...${NC}\n\n"
-  
-  # Find the sudo script
-  for script in "${TO_RUN[@]}"; do
-    if [[ "$(basename "$script")" == "00-sudo.sh" ]]; then
-      SUDO_SCRIPT="$script"
-      break
-    fi
-  done
-  
-  # Try pkexec first (graphical sudo), then fall back to sudo
-  if command -v pkexec >/dev/null; then
-    if pkexec bash "$SUDO_SCRIPT"; then
-      printf "${GREEN}Successfully configured sudo privileges${NC}\n"
-      success=$((success+1))
-    else
-      printf "${RED}Failed to configure sudo privileges${NC}\n"
-      fail=$((fail+1))
-    fi
-  else
-    if sudo bash "$SUDO_SCRIPT"; then
-      printf "${GREEN}Successfully configured sudo privileges${NC}\n"
-      success=$((success+1))
-    else
-      printf "${RED}Failed to configure sudo privileges${NC}\n"
-      fail=$((fail+1))
-    fi
-  fi
-  
-  printf "${YELLOW}Press Enter to continue with other scripts...${NC}\n"
-  read -r
-fi
-
-# Now run the remaining scripts
-for script in "${TO_RUN[@]}"; do
-  # Skip the sudo script if we already ran it
-  [[ "$(basename "$script")" == "00-sudo.sh" ]] && continue
-  
   clear
   printf "${CYAN}%s${NC}\n\n" "$LOGO"
   
@@ -216,12 +168,7 @@ for script in "${TO_RUN[@]}"; do
   printf "] $i/$total\n"
   printf "${BLUE}Running: %s${NC}\n\n" "$(basename "$script")"
   
-  # Run the script with sudo if we have privileges
-  if sudo -n true 2>/dev/null; then
-    sudo bash "$script"
-  else
-    bash "$script"
-  fi
+  bash "$script"
   
   if [ $? -eq 0 ]; then
     success=$((success+1))
