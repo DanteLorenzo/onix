@@ -28,20 +28,25 @@ set_wallpaper_avatar() {
         gsettings set org.gnome.desktop.screensaver picture-uri "file://$wallpaper_path"
         log_success "User wallpaper set successfully"
         
-        # Set login screen wallpaper (GDM)
+        # Set login screen wallpaper (GDM) - Universal method
         log_info "Setting login screen wallpaper..."
-        sudo mkdir -p /usr/share/gdm/greeter/backgrounds
-        sudo cp "$wallpaper_path" /usr/share/gdm/greeter/backgrounds/custom-login-wallpaper.jpg
-        sudo chmod 644 /usr/share/gdm/greeter/backgrounds/custom-login-wallpaper.jpg
         
-        # Create XML file for GDM background
-        sudo bash -c 'cat > /usr/share/gnome-background-properties/custom-gdm-backgrounds.xml <<EOF
+        # Create necessary directories
+        sudo mkdir -p /usr/share/backgrounds/
+        sudo mkdir -p /usr/share/gnome-background-properties/
+        
+        # Copy wallpaper
+        sudo cp "$wallpaper_path" /usr/share/backgrounds/custom-gdm.jpg
+        sudo chmod 644 /usr/share/backgrounds/custom-gdm.jpg
+        
+        # Create XML description
+        sudo bash -c 'cat > /usr/share/gnome-background-properties/custom-gdm.xml <<EOF
 <?xml version="1.0"?>
 <!DOCTYPE wallpapers SYSTEM "gnome-wp-list.dtd">
 <wallpapers>
   <wallpaper>
-    <name>Custom Login Wallpaper</name>
-    <filename>/usr/share/gdm/greeter/backgrounds/custom-login-wallpaper.jpg</filename>
+    <name>Custom GDM Background</name>
+    <filename>/usr/share/backgrounds/custom-gdm.jpg</filename>
     <options>zoom</options>
     <pcolor>#000000</pcolor>
     <scolor>#000000</scolor>
@@ -49,9 +54,17 @@ set_wallpaper_avatar() {
 </wallpapers>
 EOF'
         
-        # Set GDM background
-        sudo -u gdm dbus-launch gsettings set org.gnome.desktop.background picture-uri "file:///usr/share/gdm/greeter/backgrounds/custom-login-wallpaper.jpg"
-        log_success "Login screen wallpaper configured"
+        # For systems using gdm3
+        if [ -d /etc/gdm3 ]; then
+            sudo -u gdm dbus-launch gsettings set org.gnome.desktop.background picture-uri "file:///usr/share/backgrounds/custom-gdm.jpg"
+        fi
+        
+        # For systems using lightdm
+        if [ -d /etc/lightdm ]; then
+            sudo cp "$wallpaper_path" /etc/lightdm/background.jpg
+        fi
+        
+        log_success "Login screen wallpaper configured. May require reboot to take effect."
     else
         log_warning "Wallpaper not found at $wallpaper_path"
     fi
@@ -62,18 +75,16 @@ EOF'
         local avatar_dir="/var/lib/AccountsService/icons"
         local avatar_dest="$avatar_dir/$(id -un)"
         
-        # Create directory if needed
         if [ ! -d "$avatar_dir" ]; then
             sudo mkdir -p "$avatar_dir"
             sudo chmod 755 "$avatar_dir"
         fi
         
-        # Copy avatar (requires sudo)
         if sudo cp "$avatar_path" "$avatar_dest"; then
             sudo chmod 644 "$avatar_dest"
             log_success "Avatar set successfully"
         else
-            log_error "Failed to set avatar (permission issue?)"
+            log_error "Failed to set avatar"
         fi
     else
         log_warning "Avatar not found at $avatar_path"
@@ -172,4 +183,4 @@ FAVORITES+="]"
 gsettings set org.gnome.shell favorite-apps "$FAVORITES"
 log_success "Favorite apps configured"
 
-log_success "GNOME customization complete!"
+log_success "GNOME customization complete! Some changes may require logout/reboot to take effect."
