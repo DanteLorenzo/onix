@@ -45,22 +45,34 @@ else
     log_info "zsh is already installed"
 fi
 
-# Install Oh My Zsh
+# Install Oh My Zsh with auto-update disabled
 if [[ ! -d "$HOME/.oh-my-zsh" ]]; then
     log_info "Installing Oh My Zsh..."
+    # Отключаем автоматическое обновление при установке
+    export DISABLE_AUTO_UPDATE="true"
     if sh -c "$(wget -qO- https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended; then
-        log_success "Oh My Zsh installed successfully."
+        log_success "Oh My Zsh installed successfully with auto-update disabled"
     else
         log_error "Failed to install Oh My Zsh"
         exit 1
     fi
 else
     log_info "Oh My Zsh is already installed"
+    # Добавляем настройку отключения обновлений в существующий конфиг
+    if ! grep -q "DISABLE_AUTO_UPDATE" ~/.zshrc; then
+        echo -e "\n# Disable Oh My Zsh auto-update\nexport DISABLE_AUTO_UPDATE=\"true\"" >> ~/.zshrc
+        log_success "Added DISABLE_AUTO_UPDATE to existing .zshrc"
+    fi
 fi
 
 # Copy custom .zshrc file
 log_info "Copying custom .zshrc file..."
 if [[ -f "./configs/zsh/.zshrc" ]]; then
+    # Убедимся, что в кастомном .zshrc есть отключение автообновления
+    if ! grep -q "DISABLE_AUTO_UPDATE" ./configs/zsh/.zshrc; then
+        echo -e "\n# Disable Oh My Zsh auto-update\nexport DISABLE_AUTO_UPDATE=\"true\"" >> ./configs/zsh/.zshrc
+    fi
+    
     if cp -f ./configs/zsh/.zshrc ~/; then
         log_success "Custom .zshrc copied"
     else
@@ -68,6 +80,11 @@ if [[ -f "./configs/zsh/.zshrc" ]]; then
     fi
 else
     log_warning "Custom .zshrc not found at ./configs/zsh/.zshrc"
+    # Добавим настройку в текущий .zshrc, если кастомный не найден
+    if ! grep -q "DISABLE_AUTO_UPDATE" ~/.zshrc; then
+        echo -e "\n# Disable Oh My Zsh auto-update\nexport DISABLE_AUTO_UPDATE=\"true\"" >> ~/.zshrc
+        log_success "Added DISABLE_AUTO_UPDATE to ~/.zshrc"
+    fi
 fi
 
 # Install zsh plugins
