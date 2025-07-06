@@ -36,7 +36,7 @@ fi
 # Install zsh if not installed
 if ! command -v zsh &>/dev/null; then
     log_info "Installing zsh..."
-    sudo apt-get update && sudo apt-get install -y zsh
+    sudo dnf install -y zsh
     if [ $? -ne 0 ]; then
         log_error "Failed to install zsh"
         exit 1
@@ -48,7 +48,7 @@ fi
 
 # Install Oh My Zsh
 log_info "Installing Oh My Zsh..."
-sh -c "$(wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)" "" --unattended
+sh -c "$(wget -qO- https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
 
 # Check if installation was successful
 if [ $? -eq 0 ]; then
@@ -56,32 +56,40 @@ if [ $? -eq 0 ]; then
 
   # Copy custom .zshrc file
   log_info "Copying custom .zshrc file..."
-  cp ./configs/zsh/.zshrc ~/
+  if [[ -f "./configs/zsh/.zshrc" ]]; then
+    cp ./configs/zsh/.zshrc ~/
+    log_success "Custom .zshrc copied"
+  else
+    log_warning "Custom .zshrc not found at ./configs/zsh/.zshrc"
+  fi
 
   # Install zsh plugins
   log_info "Installing zsh plugins..."
   ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
   
-  # Install zsh-autosuggestions
-  if [ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]; then
-    git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM/plugins/zsh-autosuggestions"
-    log_success "zsh-autosuggestions installed"
-  else
-    log_info "zsh-autosuggestions already installed"
-  fi
+#   # Install zsh-autosuggestions
+#   if [ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]; then
+#     git clone -q https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM/plugins/zsh-autosuggestions" && \
+#       log_success "zsh-autosuggestions installed" || \
+#       log_error "Failed to install zsh-autosuggestions"
+#   else
+#     log_info "zsh-autosuggestions already installed"
+#   fi
   
-  # Install zsh-syntax-highlighting
-  if [ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]; then
-    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
-    log_success "zsh-syntax-highlighting installed"
-  else
-    log_info "zsh-syntax-highlighting already installed"
-  fi
+#   # Install zsh-syntax-highlighting
+#   if [ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]; then
+#     git clone -q https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" && \
+#       log_success "zsh-syntax-highlighting installed" || \
+#       log_error "Failed to install zsh-syntax-highlighting"
+#   else
+#     log_info "zsh-syntax-highlighting already installed"
+#   fi
 
   # Change default shell to zsh
   log_info "Changing default shell to zsh..."
-  sudo chsh -s $(which zsh) $(whoami)
-  log_success "Default shell changed to zsh"
+  sudo chsh -s $(which zsh) $(whoami) && \
+    log_success "Default shell changed to zsh" || \
+    log_error "Failed to change default shell"
 
   log_success "Setup completed successfully."
 else
