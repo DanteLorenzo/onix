@@ -9,6 +9,7 @@ log_info "Installing main packages with dnf..."
 # Install main packages
 sudo dnf install -y \
   tmux \
+  ollama \
 
 
 
