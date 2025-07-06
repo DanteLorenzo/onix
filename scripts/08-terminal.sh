@@ -67,23 +67,23 @@ if [ $? -eq 0 ]; then
   log_info "Installing zsh plugins..."
   ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
   
-#   # Install zsh-autosuggestions
-#   if [ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]; then
-#     git clone -q https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM/plugins/zsh-autosuggestions" && \
-#       log_success "zsh-autosuggestions installed" || \
-#       log_error "Failed to install zsh-autosuggestions"
-#   else
-#     log_info "zsh-autosuggestions already installed"
-#   fi
+  # Install zsh-autosuggestions
+  if [ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]; then
+    git clone -q https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM/plugins/zsh-autosuggestions" && \
+      log_success "zsh-autosuggestions installed" || \
+      log_error "Failed to install zsh-autosuggestions"
+  else
+    log_info "zsh-autosuggestions already installed"
+  fi
   
-#   # Install zsh-syntax-highlighting
-#   if [ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]; then
-#     git clone -q https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" && \
-#       log_success "zsh-syntax-highlighting installed" || \
-#       log_error "Failed to install zsh-syntax-highlighting"
-#   else
-#     log_info "zsh-syntax-highlighting already installed"
-#   fi
+  # Install zsh-syntax-highlighting
+  if [ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]; then
+    git clone -q https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" && \
+      log_success "zsh-syntax-highlighting installed" || \
+      log_error "Failed to install zsh-syntax-highlighting"
+  else
+    log_info "zsh-syntax-highlighting already installed"
+  fi
 
   # Change default shell to zsh
   log_info "Changing default shell to zsh..."
