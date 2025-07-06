@@ -5,7 +5,7 @@
 
 # Load logging functions
 SCRIPT_DIR=$(dirname "$0")
-LOGGING_SCRIPT="$SCRIPT_DIR/../utils/logging.sh"
+LOGGING_SCRIPT="$SCRIPT_DIR/../../utils/logging.sh"
 
 if [[ -f "$LOGGING_SCRIPT" ]]; then
     source "$LOGGING_SCRIPT"
