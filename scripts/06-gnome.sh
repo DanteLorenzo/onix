@@ -28,17 +28,30 @@ set_wallpaper_avatar() {
         gsettings set org.gnome.desktop.screensaver picture-uri "file://$wallpaper_path"
         log_success "User wallpaper set successfully"
         
-        # Set login screen wallpaper (alternative method)
-        if command -v dbus-send >/dev/null; then
-            log_info "Attempting to set login screen wallpaper..."
-            sudo cp "$wallpaper_path" /usr/share/backgrounds/custom-login-wallpaper.jpg
-            sudo chmod 644 /usr/share/backgrounds/custom-login-wallpaper.jpg
-            sudo update-alternatives --install /usr/share/gnome-background-properties/default.xml gnome-background-properties-custom \
-                /usr/share/backgrounds/custom-login-wallpaper.jpg 100
-            log_success "Login screen wallpaper configured"
-        else
-            log_warning "dbus-send not found, skipping login screen wallpaper"
-        fi
+        # Set login screen wallpaper (GDM)
+        log_info "Setting login screen wallpaper..."
+        sudo mkdir -p /usr/share/gdm/greeter/backgrounds
+        sudo cp "$wallpaper_path" /usr/share/gdm/greeter/backgrounds/custom-login-wallpaper.jpg
+        sudo chmod 644 /usr/share/gdm/greeter/backgrounds/custom-login-wallpaper.jpg
+        
+        # Create XML file for GDM background
+        sudo bash -c 'cat > /usr/share/gnome-background-properties/custom-gdm-backgrounds.xml <<EOF
+<?xml version="1.0"?>
+<!DOCTYPE wallpapers SYSTEM "gnome-wp-list.dtd">
+<wallpapers>
+  <wallpaper>
+    <name>Custom Login Wallpaper</name>
+    <filename>/usr/share/gdm/greeter/backgrounds/custom-login-wallpaper.jpg</filename>
+    <options>zoom</options>
+    <pcolor>#000000</pcolor>
+    <scolor>#000000</scolor>
+  </wallpaper>
+</wallpapers>
+EOF'
+        
+        # Set GDM background
+        sudo -u gdm dbus-launch gsettings set org.gnome.desktop.background picture-uri "file:///usr/share/gdm/greeter/backgrounds/custom-login-wallpaper.jpg"
+        log_success "Login screen wallpaper configured"
     else
         log_warning "Wallpaper not found at $wallpaper_path"
     fi
@@ -76,8 +89,7 @@ log_success "Dark theme applied"
 # Set wallpaper and avatar before other customizations
 set_wallpaper_avatar
 
-
-# 3. Keyboard Shortcuts
+# 2. Keyboard Shortcuts
 log_info "Configuring keyboard shortcuts..."
 
 # Close window shortcut
@@ -126,19 +138,19 @@ gsettings set "$CUSTOM_PATH2" command 'nautilus --new-window'
 gsettings set "$CUSTOM_PATH2" binding '<Super>e'
 log_success "File manager shortcut configured"
 
-# 4. Workspace Settings
+# 3. Workspace Settings
 log_info "Configuring workspaces..."
 gsettings set org.gnome.mutter dynamic-workspaces false
 gsettings set org.gnome.desktop.wm.preferences num-workspaces 5
 log_success "5 static workspaces configured"
 
-# 5. UI Preferences
+# 4. UI Preferences
 log_info "Applying UI preferences..."
 gsettings set org.gnome.desktop.interface enable-hot-corners false
 gsettings set org.gnome.desktop.wm.preferences button-layout 'appmenu:minimize,maximize,close'
 log_success "UI preferences applied"
 
-# 6. Favorite Apps
+# 5. Favorite Apps
 log_info "Setting favorite apps..."
 FAVORITES="['org.gnome.Terminal.desktop'"
 
