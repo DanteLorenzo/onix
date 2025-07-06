@@ -27,9 +27,9 @@ log_info "Configuring keyboard shortcuts..."
 # Close window shortcut
 gsettings set org.gnome.desktop.wm.keybindings close "['<Super>c']"
 
-# Terminal shortcut setup
+# Terminal shortcut setup (prioritizing Ptyxis if installed)
 TERMINAL_CMD=""
-for term in gnome-terminal kgx tilix xterm; do
+for term in ptyxis gnome-terminal kgx tilix xterm; do
     if command -v $term &>/dev/null; then
         TERMINAL_CMD=$term
         break
@@ -67,10 +67,22 @@ gsettings set org.gnome.desktop.interface enable-hot-corners false
 gsettings set org.gnome.desktop.wm.preferences button-layout 'appmenu:minimize,maximize,close'
 log_success "UI preferences applied"
 
-# 5. Favorite Apps
+# 5. Favorite Apps (now including Ptyxis if available)
 log_info "Setting favorite apps..."
-FAVORITES="['org.gnome.Terminal.desktop', 'org.mozila.firefox.desktop']"
+FAVORITES="['org.gnome.Terminal.desktop'"
 
+# Check for Ptyxis
+if [ -f "/usr/share/applications/org.gnome.Ptyxis.desktop" ] || [ -f "/usr/local/share/applications/org.gnome.Ptyxis.desktop" ]; then
+    FAVORITES+=", 'org.gnome.Ptyxis.desktop'"
+    log_info "Added Ptyxis to favorites"
+fi
+
+# Check for Firefox
+if [ -f "/usr/share/applications/org.mozilla.firefox.desktop" ]; then
+    FAVORITES+=", 'org.mozilla.firefox.desktop'"
+fi
+
+FAVORITES+="]"
 gsettings set org.gnome.shell favorite-apps "$FAVORITES"
 log_success "Favorite apps configured"
 
