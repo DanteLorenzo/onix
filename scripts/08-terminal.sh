@@ -3,7 +3,7 @@
 # Include logging functions
 source "$(dirname "$0")/../utils/logging.sh"
 
-log_info "Configuring GNOME terminal opacity for Ptyxis..."
+log_info "Configuring GNOME terminal opacity and blur for Ptyxis..."
 
 # Check if dconf is available
 if ! command -v dconf &>/dev/null; then
@@ -21,16 +21,21 @@ fi
 
 log_info "Default Ptyxis profile UUID: $DEFAULT_UUID"
 
-# Set opacity (0.0 = fully transparent, 1.0 = fully opaque)
+# Set variables
 OPACITY_VALUE=0.85
 PROFILE_PATH="/org/gnome/Ptyxis/Profiles/$DEFAULT_UUID"
 
-log_info "Setting opacity to $OPACITY_VALUE for profile $DEFAULT_UUID..."
-
+# Set opacity
+log_info "Setting opacity to $OPACITY_VALUE..."
 dconf write "$PROFILE_PATH/opacity" "$OPACITY_VALUE"
 
+# Enable blur
+log_info "Enabling background blur..."
+dconf write "$PROFILE_PATH/blur-background" true
+
+# Final result
 if [[ $? -eq 0 ]]; then
-    log_success "Terminal opacity successfully set to $OPACITY_VALUE"
+    log_success "Ptyxis opacity and blur configured successfully."
 else
-    log_error "Failed to set terminal opacity"
+    log_error "Failed to configure opacity or blur."
 fi
