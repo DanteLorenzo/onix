@@ -27,34 +27,32 @@ log_info "Configuring keyboard shortcuts..."
 # Close window shortcut
 gsettings set org.gnome.desktop.wm.keybindings close "['<Super>c']"
 
-# Alacritty terminal shortcut setup
-TERMINAL_CMD="alacritty"
-if ! command -v $TERMINAL_CMD &>/dev/null; then
-    log_error "Alacritty not found! Please install it first."
-    log_info "You can install Alacritty with:"
-    log_info "  Fedora: sudo dnf install alacritty"
-    log_info "  Ubuntu/Debian: sudo apt install alacritty"
-    log_info "  Arch: sudo pacman -S alacritty"
-    exit 1
+# Terminal shortcut setup (prioritizing Ptyxis if installed)
+TERMINAL_CMD=""
+for term in ptyxis gnome-terminal kgx tilix xterm; do
+    if command -v $term &>/dev/null; then
+        TERMINAL_CMD=$term
+        break
+    fi
+done
+
+if [ -z "$TERMINAL_CMD" ]; then
+    log_error "No terminal emulator found"
 else
-    log_info "Using Alacritty as default terminal"
+    log_info "Using $TERMINAL_CMD as default terminal"
     
     # Add custom keybinding
     CUSTOM_PATH="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
     CURRENT_KEYS=$(gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings)
     
-    # Use alternative sed delimiter (|) to avoid slash conflicts
-    if [[ "$CURRENT_KEYS" == "@as []" ]]; then
-        NEW_KEYS="['$CUSTOM_PATH']"
-    else
-        NEW_KEYS=$(echo "$CURRENT_KEYS" | sed "s|]|, '$CUSTOM_PATH']|")
-    fi
+    [[ "$CURRENT_KEYS" == "@as []" ]] && NEW_KEYS="['$CUSTOM_PATH']" || \
+    NEW_KEYS=$(echo "$CURRENT_KEYS" | sed "s/]$/, '$CUSTOM_PATH']/")
     
     gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "$NEW_KEYS"
-    gsettings set "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$CUSTOM_PATH" name 'Terminal'
-    gsettings set "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$CUSTOM_PATH" command "$TERMINAL_CMD"
-    gsettings set "org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:$CUSTOM_PATH" binding '<Super>Return'
-    log_success "Terminal shortcut configured (Super+Return)"
+    gsettings set "$CUSTOM_PATH" name 'Terminal'
+    gsettings set "$CUSTOM_PATH" command "$TERMINAL_CMD"
+    gsettings set "$CUSTOM_PATH" binding '<Super>q'
+    log_success "Terminal shortcut configured"
 fi
 
 # 3. Workspace Settings
@@ -69,32 +67,23 @@ gsettings set org.gnome.desktop.interface enable-hot-corners false
 gsettings set org.gnome.desktop.wm.preferences button-layout 'appmenu:minimize,maximize,close'
 log_success "UI preferences applied"
 
-# 5. Favorite Apps
+# 5. Favorite Apps (now including Ptyxis if available)
 log_info "Setting favorite apps..."
-FAVORITES="['org.gnome.Terminal.desktop'"  # Fallback entry
+FAVORITES="['org.gnome.Terminal.desktop'"
 
-# Check for Alacritty desktop file
-if [ -f "/usr/share/applications/Alacritty.desktop" ]; then
-    FAVORITES="['Alacritty.desktop'"
-elif [ -f "/usr/share/applications/org.alacritty.Alacritty.desktop" ]; then
-    FAVORITES="['org.alacritty.Alacritty.desktop'"
+# Check for Ptyxis
+if [ -f "/usr/share/applications/org.gnome.Ptyxis.desktop" ] || [ -f "/usr/local/share/applications/org.gnome.Ptyxis.desktop" ]; then
+    FAVORITES+=", 'org.gnome.Ptyxis.desktop'"
+    log_info "Added Ptyxis to favorites"
 fi
 
 # Check for Firefox
 if [ -f "/usr/share/applications/org.mozilla.firefox.desktop" ]; then
     FAVORITES+=", 'org.mozilla.firefox.desktop'"
-elif [ -f "/usr/share/applications/firefox.desktop" ]; then
-    FAVORITES+=", 'firefox.desktop'"
 fi
 
 FAVORITES+="]"
 gsettings set org.gnome.shell favorite-apps "$FAVORITES"
 log_success "Favorite apps configured"
-
-# 6. Optional: Configure Alacritty as default terminal
-if command -v update-alternatives &>/dev/null; then
-    log_info "Setting Alacritty as default terminal..."
-    sudo update-alternatives --set x-terminal-emulator $(which alacritty)
-fi
 
 log_success "GNOME customization complete!"
