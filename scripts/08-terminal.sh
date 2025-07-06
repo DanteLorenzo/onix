@@ -3,56 +3,70 @@
 # Include logging functions
 source "$(dirname "$0")/../utils/logging.sh"
 
-log_info "Starting Ptyxis blur support diagnostics..."
+log_info "Configuring GNOME terminal opacity for Ptyxis..."
 
-# 1. Session type check
-SESSION_TYPE="${XDG_SESSION_TYPE:-unknown}"
-log_info "Session Type: $SESSION_TYPE"
-
-if [[ "$SESSION_TYPE" != "wayland" ]]; then
-    log_error "Wayland is not active. Blur only works on Wayland."
-else
-    log_success "Wayland session detected."
-fi
-
-# 2. GNOME version check
-GNOME_VERSION=$(gnome-shell --version 2>/dev/null)
-if [[ -z "$GNOME_VERSION" ]]; then
-    log_error "Unable to determine GNOME version. gnome-shell not found."
-else
-    log_info "GNOME Version: $GNOME_VERSION"
-fi
-
-# 3. Mutter package check
-if command -v rpm &>/dev/null; then
-    MUTTER_VERSION=$(rpm -q mutter)
-elif command -v pacman &>/dev/null; then
-    MUTTER_VERSION=$(pacman -Q mutter 2>/dev/null)
-else
-    MUTTER_VERSION="Package manager not supported"
-fi
-
-log_info "Mutter version: $MUTTER_VERSION"
-
-# 4. Check if blur-background is set in current Ptyxis profile
-UUID=$(dconf read /org/gnome/Ptyxis/default-profile-uuid | tr -d "'")
-
-if [[ -z "$UUID" ]]; then
-    log_error "Could not find Ptyxis default profile UUID."
+# Check if dconf is available
+if ! command -v dconf &>/dev/null; then
+    log_error "dconf not found. This script requires GNOME with dconf."
     exit 1
 fi
 
-PROFILE_PATH="/org/gnome/Ptyxis/Profiles/$UUID"
-OPACITY=$(dconf read "$PROFILE_PATH/opacity" 2>/dev/null)
-BLUR_ENABLED=$(dconf read "$PROFILE_PATH/blur-background" 2>/dev/null)
+# Try to get the default UUID for Ptyxis profile
+DEFAULT_UUID=$(dconf read /org/gnome/Ptyxis/default-profile-uuid | tr -d "'")
 
-log_info "Ptyxis profile UUID: $UUID"
-log_info "Opacity: ${OPACITY:-not set}"
-log_info "Blur enabled: ${BLUR_ENABLED:-not set}"
+if [[ -z "$DEFAULT_UUID" ]]; then
+    log_error "Failed to retrieve default profile UUID. Make sure Ptyxis is configured."
+    exit 1
+fi
 
-# Final check
-if [[ "$SESSION_TYPE" == "wayland" && "$BLUR_ENABLED" == "true" ]]; then
-    log_success "Configuration seems correct. If blur still doesn't work, it's likely a Mutter or Ptyxis bug."
+log_info "Default Ptyxis profile UUID: $DEFAULT_UUID"
+
+# Set opacity (0.0 = fully transparent, 1.0 = fully opaque)
+OPACITY_VALUE=0.85
+PROFILE_PATH="/org/gnome/Ptyxis/Profiles/$DEFAULT_UUID"
+
+dconf write "$PROFILE_PATH/opacity" "$OPACITY_VALUE"
+
+if [[ $? -eq 0 ]]; then
+    log_success "Terminal opacity successfully set to $OPACITY_VALUE"
 else
-    log_error "Blur might not be applied correctly. Check the configuration above."
+    log_error "Failed to set terminal opacity"
+fi
+
+# Install Oh My Zsh
+log_info "Installing Oh My Zsh..."
+sh -c "$(wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)" "" --unattended
+
+# Check if installation was successful
+if [ $? -eq 0 ]; then
+  log_success "Oh My Zsh installed successfully."
+
+  # Copy custom .zshrc file
+  log_info "Copying custom .zshrc file..."
+  cp ./configs/zsh/.zshrc ~/
+
+  # Install zsh plugins
+  log_info "Installing zsh plugins..."
+  ZSH_CUSTOM="${ZSH_CUSTOM:-$HOME/.oh-my-zsh/custom}"
+  
+  # Install zsh-autosuggestions
+  if [ ! -d "$ZSH_CUSTOM/plugins/zsh-autosuggestions" ]; then
+    git clone https://github.com/zsh-users/zsh-autosuggestions "$ZSH_CUSTOM/plugins/zsh-autosuggestions"
+    log_success "zsh-autosuggestions installed"
+  else
+    log_info "zsh-autosuggestions already installed"
+  fi
+  
+  # Install zsh-syntax-highlighting
+  if [ ! -d "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting" ]; then
+    git clone https://github.com/zsh-users/zsh-syntax-highlighting.git "$ZSH_CUSTOM/plugins/zsh-syntax-highlighting"
+    log_success "zsh-syntax-highlighting installed"
+  else
+    log_info "zsh-syntax-highlighting already installed"
+  fi
+
+  log_success "Setup completed successfully."
+else
+  log_error "Failed to install Oh My Zsh. Check for errors above."
+  exit 1
 fi
