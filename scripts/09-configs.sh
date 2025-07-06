@@ -11,7 +11,7 @@ CONFIG_FOLDERS=(
     "tmux"
 )
 
-log_section "Starting configuration deployment"
+log_info "Starting configuration deployment"
 
 # Verify source configs directory exists
 CONFIGS_ROOT="$(dirname "$0")/../configs"
