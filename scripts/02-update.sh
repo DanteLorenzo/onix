@@ -24,11 +24,23 @@ if [ -f /etc/fedora-release ]; then
     log_info "Upgrading installed packages..."
     sudo dnf upgrade -y
     
+    # Additional Fedora-specific setup
+    log_info "Performing additional Fedora setup..."
+
+    # Enable RPM Fusion repositories (free and non-free)
+    if ! rpm -q rpmfusion-free-release >/dev/null; then
+        log_info "Enabling RPM Fusion repositories..."
+        sudo dnf install -y https://download1.rpmfusion.org/free/fedora/rpmfusion-free-release-$(rpm -E %fedora).noarch.rpm
+        sudo dnf install -y https://download1.rpmfusion.org/nonfree/fedora/rpmfusion-nonfree-release-$(rpm -E %fedora).noarch.rpm
+    fi
+
     log_info "Cleaning up package cache..."
     sudo dnf clean all
     
     log_info "Removing unused dependencies..."
     sudo dnf autoremove -y
+
+    log_success "Fedora setup base packages completed successfully."
 
 elif [ -f /etc/redhat-release ] && grep -q "CentOS" /etc/redhat-release; then
     log_success "CentOS system detected"
