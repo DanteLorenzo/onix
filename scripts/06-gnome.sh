@@ -121,8 +121,6 @@ log_success "5 static workspaces configured"
 log_info "Applying UI preferences..."
 gsettings set org.gnome.desktop.interface enable-hot-corners false
 gsettings set org.gnome.desktop.wm.preferences button-layout 'appmenu:minimize,maximize,close'
-# Show hidden files in file chooser
-gsettings set org.gtk.Settings.FileChooser show-hidden true
 log_success "UI preferences applied"
 
 # 5. Favorite Apps
