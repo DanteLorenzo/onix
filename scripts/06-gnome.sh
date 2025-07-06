@@ -15,12 +15,56 @@ if [ "$XDG_CURRENT_DESKTOP" != "GNOME" ]; then
     log_warning "Not running in GNOME session (XDG_CURRENT_DESKTOP=$XDG_CURRENT_DESKTOP)"
 fi
 
+# Set wallpaper and avatar
+set_wallpaper_avatar() {
+    local wallpaper_path="$HOME/Pictures/Wallpapers/default.png"
+    local avatar_path="$HOME/Pictures/Avatars/default.png"
+    
+    # Set wallpaper
+    if [ -f "$wallpaper_path" ]; then
+        log_info "Setting wallpaper from $wallpaper_path"
+        gsettings set org.gnome.desktop.background picture-uri "file://$wallpaper_path"
+        gsettings set org.gnome.desktop.background picture-uri-dark "file://$wallpaper_path"
+        gsettings set org.gnome.desktop.screensaver picture-uri "file://$wallpaper_path"
+        log_success "Wallpaper set successfully"
+    else
+        log_warning "Wallpaper not found at $wallpaper_path"
+    fi
+    
+    # Set avatar
+    if [ -f "$avatar_path" ]; then
+        log_info "Setting user avatar from $avatar_path"
+        local avatar_dir="/var/lib/AccountsService/icons"
+        local avatar_dest="$avatar_dir/$(id -un)"
+        
+        # Create directory if needed
+        if [ ! -d "$avatar_dir" ]; then
+            sudo mkdir -p "$avatar_dir"
+            sudo chmod 755 "$avatar_dir"
+        fi
+        
+        # Copy avatar (requires sudo)
+        if sudo cp "$avatar_path" "$avatar_dest"; then
+            sudo chmod 644 "$avatar_dest"
+            log_success "Avatar set successfully"
+        else
+            log_error "Failed to set avatar (permission issue?)"
+        fi
+    else
+        log_warning "Avatar not found at $avatar_path"
+    fi
+}
+
 # 1. Theme Settings
 log_info "Applying theme settings..."
 gsettings set org.gnome.desktop.interface color-scheme 'prefer-dark'
 gsettings set org.gnome.desktop.interface gtk-theme 'Adwaita-dark'
 log_success "Dark theme applied"
 
+# Set wallpaper and avatar before other customizations
+set_wallpaper_avatar
+
+# [Rest of your existing script remains the same...]
 # 2. Keyboard Shortcuts
 log_info "Configuring keyboard shortcuts..."
 
