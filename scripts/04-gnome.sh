@@ -56,7 +56,7 @@ else
     
     gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "$NEW_KEYS"
     gsettings set "$CUSTOM_PATH" name 'Terminal'
-    gsettings set "$CUSTOM_PATH" command "$TERMINAL_CMD"
+    gsettings set "$CUSTOM_PATH" command "$TERMINAL_CMD --new-window"
     gsettings set "$CUSTOM_PATH" binding '<Super>q'
     log_success "Terminal shortcut configured"
 fi
