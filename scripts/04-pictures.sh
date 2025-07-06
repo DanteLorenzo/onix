@@ -21,9 +21,9 @@ for folder in "${folders[@]}"; do
     fi
 done
 
-# Copy pictures to user's Pictures directory
+# Copy pictures from ~/onix/pic to ~/Pictures
 log_info "Copying picture files..."
-source_pic_dir="$(dirname "$0")/pic"  # Используем относительный путь от расположения скрипта
+source_pic_dir="$(dirname "$0")/../pic"  # Путь к папке pic относительно onix.sh
 target_pic_dir="${HOME}/Pictures"
 
 if [ -d "${source_pic_dir}" ]; then
@@ -39,10 +39,10 @@ if [ -d "${source_pic_dir}" ]; then
         log_info "Found $(ls -1 "${source_pic_dir}" | wc -l) files in ${source_pic_dir}"
         
         if cp -vr "${source_pic_dir}"/* "${target_pic_dir}"/; then
-            copied_count=$(ls -1 "${target_pic_dir}" | wc -l)
-            log_success "Successfully copied files to user's Pictures directory: ${target_pic_dir}"
+            copied_count=$(find "${target_pic_dir}" -type f | wc -l)
+            log_success "Successfully copied files from ${source_pic_dir} to ${target_pic_dir}"
         else
-            log_error "Failed to copy some files to user directory"
+            log_error "Failed to copy some files from ${source_pic_dir} to ${target_pic_dir}"
             exit 1
         fi
     else
@@ -52,4 +52,4 @@ else
     log_warning "Source directory ${source_pic_dir} not found - skipping picture copy"
 fi
 
-log_success "All operations completed in user space"
+log_success "All operations completed successfully"
