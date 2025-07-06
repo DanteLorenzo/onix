@@ -20,13 +20,27 @@ set_wallpaper_avatar() {
     local wallpaper_path="$HOME/Pictures/Wallpapers/default.jpg"
     local avatar_path="$HOME/Pictures/Avatars/default.png"
     
-    # Set wallpaper
+    # Set wallpaper for user session
     if [ -f "$wallpaper_path" ]; then
         log_info "Setting wallpaper from $wallpaper_path"
+        
+        # User session wallpaper
         gsettings set org.gnome.desktop.background picture-uri "file://$wallpaper_path"
         gsettings set org.gnome.desktop.background picture-uri-dark "file://$wallpaper_path"
         gsettings set org.gnome.desktop.screensaver picture-uri "file://$wallpaper_path"
-        log_success "Wallpaper set successfully"
+        log_success "User wallpaper set successfully"
+        
+        # GDM login screen wallpaper (requires sudo)
+        local gdm_wallpaper="/usr/share/gnome-background-properties/custom-wallpaper.jpg"
+        log_info "Setting login screen wallpaper..."
+        
+        if sudo cp "$wallpaper_path" "$gdm_wallpaper"; then
+            sudo chmod 644 "$gdm_wallpaper"
+            sudo dbus-launch gsettings set com.gnome.desktop.background picture-uri "file://$gdm_wallpaper"
+            log_success "Login screen wallpaper set successfully"
+        else
+            log_error "Failed to set login screen wallpaper (permission issue?)"
+        fi
     else
         log_warning "Wallpaper not found at $wallpaper_path"
     fi
@@ -69,6 +83,7 @@ log_info "Configuring dock preferences..."
 gsettings set org.gnome.shell.extensions.dash-to-dock custom-icon-size 24
 gsettings set org.gnome.shell.extensions.dash-to-dock dash-max-icon-size 24
 gsettings set org.gnome.shell.extensions.dash-to-dock background-opacity 0.8
+gsettings set org.gnome.shell.extensions.dash-to-dock show-mounts false
 log_success "Dock configured (icon size: 24px)"
 
 # 3. Keyboard Shortcuts
@@ -153,5 +168,12 @@ fi
 FAVORITES+="]"
 gsettings set org.gnome.shell favorite-apps "$FAVORITES"
 log_success "Favorite apps configured"
+
+# 7. Additional GNOME Settings
+log_info "Applying additional GNOME settings..."
+gsettings set org.gnome.desktop.interface clock-show-weekday true
+gsettings set org.gnome.desktop.interface clock-show-date true
+gsettings set org.gnome.desktop.interface show-battery-percentage true
+log_success "Additional settings applied"
 
 log_success "GNOME customization complete!"
