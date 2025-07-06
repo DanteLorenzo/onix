@@ -27,6 +27,22 @@ log_info "Configuring keyboard shortcuts..."
 # Close window shortcut
 gsettings set org.gnome.desktop.wm.keybindings close "['<Super>c']"
 
+# File Manager shortcut (Windows+E)
+CUSTOM_PATH1="org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
+CUSTOM_PATH2="org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/"
+
+# Get current keybindings and update the array
+CURRENT_KEYS=$(gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings)
+
+# Initialize with both custom keybindings
+if [[ "$CURRENT_KEYS" == "@as []" ]]; then
+    NEW_KEYS="['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/']"
+else
+    NEW_KEYS=$(echo "$CURRENT_KEYS" | sed "s|]|, '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/', '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom1/']|")
+fi
+
+gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "$NEW_KEYS"
+
 # Terminal shortcut setup
 TERMINAL_CMD=""
 for term in ptyxis gnome-terminal kgx tilix xterm; do
@@ -41,25 +57,18 @@ if [ -z "$TERMINAL_CMD" ]; then
 else
     log_info "Using $TERMINAL_CMD as default terminal"
     
-    # Add custom keybinding with proper path escaping
-    CUSTOM_PATH="org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
-    
-    # Get current keybindings and update the array
-    CURRENT_KEYS=$(gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings)
-    
-    # Use alternative sed delimiter (|) to avoid slash conflicts
-    if [[ "$CURRENT_KEYS" == "@as []" ]]; then
-        NEW_KEYS="['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']"
-    else
-        NEW_KEYS=$(echo "$CURRENT_KEYS" | sed "s|]|, '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']|")
-    fi
-    
-    gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "$NEW_KEYS"
-    gsettings set "$CUSTOM_PATH" name 'Terminal'
-    gsettings set "$CUSTOM_PATH" command "$TERMINAL_CMD --new-window"
-    gsettings set "$CUSTOM_PATH" binding '<Super>q'
+    # Configure terminal shortcut (custom0)
+    gsettings set "$CUSTOM_PATH1" name 'Terminal'
+    gsettings set "$CUSTOM_PATH1" command "$TERMINAL_CMD --new-window"
+    gsettings set "$CUSTOM_PATH1" binding '<Super>q'
     log_success "Terminal shortcut configured"
 fi
+
+# Configure file manager shortcut (custom1)
+gsettings set "$CUSTOM_PATH2" name 'File Manager'
+gsettings set "$CUSTOM_PATH2" command 'nautilus --new-window'
+gsettings set "$CUSTOM_PATH2" binding '<Super>e'
+log_success "File manager shortcut configured"
 
 # 3. Workspace Settings
 log_info "Configuring workspaces..."
