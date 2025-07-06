@@ -33,6 +33,19 @@ else
     log_error "Failed to set terminal opacity"
 fi
 
+# Install zsh if not installed
+if ! command -v zsh &>/dev/null; then
+    log_info "Installing zsh..."
+    sudo apt-get update && sudo apt-get install -y zsh
+    if [ $? -ne 0 ]; then
+        log_error "Failed to install zsh"
+        exit 1
+    fi
+    log_success "zsh installed successfully"
+else
+    log_info "zsh is already installed"
+fi
+
 # Install Oh My Zsh
 log_info "Installing Oh My Zsh..."
 sh -c "$(wget https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh -O -)" "" --unattended
@@ -64,6 +77,11 @@ if [ $? -eq 0 ]; then
   else
     log_info "zsh-syntax-highlighting already installed"
   fi
+
+  # Change default shell to zsh
+  log_info "Changing default shell to zsh..."
+  sudo chsh -s $(which zsh) $(whoami)
+  log_success "Default shell changed to zsh"
 
   log_success "Setup completed successfully."
 else
