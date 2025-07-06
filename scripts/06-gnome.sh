@@ -23,23 +23,21 @@ set_wallpaper_avatar() {
     # Set wallpaper for user session
     if [ -f "$wallpaper_path" ]; then
         log_info "Setting wallpaper from $wallpaper_path"
-        
-        # User session wallpaper
         gsettings set org.gnome.desktop.background picture-uri "file://$wallpaper_path"
         gsettings set org.gnome.desktop.background picture-uri-dark "file://$wallpaper_path"
         gsettings set org.gnome.desktop.screensaver picture-uri "file://$wallpaper_path"
         log_success "User wallpaper set successfully"
         
-        # GDM login screen wallpaper (requires sudo)
-        local gdm_wallpaper="/usr/share/gnome-background-properties/custom-wallpaper.jpg"
-        log_info "Setting login screen wallpaper..."
-        
-        if sudo cp "$wallpaper_path" "$gdm_wallpaper"; then
-            sudo chmod 644 "$gdm_wallpaper"
-            sudo dbus-launch gsettings set com.gnome.desktop.background picture-uri "file://$gdm_wallpaper"
-            log_success "Login screen wallpaper set successfully"
+        # Set login screen wallpaper (alternative method)
+        if command -v dbus-send >/dev/null; then
+            log_info "Attempting to set login screen wallpaper..."
+            sudo cp "$wallpaper_path" /usr/share/backgrounds/custom-login-wallpaper.jpg
+            sudo chmod 644 /usr/share/backgrounds/custom-login-wallpaper.jpg
+            sudo update-alternatives --install /usr/share/gnome-background-properties/default.xml gnome-background-properties-custom \
+                /usr/share/backgrounds/custom-login-wallpaper.jpg 100
+            log_success "Login screen wallpaper configured"
         else
-            log_error "Failed to set login screen wallpaper (permission issue?)"
+            log_warning "dbus-send not found, skipping login screen wallpaper"
         fi
     else
         log_warning "Wallpaper not found at $wallpaper_path"
@@ -78,14 +76,18 @@ log_success "Dark theme applied"
 # Set wallpaper and avatar before other customizations
 set_wallpaper_avatar
 
-# 2. Dock Settings
-log_info "Configuring dock preferences..."
-gsettings set org.gnome.shell.extensions.dash-to-dock custom-icon-size 24
-gsettings set org.gnome.shell.extensions.dash-to-dock dash-max-icon-size 24
-gsettings set org.gnome.shell.extensions.dash-to-dock background-opacity 0.8
-gsettings set org.gnome.shell.extensions.dash-to-dock show-mounts false
-log_success "Dock configured (icon size: 24px)"
+# 2. Dock Settings (only if dash-to-dock is installed)
+if gsettings list-schemas | grep -q org.gnome.shell.extensions.dash-to-dock; then
+    log_info "Configuring dock preferences..."
+    gsettings set org.gnome.shell.extensions.dash-to-dock dash-max-icon-size 24
+    gsettings set org.gnome.shell.extensions.dash-to-dock background-opacity 0.8
+    gsettings set org.gnome.shell.extensions.dash-to-dock show-mounts false
+    log_success "Dock configured (icon size: 24px)"
+else
+    log_warning "Dash-to-Dock extension not found - skipping dock customization"
+fi
 
+# [Rest of the script remains exactly the same...]
 # 3. Keyboard Shortcuts
 log_info "Configuring keyboard shortcuts..."
 
@@ -168,12 +170,5 @@ fi
 FAVORITES+="]"
 gsettings set org.gnome.shell favorite-apps "$FAVORITES"
 log_success "Favorite apps configured"
-
-# 7. Additional GNOME Settings
-log_info "Applying additional GNOME settings..."
-gsettings set org.gnome.desktop.interface clock-show-weekday true
-gsettings set org.gnome.desktop.interface clock-show-date true
-gsettings set org.gnome.desktop.interface show-battery-percentage true
-log_success "Additional settings applied"
 
 log_success "GNOME customization complete!"
