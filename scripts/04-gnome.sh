@@ -27,7 +27,7 @@ log_info "Configuring keyboard shortcuts..."
 # Close window shortcut
 gsettings set org.gnome.desktop.wm.keybindings close "['<Super>c']"
 
-# Terminal shortcut setup (prioritizing Ptyxis if installed)
+# Terminal shortcut setup
 TERMINAL_CMD=""
 for term in ptyxis gnome-terminal kgx tilix xterm; do
     if command -v $term &>/dev/null; then
@@ -41,12 +41,18 @@ if [ -z "$TERMINAL_CMD" ]; then
 else
     log_info "Using $TERMINAL_CMD as default terminal"
     
-    # Add custom keybinding
-    CUSTOM_PATH="/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
+    # Add custom keybinding with proper path escaping
+    CUSTOM_PATH="org.gnome.settings-daemon.plugins.media-keys.custom-keybinding:/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/"
+    
+    # Get current keybindings and update the array
     CURRENT_KEYS=$(gsettings get org.gnome.settings-daemon.plugins.media-keys custom-keybindings)
     
-    [[ "$CURRENT_KEYS" == "@as []" ]] && NEW_KEYS="['$CUSTOM_PATH']" || \
-    NEW_KEYS=$(echo "$CURRENT_KEYS" | sed "s/]$/, '$CUSTOM_PATH']/")
+    # Use alternative sed delimiter (|) to avoid slash conflicts
+    if [[ "$CURRENT_KEYS" == "@as []" ]]; then
+        NEW_KEYS="['/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']"
+    else
+        NEW_KEYS=$(echo "$CURRENT_KEYS" | sed "s|]|, '/org/gnome/settings-daemon/plugins/media-keys/custom-keybindings/custom0/']|")
+    fi
     
     gsettings set org.gnome.settings-daemon.plugins.media-keys custom-keybindings "$NEW_KEYS"
     gsettings set "$CUSTOM_PATH" name 'Terminal'
@@ -67,18 +73,21 @@ gsettings set org.gnome.desktop.interface enable-hot-corners false
 gsettings set org.gnome.desktop.wm.preferences button-layout 'appmenu:minimize,maximize,close'
 log_success "UI preferences applied"
 
-# 5. Favorite Apps (now including Ptyxis if available)
+# 5. Favorite Apps
 log_info "Setting favorite apps..."
 FAVORITES="['org.gnome.Terminal.desktop'"
 
 # Check for Ptyxis
-if [ -f "/usr/share/applications/org.gnome.Ptyxis.desktop" ] || [ -f "/usr/local/share/applications/org.gnome.Ptyxis.desktop" ]; then
+if [ -f "/usr/share/applications/org.gnome.Ptyxis.desktop" ] || 
+   [ -f "/usr/local/share/applications/org.gnome.Ptyxis.desktop" ] ||
+   [ -f "/var/lib/flatpak/exports/share/applications/org.gnome.Ptyxis.desktop" ]; then
     FAVORITES+=", 'org.gnome.Ptyxis.desktop'"
     log_info "Added Ptyxis to favorites"
 fi
 
 # Check for Firefox
-if [ -f "/usr/share/applications/org.mozilla.firefox.desktop" ]; then
+if [ -f "/usr/share/applications/org.mozilla.firefox.desktop" ] || 
+   [ -f "/var/lib/flatpak/exports/share/applications/org.mozilla.firefox.desktop" ]; then
     FAVORITES+=", 'org.mozilla.firefox.desktop'"
 fi
 
