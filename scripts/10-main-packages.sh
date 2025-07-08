@@ -25,7 +25,20 @@ sudo dnf install -y \
     wireshark \
     podman \
     wireguard-tools \
-    dnf-plugins-core
+    dnf-plugins-core \
+    telegram \
+    yt-dlp \
+    fastfetch \
+    keepassxc \
+    medusa \
+    hydra \
+    ffmpeg \
+    john \
+    deluge \
+    hping3 \
+    hwinfo \
+    nload \
+    
 
 # Adding browser repositories
 log_info "Adding browser repositories..."
@@ -147,6 +160,16 @@ log_info "Configuring Flatpak..."
 if ! flatpak remote-add --if-not-exists flathub https://flathub.org/repo/flathub.flatpakrepo; then
     log_error "Failed to add Flathub repository"
     exit 1
+fi
+
+# =====================
+# Amberol Installation
+# =====================
+log_info "Installing Amberol via Flatpak..."
+if flatpak install -y https://dl.flathub.org/repo/appstream/io.bassi.Amberol.flatpakref; then
+    log_success "Amberol installed successfully"
+else
+    log_error "Failed to install Amberol"
 fi
 
 # =====================
@@ -423,11 +446,52 @@ elif [ -f "/var/lib/flatpak/exports/share/applications/com.discordapp.Discord.de
     log_info "Added Discord (Flatpak) to favorites"
 fi
 
+# Add KeePassXC
+if [ -f "/usr/share/applications/org.keepassxc.KeePassXC.desktop" ]; then
+    FAVORITES+=", 'org.keepassxc.KeePassXC.desktop'"
+    log_info "Added KeePassXC to favorites"
+fi
+
+# Add Amberol
+if [ -f "/var/lib/flatpak/exports/share/applications/io.bassi.Amberol.desktop" ]; then
+    FAVORITES+=", 'io.bassi.Amberol.desktop'"
+    log_info "Added Amberol to favorites"
+fi
+
+# Add Telegram
+if [ -f "/usr/share/applications/telegram-desktop.desktop" ]; then
+    FAVORITES+=", 'telegram-desktop.desktop'"
+    log_info "Added Telegram to favorites"
+elif [ -f "/var/lib/flatpak/exports/share/applications/org.telegram.desktop.desktop" ]; then
+    FAVORITES+=", 'org.telegram.desktop.desktop'"
+    log_info "Added Telegram (Flatpak) to favorites"
+fi
+
+# Add Nautilus
+if [ -f "/usr/share/applications/org.gnome.Nautilus.desktop" ]; then
+    FAVORITES+=", 'org.gnome.Nautilus.desktop'"
+    log_info "Added Nautilus to favorites"
+fi
+
+# Add Postman
+if [ -f "/var/lib/flatpak/exports/share/applications/com.getpostman.Postman.desktop" ]; then
+    FAVORITES+=", 'com.getpostman.Postman.desktop'"
+    log_info "Added Postman to favorites"
+fi
+
+# Add Deluge
+if [ -f "/usr/share/applications/deluge.desktop" ]; then
+    FAVORITES+=", 'deluge.desktop'"
+    log_info "Added Deluge to favorites"
+elif [ -f "/var/lib/flatpak/exports/share/applications/org.deluge_torrent.deluge.desktop" ]; then
+    FAVORITES+=", 'org.deluge_torrent.deluge.desktop'"
+    log_info "Added Deluge (Flatpak) to favorites"
+fi
+
 FAVORITES+=" ]"
 
 # Set favorite apps in GNOME
 gsettings set org.gnome.shell favorite-apps "$FAVORITES"
 log_success "Favorite apps configured: $FAVORITES"
-
 
 exit 0
