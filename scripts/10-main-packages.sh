@@ -273,8 +273,8 @@ if [ -n "$CURRENT_TONKEEPER_VERSION" ]; then
     
     version_compare "$CURRENT_TONKEEPER_VERSION" "$LATEST_TONKEEPER_VERSION"
     case $? in
-        0) log_success "Latest Ton Keeper version already installed"; exit 0 ;;
-        1) log_info "Current version is newer than latest release (unexpected)"; exit 0 ;;
+        0) log_success "Latest Ton Keeper version already installed"; continue ;;
+        1) log_info "Current version is newer than latest release (unexpected)"; continue ;;
         2) log_info "Newer version available, will update" ;;
     esac
 else
