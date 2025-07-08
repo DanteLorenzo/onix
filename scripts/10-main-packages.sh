@@ -156,7 +156,7 @@ DESKTOP_DIR="$HOME/.local/share/applications"
 ICON_DIR="$HOME/.local/share/icons/hicolor/256x256/apps"
 mkdir -p "$APP_DIR" "$DESKTOP_DIR" "$ICON_DIR"
 
-# Latest stable version (можно обновлять при выходе новых версий)
+# Latest stable version
 OBSIDIAN_VERSION="1.8.10"
 OBSIDIAN_URL="https://github.com/obsidianmd/obsidian-releases/releases/download/v${OBSIDIAN_VERSION}/Obsidian-${OBSIDIAN_VERSION}.AppImage"
 OBSIDIAN_FILE="$APP_DIR/Obsidian.AppImage"
@@ -196,14 +196,24 @@ Terminal=false
 StartupWMClass=obsidian
 EOL
 
-# Download icon
-if [ ! -f "$ICON_DIR/obsidian.png" ]; then
+# Copy icon from project directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+ICON_SOURCE="$SCRIPT_DIR/../configs/icons/obsidian-icon.png"
+
+if [ -f "$ICON_SOURCE" ]; then
+    cp "$ICON_SOURCE" "$ICON_DIR/obsidian.png"
+    log_info "Obsidian icon copied from project directory"
+else
+    # Fallback to downloading icon if not found in project
     wget https://obsidian.md/images/icon.png -O "$ICON_DIR/obsidian.png" 2>/dev/null || true
+    log_info "Used fallback method to get Obsidian icon"
 fi
 
 # Update desktop database
 update-desktop-database "$DESKTOP_DIR"
 log_success "Obsidian ${OBSIDIAN_VERSION} installed successfully"
+
+
 # =================
 # Final Completion
 # =================
