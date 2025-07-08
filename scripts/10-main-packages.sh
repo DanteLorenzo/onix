@@ -504,12 +504,6 @@ if [ -f "/var/lib/flatpak/exports/share/applications/app.zen_browser.zen.desktop
     log_info "Added Zen Browser (Flatpak) to favorites"
 fi
 
-# Check for Brave browser
-if [ -f "/usr/share/applications/brave-browser.desktop" ]; then
-    FAVORITES+=", 'brave-browser.desktop'"
-    log_info "Added Brave browser to favorites"
-fi
-
 # Check for LibreWolf browser
 if [ -f "/usr/share/applications/librewolf.desktop" ]; then
     FAVORITES+=", 'librewolf.desktop'"
@@ -518,6 +512,13 @@ elif [ -f "/var/lib/flatpak/exports/share/applications/io.gitlab.librewolf-commu
     FAVORITES+=", 'io.gitlab.librewolf-community.desktop'"
     log_info "Added LibreWolf (Flatpak) to favorites"
 fi
+
+# Check for Brave browser
+if [ -f "/usr/share/applications/brave-browser.desktop" ]; then
+    FAVORITES+=", 'brave-browser.desktop'"
+    log_info "Added Brave browser to favorites"
+fi
+
 
 # Add Amberol
 if [ -f "/var/lib/flatpak/exports/share/applications/io.bassi.Amberol.desktop" ]; then
