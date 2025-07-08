@@ -296,37 +296,34 @@ fi
 ZEN_LINK="$APP_DIR/Zen.AppImage"
 ln -sf "$ZEN_FILE" "$ZEN_LINK"
 
-# Extract icon from AppImage
+# Create desktop file with absolute path to icon
+ZEN_DESKTOP_FILE="$DESKTOP_DIR/zen-browser.desktop"
+ZEN_ICON_PATH="$ICON_DIR/zen-browser.png"
+
+# Handle icon installation
 ZEN_ICON_INSTALLED=0
 if [ -f "$ZEN_FILE" ]; then
-    # First try to extract icon without running the AppImage
-    if "$ZEN_FILE" --appimage-extract >/dev/null 2>&1; then
-        # Check multiple possible icon locations
-        ICON_PATHS=(
-            "squashfs-root/zen.png"
-            "squashfs-root/.DirIcon"
-            "squashfs-root/usr/share/icons/hicolor/256x256/apps/zen.png"
-            "squashfs-root/usr/share/pixmaps/zen.png"
-        )
-        
-        for icon_path in "${ICON_PATHS[@]}"; do
-            if [ -f "$icon_path" ]; then
-                cp "$icon_path" "$ZEN_ICON_PATH" && ZEN_ICON_INSTALLED=1
-                log_info "Zen Browser icon found at: $icon_path"
-                break
-            fi
-        done
-        
-        # Clean up
-        rm -rf squashfs-root
-    fi
+    # Extract AppImage to get the icon
+    "$ZEN_FILE" --appimage-extract &>/dev/null
     
-    # If icon still not found, create a default one
-    if [ $ZEN_ICON_INSTALLED -eq 0 ]; then
-        log_info "Creating default icon for Zen Browser"
-        convert -size 256x256 xc:blue -pointsize 30 -fill white -gravity center -draw "text 0,0 'Zen'" "$ZEN_ICON_PATH"
-        ZEN_ICON_INSTALLED=1
-    fi
+    # Check multiple possible icon locations
+    POSSIBLE_ICON_PATHS=(
+        "squashfs-root/zen.png"
+        "squashfs-root/.DirIcon"
+        "squashfs-root/usr/share/icons/hicolor/256x256/apps/zen.png"
+        "squashfs-root/usr/share/pixmaps/zen.png"
+    )
+    
+    for icon_source in "${POSSIBLE_ICON_PATHS[@]}"; do
+        if [ -f "$icon_source" ]; then
+            cp "$icon_source" "$ZEN_ICON_PATH" && ZEN_ICON_INSTALLED=1
+            log_info "Zen Browser icon found at: $icon_source"
+            break
+        fi
+    done
+    
+    # Clean up extracted files
+    rm -rf squashfs-root &>/dev/null
 fi
 
 # Create desktop file with NO sandbox flag and absolute paths
@@ -344,9 +341,6 @@ Terminal=false
 StartupWMClass=zen-browser
 MimeType=text/html;text/xml;application/xhtml+xml;x-scheme-handler/http;x-scheme-handler/https;
 EOL
-
-# Make desktop file executable
-chmod +x "$ZEN_DESKTOP_FILE"
 
 # Update desktop database
 update-desktop-database "$DESKTOP_DIR"
