@@ -39,8 +39,8 @@ sudo dnf config-manager addrepo --overwrite --from-repofile=https://brave-browse
 # Installing browsers
 log_info "Installing browsers..."
 sudo dnf install -y \
-    librewolf \         # Install LibreWolf browser
-    brave-browser       # Install Brave browser
+    librewolf \
+    brave-browser
 
 
 if [ $? -eq 0 ]; then
