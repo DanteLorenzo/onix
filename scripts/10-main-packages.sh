@@ -3,9 +3,6 @@
 # Base system configuration and package installation
 source "$(dirname "$0")/../utils/logging.sh"
 
-# Enable colors in output
-export TERM=xterm-256color
-
 # ========================
 # DNF Packages Installation
 # ========================
@@ -13,7 +10,8 @@ log_info "Installing main packages with dnf..."
 sudo dnf install -y \
     tmux \
     ollama \
-    flatpak
+    flatpak \
+    steam \
 
 if [ $? -eq 0 ]; then
     log_success "Main packages installation complete."
