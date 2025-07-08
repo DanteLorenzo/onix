@@ -18,8 +18,6 @@ sudo dnf install -y \
   vulkan \
   vulkan-tools \
   jq \
-  btop \
-  htop \
   curl
 
 

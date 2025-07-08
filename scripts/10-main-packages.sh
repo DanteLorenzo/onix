@@ -14,7 +14,39 @@ sudo dnf install -y \
     steam \
     discord \
     wget \
-    desktop-file-utils
+    macchanger \
+    desktop-file-utils \
+    hashcat \
+    htop \
+    btop \
+    gimp \
+    nmap \
+    gobuster \
+    wireshark \
+    podman \
+    wireguard
+
+# Adding browser repositories
+log_info "Adding browser repositories..."
+
+# Add LibreWolf repository
+sudo dnf config-manager --add-repo https://rpm.librewolf.net/librewolf-repo.repo
+
+# Add Brave browser repository and import its signing key
+sudo dnf config-manager --add-repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
+sudo rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc
+
+# Enable COPR repository for Zen browser
+sudo dnf install -y 'dnf-command(copr)'
+sudo dnf copr enable -y atim/zen-browser
+
+# Installing browsers
+log_info "Installing browsers..."
+sudo dnf install -y \
+    librewolf \         # Install LibreWolf browser
+    brave-browser \     # Install Brave browser
+    zen-browser         # Install Zen browser
+
 
 if [ $? -eq 0 ]; then
     log_success "Main packages installation complete."
@@ -279,16 +311,19 @@ if [ -f "$DESKTOP_FILE" ]; then
     log_info "Added Obsidian to favorites"
 fi
 
-# Check for web browsers
-if [ -f "/usr/share/applications/firefox.desktop" ]; then
-    FAVORITES+=", 'firefox.desktop'"
-    log_info "Added Firefox (DNF) to favorites"
-elif [ -f "/usr/share/applications/org.mozilla.firefox.desktop" ]; then
-    FAVORITES+=", 'org.mozilla.firefox.desktop'"
-    log_info "Added Firefox (alternative) to favorites"
-elif [ -f "/var/lib/flatpak/exports/share/applications/org.mozilla.firefox.desktop" ]; then
-    FAVORITES+=", 'org.mozilla.firefox.desktop'"
-    log_info "Added Firefox (Flatpak) to favorites"
+# Check for Zen browser (replacing Firefox check)
+if [ -f "/usr/share/applications/zen-browser.desktop" ]; then
+    FAVORITES+=", 'zen-browser.desktop'"
+    log_info "Added Zen browser to favorites"
+fi
+
+# Check for LibreWolf browser (replacing Firefox alternative check)
+if [ -f "/usr/share/applications/librewolf.desktop" ]; then
+    FAVORITES+=", 'librewolf.desktop'"
+    log_info "Added LibreWolf browser to favorites"
+elif [ -f "/var/lib/flatpak/exports/share/applications/io.gitlab.librewolf-community.desktop" ]; then
+    FAVORITES+=", 'io.gitlab.librewolf-community.desktop'"
+    log_info "Added LibreWolf (Flatpak) to favorites"
 fi
 
 # Check for Steam
@@ -308,8 +343,6 @@ elif [ -f "/var/lib/flatpak/exports/share/applications/com.discordapp.Discord.de
     FAVORITES+=", 'com.discordapp.Discord.desktop'"
     log_info "Added Discord (Flatpak) to favorites"
 fi
-
-
 
 FAVORITES+=" ]"
 
