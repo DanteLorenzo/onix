@@ -24,28 +24,23 @@ sudo dnf install -y \
     gobuster \
     wireshark \
     podman \
-    wireguard
+    wireguard \
+    dnf-plugins-core
 
 # Adding browser repositories
 log_info "Adding browser repositories..."
 
 # Add LibreWolf repository
-sudo dnf config-manager --add-repo https://rpm.librewolf.net/librewolf-repo.repo
+curl -fsSL https://repo.librewolf.net/librewolf.repo | pkexec tee /etc/yum.repos.d/librewolf.repo
 
 # Add Brave browser repository and import its signing key
-sudo dnf config-manager --add-repo https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
-sudo rpm --import https://brave-browser-rpm-release.s3.brave.com/brave-core.asc
-
-# Enable COPR repository for Zen browser
-sudo dnf install -y 'dnf-command(copr)'
-sudo dnf copr enable -y atim/zen-browser
+sudo dnf config-manager addrepo --from-repofile=https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
 
 # Installing browsers
 log_info "Installing browsers..."
 sudo dnf install -y \
     librewolf \         # Install LibreWolf browser
-    brave-browser \     # Install Brave browser
-    zen-browser         # Install Zen browser
+    brave-browser       # Install Brave browser
 
 
 if [ $? -eq 0 ]; then
