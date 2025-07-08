@@ -44,43 +44,57 @@ fi
 # =====================
 # Go Installation (latest version)
 # =====================
-log_info "Installing latest Go version..."
+log_info "Checking Go installation..."
 
 # Get the latest stable Go version
 LATEST_GO_VERSION=$(curl -s https://go.dev/VERSION?m=text | head -1)
-LATEST_GO_URL="https://go.dev/dl/${LATEST_GO_VERSION}.linux-amd64.tar.gz"
+CURRENT_GO_VERSION=$(go version 2>/dev/null | awk '{print $3}')
 
-log_info "Downloading ${LATEST_GO_VERSION}..."
-curl -OL $LATEST_GO_URL || {
-    log_error "Failed to download Go"
-    exit 1
-}
-
-sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf ${LATEST_GO_VERSION}.linux-amd64.tar.gz || {
-    log_error "Failed to install Go"
-    exit 1
-}
-
-rm ${LATEST_GO_VERSION}.linux-amd64.tar.gz
-
-# Add to PATH in multiple places for reliability
-GO_PATH_EXPORT='export PATH=$PATH:/usr/local/go/bin'
-
-# For current session
-export PATH=$PATH:/usr/local/go/bin
-
-# For future sessions
-for rcfile in ~/.bashrc ~/.profile ~/.zshrc; do
-    if [ -f "$rcfile" ] && ! grep -q "$GO_PATH_EXPORT" "$rcfile"; then
-        echo "$GO_PATH_EXPORT" >> "$rcfile"
-    fi
-done
-
-if go version; then
-    log_success "Go installed successfully: $(go version)"
+if [ -n "$CURRENT_GO_VERSION" ] && [ "$CURRENT_GO_VERSION" == "$LATEST_GO_VERSION" ]; then
+    log_success "Latest Go version already installed: $(go version)"
 else
-    log_error "Go installation failed"
-    exit 1
+    if [ -n "$CURRENT_GO_VERSION" ]; then
+        log_info "Current Go version: $CURRENT_GO_VERSION"
+        log_info "Latest available version: $LATEST_GO_VERSION"
+        log_info "Updating Go to latest version..."
+    else
+        log_info "Installing latest Go version..."
+    fi
+
+    LATEST_GO_URL="https://go.dev/dl/${LATEST_GO_VERSION}.linux-amd64.tar.gz"
+
+    log_info "Downloading ${LATEST_GO_VERSION}..."
+    curl -OL $LATEST_GO_URL || {
+        log_error "Failed to download Go"
+        exit 1
+    }
+
+    sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf ${LATEST_GO_VERSION}.linux-amd64.tar.gz || {
+        log_error "Failed to install Go"
+        exit 1
+    }
+
+    rm ${LATEST_GO_VERSION}.linux-amd64.tar.gz
+
+    # Add to PATH in multiple places for reliability
+    GO_PATH_EXPORT='export PATH=$PATH:/usr/local/go/bin'
+
+    # For current session
+    export PATH=$PATH:/usr/local/go/bin
+
+    # For future sessions
+    for rcfile in ~/.bashrc ~/.profile ~/.zshrc; do
+        if [ -f "$rcfile" ] && ! grep -q "$GO_PATH_EXPORT" "$rcfile"; then
+            echo "$GO_PATH_EXPORT" >> "$rcfile"
+        fi
+    done
+
+    if go version; then
+        log_success "Go installed successfully: $(go version)"
+    else
+        log_error "Go installation failed"
+        exit 1
+    fi
 fi
 
 # =====================
