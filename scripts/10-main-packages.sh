@@ -156,13 +156,32 @@ DESKTOP_DIR="$HOME/.local/share/applications"
 ICON_DIR="$HOME/.local/share/icons/hicolor/256x256/apps"
 mkdir -p "$APP_DIR" "$DESKTOP_DIR" "$ICON_DIR"
 
-# Latest stable version
-OBSIDIAN_VERSION="1.8.10"
+# Get latest Obsidian version from GitHub API
+log_info "Checking latest Obsidian version..."
+OBSIDIAN_VERSION=$(curl -s https://api.github.com/repos/obsidianmd/obsidian-releases/releases/latest | grep -oP '"tag_name": "\Kv?\d+\.\d+\.\d+')
+if [ -z "$OBSIDIAN_VERSION" ]; then
+    log_error "Failed to get latest Obsidian version"
+    exit 1
+fi
+
+# Remove 'v' prefix if present
+OBSIDIAN_VERSION=${OBSIDIAN_VERSION#v}
 OBSIDIAN_URL="https://github.com/obsidianmd/obsidian-releases/releases/download/v${OBSIDIAN_VERSION}/Obsidian-${OBSIDIAN_VERSION}.AppImage"
 OBSIDIAN_FILE="$APP_DIR/Obsidian.AppImage"
 
 # Download and install
-if [ ! -f "$OBSIDIAN_FILE" ]; then
+NEED_DOWNLOAD=1
+if [ -f "$OBSIDIAN_FILE" ]; then
+    CURRENT_VERSION=$("$OBSIDIAN_FILE" --version 2>/dev/null | grep -oP '\d+\.\d+\.\d+')
+    if [ "$CURRENT_VERSION" == "$OBSIDIAN_VERSION" ]; then
+        log_info "Latest Obsidian version ${OBSIDIAN_VERSION} already installed"
+        NEED_DOWNLOAD=0
+    else
+        log_info "Updating Obsidian from ${CURRENT_VERSION} to ${OBSIDIAN_VERSION}"
+    fi
+fi
+
+if [ $NEED_DOWNLOAD -eq 1 ]; then
     log_info "Downloading Obsidian ${OBSIDIAN_VERSION}..."
     wget "$OBSIDIAN_URL" -O "$OBSIDIAN_FILE" || {
         log_error "Failed to download Obsidian"
@@ -170,15 +189,6 @@ if [ ! -f "$OBSIDIAN_FILE" ]; then
     }
     chmod +x "$OBSIDIAN_FILE"
     log_success "Obsidian downloaded and made executable"
-else
-    log_info "Obsidian already installed, checking for updates..."
-    CURRENT_VERSION=$("$OBSIDIAN_FILE" --version 2>/dev/null | grep -oP '\d+\.\d+\.\d+')
-    if [ "$CURRENT_VERSION" != "$OBSIDIAN_VERSION" ]; then
-        log_info "Updating Obsidian from ${CURRENT_VERSION} to ${OBSIDIAN_VERSION}"
-        wget "$OBSIDIAN_URL" -O "$OBSIDIAN_FILE" && chmod +x "$OBSIDIAN_FILE"
-    else
-        log_info "Latest Obsidian version already installed"
-    fi
 fi
 
 # Create desktop file
@@ -196,25 +206,27 @@ Terminal=false
 StartupWMClass=obsidian
 EOL
 
-# Handle icon installation - multiple fallback methods
+# Handle icon installation
 ICON_INSTALLED=0
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Method 1: Check local project icons directory
-ICON_SOURCE="$SCRIPT_DIR/../configs/icons/obsidian-icon.png"
-if [ -f "$ICON_SOURCE" ]; then
-    cp "$ICON_SOURCE" "$ICON_DIR/obsidian.png" && ICON_INSTALLED=1
-    log_info "Obsidian icon copied from project directory"
-fi
-
-# Method 2: Check if icon exists in AppImage
-if [ $ICON_INSTALLED -eq 0 ] && [ -f "$OBSIDIAN_FILE" ]; then
+# Method 1: Extract icon from AppImage
+if [ -f "$OBSIDIAN_FILE" ]; then
     "$OBSIDIAN_FILE" --appimage-extract &>/dev/null
     if [ -f squashfs-root/usr/share/icons/hicolor/256x256/apps/obsidian.png ]; then
         cp squashfs-root/usr/share/icons/hicolor/256x256/apps/obsidian.png "$ICON_DIR/obsidian.png" && ICON_INSTALLED=1
         log_info "Obsidian icon extracted from AppImage"
     fi
     rm -rf squashfs-root &>/dev/null
+fi
+
+# Method 2: Check local project icons directory
+if [ $ICON_INSTALLED -eq 0 ]; then
+    ICON_SOURCE="$SCRIPT_DIR/../configs/icons/obsidian-icon.png"
+    if [ -f "$ICON_SOURCE" ]; then
+        cp "$ICON_SOURCE" "$ICON_DIR/obsidian.png" && ICON_INSTALLED=1
+        log_info "Obsidian icon copied from project directory"
+    fi
 fi
 
 # Method 3: Download from GitHub
@@ -226,19 +238,10 @@ if [ $ICON_INSTALLED -eq 0 ]; then
     fi
 fi
 
-# Method 4: Final fallback to official site
-if [ $ICON_INSTALLED -eq 0 ]; then
-    if wget "https://obsidian.md/images/icon.png" -O "$ICON_DIR/obsidian.png" &>/dev/null; then
-        ICON_INSTALLED=1
-        log_info "Obsidian icon downloaded from official site"
-    else
-        log_warning "Failed to install Obsidian icon - will use default icon"
-    fi
-fi
-
 # Update desktop database
 update-desktop-database "$DESKTOP_DIR"
-log_success "Obsidian ${OBSIDIAN_VERSION} installed successfully (icon installed: $([ $ICON_INSTALLED -eq 1 ] && echo "yes" || echo "no")"
+log_success "Obsidian ${OBSIDIAN_VERSION} installed successfully (icon installed: $([ $ICON_INSTALLED -eq 1 ] && echo "yes" || echo "no"))"
+
 
 
 # =================
@@ -277,6 +280,12 @@ if [ -f "/usr/share/applications/org.gnome.Ptyxis.desktop" ] ||
     log_info "Added Ptyxis terminal to favorites"
 fi
 
+# Add Obsidian if installed
+if [ -f "$DESKTOP_FILE" ]; then
+    FAVORITES+=", 'obsidian.desktop'"
+    log_info "Added Obsidian to favorites"
+fi
+
 # Check for web browsers
 if [ -f "/usr/share/applications/firefox.desktop" ]; then
     FAVORITES+=", 'firefox.desktop'"
@@ -307,11 +316,7 @@ elif [ -f "/var/lib/flatpak/exports/share/applications/com.discordapp.Discord.de
     log_info "Added Discord (Flatpak) to favorites"
 fi
 
-# Add Obsidian if installed
-if [ -f "$DESKTOP_FILE" ]; then
-    FAVORITES+=", 'obsidian.desktop'"
-    log_info "Added Obsidian to favorites"
-fi
+
 
 FAVORITES+=" ]"
 
