@@ -301,8 +301,37 @@ fi
 ZEN_LINK="$APP_DIR/Zen.AppImage"
 ln -sf "$ZEN_FILE" "$ZEN_LINK"
 
-# Create desktop file
+# Create desktop file with absolute path to icon
 ZEN_DESKTOP_FILE="$DESKTOP_DIR/zen-browser.desktop"
+ZEN_ICON_PATH="$ICON_DIR/zen-browser.png"
+
+# Handle icon installation
+ZEN_ICON_INSTALLED=0
+if [ -f "$ZEN_FILE" ]; then
+    # Extract AppImage to get the icon
+    "$ZEN_FILE" --appimage-extract &>/dev/null
+    
+    # Check multiple possible icon locations
+    POSSIBLE_ICON_PATHS=(
+        "squashfs-root/zen.png"
+        "squashfs-root/.DirIcon"
+        "squashfs-root/usr/share/icons/hicolor/256x256/apps/zen.png"
+        "squashfs-root/usr/share/pixmaps/zen.png"
+    )
+    
+    for icon_source in "${POSSIBLE_ICON_PATHS[@]}"; do
+        if [ -f "$icon_source" ]; then
+            cp "$icon_source" "$ZEN_ICON_PATH" && ZEN_ICON_INSTALLED=1
+            log_info "Zen Browser icon found at: $icon_source"
+            break
+        fi
+    done
+    
+    # Clean up extracted files
+    rm -rf squashfs-root &>/dev/null
+fi
+
+# Create the desktop file with absolute icon path
 cat > "$ZEN_DESKTOP_FILE" <<EOL
 [Desktop Entry]
 Version=1.0
@@ -310,26 +339,11 @@ Type=Application
 Name=Zen Browser
 Comment=A privacy-focused web browser
 Exec="$ZEN_LINK" --no-sandbox
-Icon=zen-browser
+Icon=$ZEN_ICON_PATH
 Categories=Network;WebBrowser;
 Terminal=false
 StartupWMClass=zen-browser
 EOL
-
-# Handle icon installation
-ZEN_ICON_INSTALLED=0
-if [ -f "$ZEN_FILE" ]; then
-    "$ZEN_FILE" --appimage-extract &>/dev/null
-    if [ -f squashfs-root/zen.png ]; then
-        cp squashfs-root/zen.png "$ICON_DIR/zen-browser.png" && ZEN_ICON_INSTALLED=1
-        log_info "Zen Browser icon extracted from AppImage"
-    fi
-    rm -rf squashfs-root &>/dev/null
-
-    if [ $ZEN_ICON_INSTALLED -eq 0 ]; then
-        log_info "No icon found in Zen Browser AppImage"
-    fi
-fi
 
 # Update desktop database
 update-desktop-database "$DESKTOP_DIR"
