@@ -217,17 +217,36 @@ else
 fi
 
 # =====================
-# Ton Keeper Installation (RPM) - x86_64 only
+# Zen Browser Installation (Flatpak)
+# =====================
+log_info "Installing Zen Browser via Flatpak..."
+
+if flatpak install -y flathub io.github.zen-browser.Zen; then
+    log_success "Zen Browser installed successfully via Flatpak"
+    echo "Run with: flatpak run io.github.zen-browser.Zen"
+    
+    # Add to favorites if not already present
+    if ! gsettings get org.gnome.shell favorite-apps | grep -q "io.github.zen-browser.Zen.desktop"; then
+        CURRENT_FAVORITES=$(gsettings get org.gnome.shell favorite-apps | sed 's/]$/, '\''io.github.zen-browser.Zen.desktop'\'']/')
+        gsettings set org.gnome.shell favorite-apps "$CURRENT_FAVORITES"
+        log_info "Added Zen Browser to favorites"
+    fi
+else
+    log_error "Failed to install Zen Browser via Flatpak"
+fi
+
+# =====================
+# Ton Keeper Installation (RPM) - x86_64
 # =====================
 log_info "Installing Ton Keeper (x86_64)..."
 
-# Проверяем архитектуру системы
+# Verify system architecture
 if [ "$(uname -m)" != "x86_64" ]; then
     log_error "This script requires x86_64 architecture. Detected: $(uname -m)"
     exit 1
 fi
 
-# Получаем список ассетов последнего релиза
+# Get latest release assets from GitHub
 log_info "Fetching latest release info from GitHub..."
 ASSETS_JSON=$(curl -s https://api.github.com/repos/tonkeeper/tonkeeper-web/releases/latest | jq -r '.assets[] | {name: .name, url: .browser_download_url}')
 if [ -z "$ASSETS_JSON" ]; then
@@ -235,7 +254,7 @@ if [ -z "$ASSETS_JSON" ]; then
     exit 1
 fi
 
-# Ищем именно x86_64 RPM пакет
+# Find x86_64 RPM package
 TONKEEPER_RPM_URL=$(echo "$ASSETS_JSON" | jq -r 'select(.name | test("Tonkeeper.*x86_64\\.rpm"; "i")) | .url')
 if [ -z "$TONKEEPER_RPM_URL" ]; then
     log_error "Could not find x86_64 RPM package in release assets"
@@ -244,21 +263,21 @@ if [ -z "$TONKEEPER_RPM_URL" ]; then
     exit 1
 fi
 
-# Выводим ссылку для скачивания
+# Display download URL
 log_info "Download URL for x86_64: $TONKEEPER_RPM_URL"
 
-# Извлекаем версию из имени файла
+# Extract version from filename
 TONKEEPER_VERSION=$(echo "$TONKEEPER_RPM_URL" | grep -oP 'Tonkeeper-\K\d+\.\d+\.\d+')
 TONKEEPER_TEMP_RPM="/tmp/tonkeeper-${TONKEEPER_VERSION}.x86_64.rpm"
 
-# Скачиваем с прогресс-баром
+# Download with progress bar
 log_info "Downloading Ton Keeper ${TONKEEPER_VERSION} for x86_64..."
 wget --show-progress -q "$TONKEEPER_RPM_URL" -O "$TONKEEPER_TEMP_RPM" || {
     log_error "Failed to download Ton Keeper RPM"
     exit 1
 }
 
-# Устанавливаем
+# Install the package
 log_info "Installing Ton Keeper..."
 sudo dnf install -y "$TONKEEPER_TEMP_RPM" || {
     log_error "Failed to install Ton Keeper RPM"
@@ -266,10 +285,10 @@ sudo dnf install -y "$TONKEEPER_TEMP_RPM" || {
     exit 1
 }
 
-# Очистка
+# Cleanup temporary file
 rm -f "$TONKEEPER_TEMP_RPM"
 
-# Проверка установки
+# Verify installation
 if [ -f "/usr/share/applications/tonkeeper.desktop" ]; then
     log_success "Ton Keeper ${TONKEEPER_VERSION} (x86_64) installed successfully"
 else
@@ -360,99 +379,6 @@ if [ -f "$OBSIDIAN_FILE" ]; then
     rm -rf squashfs-root &>/dev/null
 fi
 
-# =====================
-# Zen Browser Installation (AppImage)
-# =====================
-log_info "Installing Zen Browser (AppImage)..."
-
-# Create directories if they don't exist
-mkdir -p "$APP_DIR" "$DESKTOP_DIR" "$ICON_DIR"
-
-# Get latest Zen Browser version from GitHub API
-log_info "Checking latest Zen Browser version..."
-ZEN_VERSION=$(curl -s https://api.github.com/repos/zen-browser/desktop/releases/latest | grep -oP '"tag_name": "\Kv?\d+\.\d+\.\d+\w*')
-if [ -z "$ZEN_VERSION" ]; then
-    log_error "Failed to get latest Zen Browser version"
-    exit 1
-fi
-
-# Remove 'v' prefix if present
-ZEN_VERSION=${ZEN_VERSION#v}
-ZEN_URL="https://github.com/zen-browser/desktop/releases/download/${ZEN_VERSION}/zen-x86_64.AppImage"
-ZEN_FILE="$APP_DIR/Zen-${ZEN_VERSION}.AppImage"
-ZEN_ICON_PATH="$ICON_DIR/zen-browser.png"
-
-# Download and install
-NEED_DOWNLOAD=1
-if [ -f "$ZEN_FILE" ]; then
-    log_info "Latest Zen Browser version ${ZEN_VERSION} already installed"
-    NEED_DOWNLOAD=0
-else
-    # Remove any old versions
-    rm -f "$APP_DIR"/Zen-*.AppImage
-    
-    log_info "Downloading Zen Browser ${ZEN_VERSION}..."
-    wget "$ZEN_URL" -O "$ZEN_FILE" || {
-        log_error "Failed to download Zen Browser"
-        exit 1
-    }
-    chmod +x "$ZEN_FILE"
-    log_success "Zen Browser downloaded and made executable"
-fi
-
-# Create symlink for easier access
-ZEN_LINK="$APP_DIR/Zen.AppImage"
-ln -sf "$ZEN_FILE" "$ZEN_LINK"
-
-# Create desktop file with absolute path to icon
-ZEN_DESKTOP_FILE="$DESKTOP_DIR/zen-browser.desktop"
-ZEN_ICON_PATH="$ICON_DIR/zen-browser.png"
-
-# Handle icon installation
-ZEN_ICON_INSTALLED=0
-if [ -f "$ZEN_FILE" ]; then
-    # Extract AppImage to get the icon
-    "$ZEN_FILE" --appimage-extract &>/dev/null
-    
-    # Check multiple possible icon locations
-    POSSIBLE_ICON_PATHS=(
-        "squashfs-root/zen.png"
-        "squashfs-root/.DirIcon"
-        "squashfs-root/usr/share/icons/hicolor/256x256/apps/zen.png"
-        "squashfs-root/usr/share/pixmaps/zen.png"
-    )
-    
-    for icon_source in "${POSSIBLE_ICON_PATHS[@]}"; do
-        if [ -f "$icon_source" ]; then
-            cp "$icon_source" "$ZEN_ICON_PATH" && ZEN_ICON_INSTALLED=1
-            log_info "Zen Browser icon found at: $icon_source"
-            break
-        fi
-    done
-    
-    # Clean up extracted files
-    rm -rf squashfs-root &>/dev/null
-fi
-
-# Create desktop file with NO sandbox flag and absolute paths
-cat > "$ZEN_DESKTOP_FILE" <<EOL
-[Desktop Entry]
-Version=1.0
-Type=Application
-Name=Zen Browser
-GenericName=Web Browser
-Comment=A privacy-focused web browser
-Exec="$ZEN_LINK" --no-sandbox %U
-Icon=$ZEN_ICON_PATH
-Categories=Network;WebBrowser;
-Terminal=false
-StartupWMClass=zen-browser
-MimeType=text/html;text/xml;application/xhtml+xml;x-scheme-handler/http;x-scheme-handler/https;
-EOL
-
-# Update desktop database
-update-desktop-database "$DESKTOP_DIR"
-log_success "Zen Browser ${ZEN_VERSION} installed successfully (icon installed: $([ $ZEN_ICON_INSTALLED -eq 1 ] && echo "yes" || echo "no"))"
 log_success "Obsidian ${OBSIDIAN_VERSION} installed successfully (icon installed: $([ $OBSIDIAN_ICON_INSTALLED -eq 1 ] && echo "yes" || echo "no"))"
 
 # =================
@@ -517,15 +443,15 @@ if [ -f "/usr/share/applications/org.keepassxc.KeePassXC.desktop" ]; then
 fi
 
 # Add Ton Keeper
-if [ -f "/usr/share/applications/tonkeeper.desktop" ]; then
+if [ -f "/usr/share/applications/Tonkeeper.desktop" ]; then
     FAVORITES+=", 'tonkeeper.desktop'"
     log_info "Added Ton Keeper to favorites"
 fi
 
-# Add Zen Browser if installed
-if [ -f "$ZEN_DESKTOP_FILE" ]; then
-    FAVORITES+=", 'zen-browser.desktop'"
-    log_info "Added Zen Browser to favorites"
+# Add Zen Browser (Flatpak)
+if [ -f "/var/lib/flatpak/exports/share/applications/io.github.zen-browser.Zen.desktop" ]; then
+    FAVORITES+=", 'io.github.zen-browser.Zen.desktop'"
+    log_info "Added Zen Browser (Flatpak) to favorites"
 fi
 
 # Check for Brave browser
