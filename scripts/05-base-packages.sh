@@ -26,3 +26,10 @@ if [ $? -eq 0 ]; then
 else
   log_error "Base packages installation failed."
 fi
+
+# ======================
+# Remove Unnecessary Packages
+# ======================
+log_info "Removing unnecessary GNOME packages..."
+sudo dnf remove -y gnome-tour gnome-maps gnome-help gnome-weather
+log_success "Unnecessary packages removed"
