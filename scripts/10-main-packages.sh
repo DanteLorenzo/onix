@@ -41,6 +41,52 @@ else
 fi
 
 # =====================
+# Go Installation
+# =====================
+log_info "Installing latest Go version..."
+curl -OL https://go.dev/dl/go1.22.0.linux-amd64.tar.gz
+sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.22.0.linux-amd64.tar.gz
+rm go1.22.0.linux-amd64.tar.gz
+echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
+source ~/.bashrc
+
+if go version; then
+    log_success "Go installed successfully: $(go version)"
+else
+    log_error "Go installation failed"
+    exit 1
+fi
+
+# =====================
+# Python Installation
+# =====================
+log_info "Installing latest Python version..."
+sudo dnf install -y python39 python39-devel python39-pip python3-virtualenv
+
+if python3 --version && pip3 --version; then
+    log_success "Python installed successfully: $(python3 --version)"
+    log_success "Pip installed successfully: $(pip3 --version)"
+else
+    log_error "Python installation failed"
+    exit 1
+fi
+
+# =====================
+# Rust Installation
+# =====================
+log_info "Installing Rust..."
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y
+source "$HOME/.cargo/env"
+
+if rustc --version && cargo --version; then
+    log_success "Rust installed successfully: $(rustc --version)"
+    log_success "Cargo installed successfully: $(cargo --version)"
+else
+    log_error "Rust installation failed"
+    exit 1
+fi
+
+# =====================
 # Flatpak Configuration
 # =====================
 log_info "Configuring Flatpak..."
@@ -81,8 +127,12 @@ echo "  Postman:  flatpak run com.getpostman.Postman"
 echo "  Insomnia: flatpak run rest.insomnia.Insomnia"
 echo "  TMUX:     tmux"
 echo "  Ollama:   ollama"
-echo "  Docker:   docker --version"
+echo "  Docker:   $(docker --version 2>/dev/null || echo 'not available')"
+echo "  Go:       $(go version 2>/dev/null || echo 'not available')"
+echo "  Python:   $(python3 --version 2>/dev/null || echo 'not available')"
+echo "  Rust:     $(rustc --version 2>/dev/null || echo 'not available')"
 echo ""
 log_info "Note: After logout/login you can run docker commands without sudo."
+log_info "Note: You may need to start a new shell for PATH changes to take effect."
 
 exit 0
