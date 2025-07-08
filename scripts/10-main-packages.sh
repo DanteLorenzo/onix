@@ -217,6 +217,40 @@ else
 fi
 
 # =====================
+# Ton Keeper Installation (RPM)
+# =====================
+log_info "Installing Ton Keeper..."
+
+TONKEEPER_RPM_URL="https://github.com/tonkeeper/tonkeeper-web/releases/latest/download/Tonkeeper-$(uname -m).rpm"
+TONKEEPER_TEMP_RPM="/tmp/tonkeeper-latest.rpm"
+
+# Download latest RPM
+log_info "Downloading latest Ton Keeper RPM..."
+wget "$TONKEEPER_RPM_URL" -O "$TONKEEPER_TEMP_RPM" || {
+    log_error "Failed to download Ton Keeper RPM"
+    exit 1
+}
+
+# Install the RPM
+log_info "Installing Ton Keeper RPM..."
+sudo dnf install -y "$TONKEEPER_TEMP_RPM" || {
+    log_error "Failed to install Ton Keeper RPM"
+    exit 1
+}
+
+# Clean up
+rm -f "$TONKEEPER_TEMP_RPM"
+
+# Verify installation
+if [ -f "/usr/share/applications/tonkeeper.desktop" ]; then
+    TONKEEPER_DESKTOP_FILE="/usr/share/applications/tonkeeper.desktop"
+    log_success "Ton Keeper installed successfully"
+else
+    log_error "Ton Keeper installation completed but desktop file not found"
+    exit 1
+fi
+
+# =====================
 # Obsidian Installation (Latest AppImage)
 # =====================
 log_info "Installing latest Obsidian version..."
@@ -441,6 +475,24 @@ if [ -f "/usr/share/applications/codium.desktop" ]; then
     log_info "Added VSCodium to favorites"
 fi
 
+# Add Postman
+if [ -f "/var/lib/flatpak/exports/share/applications/com.getpostman.Postman.desktop" ]; then
+    FAVORITES+=", 'com.getpostman.Postman.desktop'"
+    log_info "Added Postman to favorites"
+fi
+
+# Add KeePassXC
+if [ -f "/usr/share/applications/org.keepassxc.KeePassXC.desktop" ]; then
+    FAVORITES+=", 'org.keepassxc.KeePassXC.desktop'"
+    log_info "Added KeePassXC to favorites"
+fi
+
+# Add Ton Keeper
+if [ -f "/usr/share/applications/tonkeeper.desktop" ]; then
+    FAVORITES+=", 'tonkeeper.desktop'"
+    log_info "Added Ton Keeper to favorites"
+fi
+
 # Add Zen Browser if installed
 if [ -f "$ZEN_DESKTOP_FILE" ]; then
     FAVORITES+=", 'zen-browser.desktop'"
@@ -462,13 +514,19 @@ elif [ -f "/var/lib/flatpak/exports/share/applications/io.gitlab.librewolf-commu
     log_info "Added LibreWolf (Flatpak) to favorites"
 fi
 
-# Check for Steam
-if [ -f "/usr/share/applications/steam.desktop" ]; then
-    FAVORITES+=", 'steam.desktop'"
-    log_info "Added Steam (DNF) to favorites"
-elif [ -f "/var/lib/flatpak/exports/share/applications/com.valvesoftware.Steam.desktop" ]; then
-    FAVORITES+=", 'com.valvesoftware.Steam.desktop'"
-    log_info "Added Steam (Flatpak) to favorites"
+# Add Amberol
+if [ -f "/var/lib/flatpak/exports/share/applications/io.bassi.Amberol.desktop" ]; then
+    FAVORITES+=", 'io.bassi.Amberol.desktop'"
+    log_info "Added Amberol to favorites"
+fi
+
+# Add Telegram
+if [ -f "/usr/share/applications/org.telegram.desktop.desktop" ]; then
+    FAVORITES+=", 'org.telegram.desktop.desktop'"
+    log_info "Added Telegram to favorites"
+elif [ -f "/var/lib/flatpak/exports/share/applications/org.telegram.desktop.desktop" ]; then
+    FAVORITES+=", 'org.telegram.desktop.desktop'"
+    log_info "Added Telegram (Flatpak) to favorites"
 fi
 
 # Check for Discord
@@ -480,38 +538,6 @@ elif [ -f "/var/lib/flatpak/exports/share/applications/com.discordapp.Discord.de
     log_info "Added Discord (Flatpak) to favorites"
 fi
 
-# Add KeePassXC
-if [ -f "/usr/share/applications/org.keepassxc.KeePassXC.desktop" ]; then
-    FAVORITES+=", 'org.keepassxc.KeePassXC.desktop'"
-    log_info "Added KeePassXC to favorites"
-fi
-
-# Add Amberol
-if [ -f "/var/lib/flatpak/exports/share/applications/io.bassi.Amberol.desktop" ]; then
-    FAVORITES+=", 'io.bassi.Amberol.desktop'"
-    log_info "Added Amberol to favorites"
-fi
-
-# Add Telegram (fixed entry)
-if [ -f "/usr/share/applications/org.telegram.desktop.desktop" ]; then
-    FAVORITES+=", 'org.telegram.desktop.desktop'"
-    log_info "Added Telegram to favorites"
-elif [ -f "/var/lib/flatpak/exports/share/applications/org.telegram.desktop.desktop" ]; then
-    FAVORITES+=", 'org.telegram.desktop.desktop'"
-    log_info "Added Telegram (Flatpak) to favorites"
-fi
-
-# Add Nautilus
-if [ -f "/usr/share/applications/org.gnome.Nautilus.desktop" ]; then
-    FAVORITES+=", 'org.gnome.Nautilus.desktop'"
-    log_info "Added Nautilus to favorites"
-fi
-
-# Add Postman
-if [ -f "/var/lib/flatpak/exports/share/applications/com.getpostman.Postman.desktop" ]; then
-    FAVORITES+=", 'com.getpostman.Postman.desktop'"
-    log_info "Added Postman to favorites"
-fi
 
 # Add Deluge
 if [ -f "/usr/share/applications/deluge.desktop" ]; then
@@ -520,6 +546,21 @@ if [ -f "/usr/share/applications/deluge.desktop" ]; then
 elif [ -f "/var/lib/flatpak/exports/share/applications/org.deluge_torrent.deluge.desktop" ]; then
     FAVORITES+=", 'org.deluge_torrent.deluge.desktop'"
     log_info "Added Deluge (Flatpak) to favorites"
+fi
+
+# Check for Steam
+if [ -f "/usr/share/applications/steam.desktop" ]; then
+    FAVORITES+=", 'steam.desktop'"
+    log_info "Added Steam (DNF) to favorites"
+elif [ -f "/var/lib/flatpak/exports/share/applications/com.valvesoftware.Steam.desktop" ]; then
+    FAVORITES+=", 'com.valvesoftware.Steam.desktop'"
+    log_info "Added Steam (Flatpak) to favorites"
+fi
+
+# Add Nautilus
+if [ -f "/usr/share/applications/org.gnome.Nautilus.desktop" ]; then
+    FAVORITES+=", 'org.gnome.Nautilus.desktop'"
+    log_info "Added Nautilus to favorites"
 fi
 
 FAVORITES+=" ]"
