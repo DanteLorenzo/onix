@@ -46,7 +46,7 @@ fi
 # =====================
 log_info "Installing latest Go version..."
 
-# Получаем последнюю стабильную версию Go
+# Get the latest stable Go version
 LATEST_GO_VERSION=$(curl -s https://go.dev/VERSION?m=text | head -1)
 LATEST_GO_URL="https://go.dev/dl/${LATEST_GO_VERSION}.linux-amd64.tar.gz"
 
@@ -63,13 +63,13 @@ sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf ${LATEST_GO_VERSION}.li
 
 rm ${LATEST_GO_VERSION}.linux-amd64.tar.gz
 
-# Добавляем в PATH в несколько мест для надежности
+# Add to PATH in multiple places for reliability
 GO_PATH_EXPORT='export PATH=$PATH:/usr/local/go/bin'
 
-# Для текущей сессии
+# For current session
 export PATH=$PATH:/usr/local/go/bin
 
-# Для будущих сессий
+# For future sessions
 for rcfile in ~/.bashrc ~/.profile ~/.zshrc; do
     if [ -f "$rcfile" ] && ! grep -q "$GO_PATH_EXPORT" "$rcfile"; then
         echo "$GO_PATH_EXPORT" >> "$rcfile"
@@ -82,20 +82,6 @@ else
     log_error "Go installation failed"
     exit 1
 fi
-
-# =====================
-# Python Installation
-# =====================
-# log_info "Installing latest Python version..."
-# sudo dnf install -y python39 python39-devel python39-pip python3-virtualenv
-
-# if python3 --version && pip3 --version; then
-#     log_success "Python installed successfully: $(python3 --version)"
-#     log_success "Pip installed successfully: $(pip3 --version)"
-# else
-#     log_error "Python installation failed"
-#     exit 1
-# fi
 
 # =====================
 # Rust Installation
@@ -160,5 +146,46 @@ echo "  Rust:     $(rustc --version 2>/dev/null || echo 'not available')"
 echo ""
 log_info "Note: After logout/login you can run docker commands without sudo."
 log_info "Note: You may need to start a new shell for PATH changes to take effect."
+
+# ======================
+# Favorite Apps Setup
+# ======================
+log_info "Setting favorite apps..."
+FAVORITES="[ "
+
+# Check for Ptyxis
+if [ -f "/usr/share/applications/org.gnome.Ptyxis.desktop" ] || 
+   [ -f "/usr/local/share/applications/org.gnome.Ptyxis.desktop" ] ||
+   [ -f "/var/lib/flatpak/exports/share/applications/org.gnome.Ptyxis.desktop" ]; then
+    FAVORITES+="'org.gnome.Ptyxis.desktop'"
+    log_info "Added Ptyxis terminal to favorites"
+fi
+
+# Check for web browsers
+if [ -f "/usr/share/applications/org.mozilla.firefox.desktop" ] || 
+   [ -f "/var/lib/flatpak/exports/share/applications/org.mozilla.firefox.desktop" ]; then
+    FAVORITES+=", 'org.mozilla.firefox.desktop'"
+    log_info "Added Firefox to favorites"
+fi
+
+# Check for communication apps
+if [ -f "/usr/share/applications/discord.desktop" ] || 
+   [ -f "/var/lib/flatpak/exports/share/applications/com.discordapp.Discord.desktop" ]; then
+    FAVORITES+=", 'com.discordapp.Discord.desktop'"
+    log_info "Added Discord to favorites"
+fi
+
+# Check for games
+if [ -f "/usr/share/applications/steam.desktop" ] || 
+   [ -f "/var/lib/flatpak/exports/share/applications/com.valvesoftware.Steam.desktop" ]; then
+    FAVORITES+=", 'com.valvesoftware.Steam.desktop'"
+    log_info "Added Steam to favorites"
+fi
+
+FAVORITES+="]"
+
+# Set favorite apps in GNOME
+gsettings set org.gnome.shell favorite-apps "$FAVORITES"
+log_success "Favorite apps configured: $FAVORITES"
 
 exit 0

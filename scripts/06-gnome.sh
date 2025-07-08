@@ -123,26 +123,5 @@ gsettings set org.gnome.desktop.interface enable-hot-corners false
 gsettings set org.gnome.desktop.wm.preferences button-layout 'appmenu:minimize,maximize,close'
 log_success "UI preferences applied"
 
-# 5. Favorite Apps
-log_info "Setting favorite apps..."
-FAVORITES="['org.gnome.Terminal.desktop'"
-
-# Check for Ptyxis
-if [ -f "/usr/share/applications/org.gnome.Ptyxis.desktop" ] || 
-   [ -f "/usr/local/share/applications/org.gnome.Ptyxis.desktop" ] ||
-   [ -f "/var/lib/flatpak/exports/share/applications/org.gnome.Ptyxis.desktop" ]; then
-    FAVORITES+=", 'org.gnome.Ptyxis.desktop'"
-    log_info "Added Ptyxis to favorites"
-fi
-
-# Check for Firefox
-if [ -f "/usr/share/applications/org.mozilla.firefox.desktop" ] || 
-   [ -f "/var/lib/flatpak/exports/share/applications/org.mozilla.firefox.desktop" ]; then
-    FAVORITES+=", 'org.mozilla.firefox.desktop'"
-fi
-
-FAVORITES+="]"
-gsettings set org.gnome.shell favorite-apps "$FAVORITES"
-log_success "Favorite apps configured"
 
 log_success "GNOME customization complete! Some changes may require logout to take effect."
