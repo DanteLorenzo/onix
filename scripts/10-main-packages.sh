@@ -32,7 +32,6 @@ sudo dnf install -y \
     keepassxc \
     medusa \
     hydra \
-    ffmpeg \
     john \
     deluge \
     hping3 \
@@ -165,11 +164,16 @@ fi
 # =====================
 # Amberol Installation
 # =====================
-log_info "Installing Amberol via Flatpak..."
-if flatpak install -y https://dl.flathub.org/repo/appstream/io.bassi.Amberol.flatpakref; then
-    log_success "Amberol installed successfully"
+log_info "Checking Amberol installation..."
+if ! flatpak list | grep -q io.bassi.Amberol; then
+    log_info "Installing Amberol via Flatpak..."
+    if flatpak install -y https://dl.flathub.org/repo/appstream/io.bassi.Amberol.flatpakref; then
+        log_success "Amberol installed successfully"
+    else
+        log_error "Failed to install Amberol"
+    fi
 else
-    log_error "Failed to install Amberol"
+    log_success "Amberol is already installed"
 fi
 
 # =====================
