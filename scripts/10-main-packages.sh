@@ -41,13 +41,32 @@ else
 fi
 
 # =====================
-# Go Installation
+# Go Installation (latest version)
 # =====================
 log_info "Installing latest Go version..."
-curl -OL https://go.dev/dl/go1.22.0.linux-amd64.tar.gz
-sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go1.22.0.linux-amd64.tar.gz
-rm go1.22.0.linux-amd64.tar.gz
-echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
+
+# Получаем последнюю стабильную версию Go
+LATEST_GO_VERSION=$(curl -s https://go.dev/VERSION?m=text | head -1)
+LATEST_GO_URL="https://go.dev/dl/${LATEST_GO_VERSION}.linux-amd64.tar.gz"
+
+log_info "Downloading ${LATEST_GO_VERSION}..."
+curl -OL $LATEST_GO_URL || {
+    log_error "Failed to download Go"
+    exit 1
+}
+
+sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf ${LATEST_GO_VERSION}.linux-amd64.tar.gz || {
+    log_error "Failed to install Go"
+    exit 1
+}
+
+rm ${LATEST_GO_VERSION}.linux-amd64.tar.gz
+
+# Добавляем в PATH только если еще не добавлено
+if ! grep -q '/usr/local/go/bin' ~/.bashrc; then
+    echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
+fi
+
 source ~/.bashrc
 
 if go version; then
@@ -60,16 +79,16 @@ fi
 # =====================
 # Python Installation
 # =====================
-log_info "Installing latest Python version..."
-sudo dnf install -y python39 python39-devel python39-pip python3-virtualenv
+# log_info "Installing latest Python version..."
+# sudo dnf install -y python39 python39-devel python39-pip python3-virtualenv
 
-if python3 --version && pip3 --version; then
-    log_success "Python installed successfully: $(python3 --version)"
-    log_success "Pip installed successfully: $(pip3 --version)"
-else
-    log_error "Python installation failed"
-    exit 1
-fi
+# if python3 --version && pip3 --version; then
+#     log_success "Python installed successfully: $(python3 --version)"
+#     log_success "Pip installed successfully: $(pip3 --version)"
+# else
+#     log_error "Python installation failed"
+#     exit 1
+# fi
 
 # =====================
 # Rust Installation
