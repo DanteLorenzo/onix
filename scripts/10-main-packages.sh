@@ -437,13 +437,13 @@ fi
 
 # Add Ton Keeper
 if [ -f "/usr/share/applications/Tonkeeper.desktop" ]; then
-    FAVORITES+=", 'tonkeeper.desktop'"
+    FAVORITES+=", 'Tonkeeper.desktop'"
     log_info "Added Ton Keeper to favorites"
 fi
 
 # Add Zen Browser (Flatpak)
-if [ -f "/var/lib/flatpak/exports/share/applications/io.github.zen-browser.Zen.desktop" ]; then
-    FAVORITES+=", 'io.github.zen-browser.Zen.desktop'"
+if [ -f "/var/lib/flatpak/exports/share/applications/app.zen_browser.zen.desktop" ]; then
+    FAVORITES+=", 'app.zen_browser.zen.desktop'"
     log_info "Added Zen Browser (Flatpak) to favorites"
 fi
 
