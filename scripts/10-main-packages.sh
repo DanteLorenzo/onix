@@ -168,18 +168,24 @@ if [ -f "/usr/share/applications/org.mozilla.firefox.desktop" ] ||
     log_info "Added Firefox to favorites"
 fi
 
-# Check for communication apps
-if [ -f "/usr/share/applications/discord.desktop" ] || 
-   [ -f "/var/lib/flatpak/exports/share/applications/com.discordapp.Discord.desktop" ]; then
+# Check for Discord (DNF installed)
+if [ -f "/usr/share/applications/discord.desktop" ]; then
+    FAVORITES+=", 'discord.desktop'"
+    log_info "Added Discord (DNF) to favorites"
+# Flatpak version
+elif [ -f "/var/lib/flatpak/exports/share/applications/com.discordapp.Discord.desktop" ]; then
     FAVORITES+=", 'com.discordapp.Discord.desktop'"
-    log_info "Added Discord to favorites"
+    log_info "Added Discord (Flatpak) to favorites"
 fi
 
-# Check for games
-if [ -f "/usr/share/applications/steam.desktop" ] || 
-   [ -f "/var/lib/flatpak/exports/share/applications/com.valvesoftware.Steam.desktop" ]; then
+# Check for Steam (DNF installed)
+if [ -f "/usr/share/applications/steam.desktop" ]; then
+    FAVORITES+=", 'steam.desktop'"
+    log_info "Added Steam (DNF) to favorites"
+# Flatpak version
+elif [ -f "/var/lib/flatpak/exports/share/applications/com.valvesoftware.Steam.desktop" ]; then
     FAVORITES+=", 'com.valvesoftware.Steam.desktop'"
-    log_info "Added Steam to favorites"
+    log_info "Added Steam (Flatpak) to favorites"
 fi
 
 FAVORITES+="]"
