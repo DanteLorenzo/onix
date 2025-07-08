@@ -172,13 +172,18 @@ OBSIDIAN_FILE="$APP_DIR/Obsidian.AppImage"
 # Download and install
 NEED_DOWNLOAD=1
 if [ -f "$OBSIDIAN_FILE" ]; then
-    # Check version without running the AppImage
-    CURRENT_VERSION=$(strings "$OBSIDIAN_FILE" | grep -oP 'Obsidian-\d+\.\d+\.\d+' | head -1 | cut -d'-' -f2)
-    if [ "$CURRENT_VERSION" == "$OBSIDIAN_VERSION" ]; then
-        log_info "Latest Obsidian version ${OBSIDIAN_VERSION} already installed"
-        NEED_DOWNLOAD=0
+    # Check version by extracting AppImage metadata
+    CURRENT_VERSION=$(dd if="$OBSIDIAN_FILE" bs=1 skip=20 count=20 2>/dev/null | strings | grep -oP 'Obsidian-\d+\.\d+\.\d+' | head -1 | cut -d'-' -f2)
+    
+    if [ -n "$CURRENT_VERSION" ]; then
+        if [ "$CURRENT_VERSION" == "$OBSIDIAN_VERSION" ]; then
+            log_info "Latest Obsidian version ${OBSIDIAN_VERSION} already installed"
+            NEED_DOWNLOAD=0
+        else
+            log_info "Updating Obsidian from ${CURRENT_VERSION} to ${OBSIDIAN_VERSION}"
+        fi
     else
-        log_info "Updating Obsidian from ${CURRENT_VERSION} to ${OBSIDIAN_VERSION}"
+        log_warning "Could not determine current Obsidian version, will reinstall"
     fi
 fi
 
