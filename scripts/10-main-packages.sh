@@ -435,6 +435,12 @@ if [ -f "$OBSIDIAN_DESKTOP_FILE" ]; then
     log_info "Added Obsidian to favorites"
 fi
 
+# Add VSCodium
+if [ -f "/usr/share/applications/codium.desktop" ]; then
+    FAVORITES+=", 'codium.desktop'"
+    log_info "Added VSCodium to favorites"
+fi
+
 # Add Zen Browser if installed
 if [ -f "$ZEN_DESKTOP_FILE" ]; then
     FAVORITES+=", 'zen-browser.desktop'"
