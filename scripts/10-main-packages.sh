@@ -11,12 +11,31 @@ sudo dnf install -y \
     tmux \
     ollama \
     flatpak \
-    steam \
+    steam
 
 if [ $? -eq 0 ]; then
     log_success "Main packages installation complete."
 else
     log_error "Main packages installation failed."
+    exit 1
+fi
+
+# =====================
+# Docker Installation
+# =====================
+log_info "Installing Docker..."
+sudo dnf install -y dnf-plugins-core
+sudo dnf config-manager --add-repo https://download.docker.com/linux/fedora/docker-ce.repo
+sudo dnf install -y docker-ce docker-ce-cli containerd.io
+
+if [ $? -eq 0 ]; then
+    log_success "Docker installed successfully."
+    sudo systemctl enable --now docker
+    sudo usermod -aG docker $USER
+    log_info "Docker service enabled and current user added to docker group."
+    log_info "You may need to log out and back in for group changes to take effect."
+else
+    log_error "Docker installation failed."
     exit 1
 fi
 
@@ -61,5 +80,8 @@ echo "  Postman:  flatpak run com.getpostman.Postman"
 echo "  Insomnia: flatpak run rest.insomnia.Insomnia"
 echo "  TMUX:     tmux"
 echo "  Ollama:   ollama"
+echo "  Docker:   docker --version"
+echo ""
+log_info "Note: After logout/login you can run docker commands without sudo."
 
 exit 0
