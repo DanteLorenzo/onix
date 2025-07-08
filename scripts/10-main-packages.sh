@@ -273,60 +273,73 @@ if [ -n "$CURRENT_TONKEEPER_VERSION" ]; then
     
     version_compare "$CURRENT_TONKEEPER_VERSION" "$LATEST_TONKEEPER_VERSION"
     case $? in
-        0) log_success "Latest Ton Keeper version already installed"; continue ;;
-        1) log_info "Current version is newer than latest release (unexpected)"; continue ;;
-        2) log_info "Newer version available, will update" ;;
+        0) log_success "Latest Ton Keeper version already installed";;
+        1) log_info "Current version is newer than latest release (unexpected)";;
+        2) log_info "Newer version available, will update"
+           # Continue with installation below
+           ;;
     esac
+    
+    # If we have the latest version or a newer version, skip installation
+    if [ $? -ne 2 ]; then
+        log_info "Skipping Ton Keeper installation as no update is needed"
+    fi
 else
     log_info "Ton Keeper not installed, will install latest version"
 fi
 
-# Get latest release assets from GitHub
-ASSETS_JSON=$(curl -s https://api.github.com/repos/tonkeeper/tonkeeper-web/releases/latest | jq -r '.assets[] | {name: .name, url: .browser_download_url}')
-if [ -z "$ASSETS_JSON" ]; then
-    log_error "Failed to get Ton Keeper release assets"
-    exit 1
-fi
+# Only proceed with installation if we don't have the latest version
+if [ -z "$CURRENT_TONKEEPER_VERSION" ] || 
+   ( [ -n "$CURRENT_TONKEEPER_VERSION" ] && 
+     [ "$(version_compare "$CURRENT_TONKEEPER_VERSION" "$LATEST_TONKEEPER_VERSION")" -eq 2 ] ); then
 
-# Find x86_64 RPM package
-TONKEEPER_RPM_URL=$(echo "$ASSETS_JSON" | jq -r 'select(.name | test("Tonkeeper.*x86_64\\.rpm"; "i")) | .url')
-if [ -z "$TONKEEPER_RPM_URL" ]; then
-    log_error "Could not find x86_64 RPM package in release assets"
-    log_info "Available assets:"
-    echo "$ASSETS_JSON" | jq -r '.name'
-    exit 1
-fi
+    # Get latest release assets from GitHub
+    ASSETS_JSON=$(curl -s https://api.github.com/repos/tonkeeper/tonkeeper-web/releases/latest | jq -r '.assets[] | {name: .name, url: .browser_download_url}')
+    if [ -z "$ASSETS_JSON" ]; then
+        log_error "Failed to get Ton Keeper release assets"
+        exit 1
+    fi
 
-# Display download URL
-log_info "Download URL for x86_64: $TONKEEPER_RPM_URL"
+    # Find x86_64 RPM package
+    TONKEEPER_RPM_URL=$(echo "$ASSETS_JSON" | jq -r 'select(.name | test("Tonkeeper.*x86_64\\.rpm"; "i")) | .url')
+    if [ -z "$TONKEEPER_RPM_URL" ]; then
+        log_error "Could not find x86_64 RPM package in release assets"
+        log_info "Available assets:"
+        echo "$ASSETS_JSON" | jq -r '.name'
+        exit 1
+    fi
 
-TONKEEPER_TEMP_RPM="/tmp/tonkeeper-${LATEST_TONKEEPER_VERSION}.x86_64.rpm"
+    # Display download URL
+    log_info "Download URL for x86_64: $TONKEEPER_RPM_URL"
 
-# Download with progress bar
-log_info "Downloading Ton Keeper ${LATEST_TONKEEPER_VERSION} for x86_64..."
-wget --show-progress -q "$TONKEEPER_RPM_URL" -O "$TONKEEPER_TEMP_RPM" || {
-    log_error "Failed to download Ton Keeper RPM"
-    exit 1
-}
+    TONKEEPER_TEMP_RPM="/tmp/tonkeeper-${LATEST_TONKEEPER_VERSION}.x86_64.rpm"
 
-# Install the package
-log_info "Installing Ton Keeper..."
-sudo dnf install -y "$TONKEEPER_TEMP_RPM" || {
-    log_error "Failed to install Ton Keeper RPM"
+    # Download with progress bar
+    log_info "Downloading Ton Keeper ${LATEST_TONKEEPER_VERSION} for x86_64..."
+    wget --show-progress -q "$TONKEEPER_RPM_URL" -O "$TONKEEPER_TEMP_RPM" || {
+        log_error "Failed to download Ton Keeper RPM"
+        exit 1
+    }
+
+    # Install the package
+    log_info "Installing Ton Keeper..."
+    sudo dnf install -y "$TONKEEPER_TEMP_RPM" || {
+        log_error "Failed to install Ton Keeper RPM"
+        rm -f "$TONKEEPER_TEMP_RPM"
+        exit 1
+    }
+
+    # Cleanup temporary file
     rm -f "$TONKEEPER_TEMP_RPM"
-    exit 1
-}
 
-# Cleanup temporary file
-rm -f "$TONKEEPER_TEMP_RPM"
-
-# Verify installation
-if [ -f "/usr/share/applications/tonkeeper.desktop" ]; then
-    log_success "Ton Keeper ${LATEST_TONKEEPER_VERSION} (x86_64) installed successfully"
-else
-    log_warning "Ton Keeper installed but desktop file not found in standard location"
-    if [ -f "/usr/local/share/applications/tonkeeper.desktop" ]; then
-        log_info "Found desktop file in alternative location"
+    # Verify installation
+    if [ -f "/usr/share/applications/tonkeeper.desktop" ]; then
+        log_success "Ton Keeper ${LATEST_TONKEEPER_VERSION} (x86_64) installed successfully"
+    else
+        log_warning "Ton Keeper installed but desktop file not found in standard location"
+        if [ -f "/usr/local/share/applications/tonkeeper.desktop" ]; then
+            log_info "Found desktop file in alternative location"
+        fi
     fi
 fi
 
