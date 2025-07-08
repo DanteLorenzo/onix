@@ -156,21 +156,14 @@ DESKTOP_DIR="$HOME/.local/share/applications"
 ICON_DIR="$HOME/.local/share/icons/hicolor/256x256/apps"
 mkdir -p "$APP_DIR" "$DESKTOP_DIR" "$ICON_DIR"
 
-# Get latest Obsidian release
-OBSIDIAN_URL=$(curl -s https://api.github.com/repos/obsidianmd/obsidian-releases/releases/latest | 
-    grep -E 'browser_download_url.*AppImage' | 
-    grep -v 'linux-arm' | 
-    cut -d '"' -f 4)
-
-if [ -z "$OBSIDIAN_URL" ]; then
-    log_error "Failed to get latest Obsidian download URL"
-    exit 1
-fi
+# Latest stable version (можно обновлять при выходе новых версий)
+OBSIDIAN_VERSION="1.8.10"
+OBSIDIAN_URL="https://github.com/obsidianmd/obsidian-releases/releases/download/v${OBSIDIAN_VERSION}/Obsidian-${OBSIDIAN_VERSION}.AppImage"
+OBSIDIAN_FILE="$APP_DIR/Obsidian.AppImage"
 
 # Download and install
-OBSIDIAN_FILE="$APP_DIR/Obsidian.AppImage"
-if [ ! -f "$OBSIDIAN_FILE" ] || [ $(stat -c %Y "$OBSIDIAN_FILE") -lt $(date -d '1 week ago' +%s) ]; then
-    log_info "Downloading latest Obsidian..."
+if [ ! -f "$OBSIDIAN_FILE" ]; then
+    log_info "Downloading Obsidian ${OBSIDIAN_VERSION}..."
     wget "$OBSIDIAN_URL" -O "$OBSIDIAN_FILE" || {
         log_error "Failed to download Obsidian"
         exit 1
@@ -178,7 +171,14 @@ if [ ! -f "$OBSIDIAN_FILE" ] || [ $(stat -c %Y "$OBSIDIAN_FILE") -lt $(date -d '
     chmod +x "$OBSIDIAN_FILE"
     log_success "Obsidian downloaded and made executable"
 else
-    log_info "Latest Obsidian already installed"
+    log_info "Obsidian already installed, checking for updates..."
+    CURRENT_VERSION=$("$OBSIDIAN_FILE" --version 2>/dev/null | grep -oP '\d+\.\d+\.\d+')
+    if [ "$CURRENT_VERSION" != "$OBSIDIAN_VERSION" ]; then
+        log_info "Updating Obsidian from ${CURRENT_VERSION} to ${OBSIDIAN_VERSION}"
+        wget "$OBSIDIAN_URL" -O "$OBSIDIAN_FILE" && chmod +x "$OBSIDIAN_FILE"
+    else
+        log_info "Latest Obsidian version already installed"
+    fi
 fi
 
 # Create desktop file
@@ -189,7 +189,7 @@ Version=1.0
 Type=Application
 Name=Obsidian
 Comment=A knowledge base that works on local Markdown files
-Exec=$OBSIDIAN_FILE --no-sandbox
+Exec="$OBSIDIAN_FILE" --no-sandbox
 Icon=obsidian
 Categories=Office;TextEditor;
 Terminal=false
@@ -203,7 +203,7 @@ fi
 
 # Update desktop database
 update-desktop-database "$DESKTOP_DIR"
-
+log_success "Obsidian ${OBSIDIAN_VERSION} installed successfully"
 # =================
 # Final Completion
 # =================
