@@ -221,17 +221,25 @@ fi
 # =====================
 log_info "Installing Ton Keeper..."
 
-# Get latest version info from GitHub API
-TONKEEPER_LATEST=$(curl -s https://api.github.com/repos/tonkeeper/tonkeeper-web/releases/latest | grep -oP '"tag_name": "\Kv\d+\.\d+\.\d+')
-if [ -z "$TONKEEPER_LATEST" ]; then
-    log_error "Failed to get latest Ton Keeper version"
+# Get list of assets from latest release
+ASSETS_JSON=$(curl -s https://api.github.com/repos/tonkeeper/tonkeeper-web/releases/latest | jq -r '.assets[] | {name: .name, url: .browser_download_url}')
+if [ -z "$ASSETS_JSON" ]; then
+    log_error "Failed to get Ton Keeper release assets"
     exit 1
 fi
 
-TONKEEPER_RPM_URL="https://github.com/tonkeeper/tonkeeper-web/releases/download/${TONKEEPER_LATEST}/Tonkeeper-${TONKEEPER_LATEST}-1.x86_64.rpm"
-TONKEEPER_TEMP_RPM="/tmp/tonkeeper-${TONKEEPER_LATEST}.rpm"
+# Find RPM package (case insensitive)
+TONKEEPER_RPM_URL=$(echo "$ASSETS_JSON" | jq -r 'select(.name | test("Tonkeeper.*\\.rpm"; "i")) | .url')
+if [ -z "$TONKEEPER_RPM_URL" ]; then
+    log_error "Could not find RPM package in release assets"
+    exit 1
+fi
 
-log_info "Downloading Ton Keeper ${TONKEEPER_LATEST}..."
+# Extract version from filename
+TONKEEPER_VERSION=$(echo "$TONKEEPER_RPM_URL" | grep -oP 'Tonkeeper-\K\d+\.\d+\.\d+')
+TONKEEPER_TEMP_RPM="/tmp/tonkeeper-${TONKEEPER_VERSION}.rpm"
+
+log_info "Downloading Ton Keeper ${TONKEEPER_VERSION}..."
 wget "$TONKEEPER_RPM_URL" -O "$TONKEEPER_TEMP_RPM" || {
     log_error "Failed to download Ton Keeper RPM"
     exit 1
@@ -249,7 +257,7 @@ rm -f "$TONKEEPER_TEMP_RPM"
 
 # Verify installation
 if [ -f "/usr/share/applications/tonkeeper.desktop" ]; then
-    log_success "Ton Keeper ${TONKEEPER_LATEST} installed successfully"
+    log_success "Ton Keeper ${TONKEEPER_VERSION} installed successfully"
 else
     log_warning "Ton Keeper installed but desktop file not found in standard location"
     # Check alternative locations
