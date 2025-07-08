@@ -32,7 +32,7 @@ if [ $? -eq 0 ]; then
     log_success "Docker installed successfully."
     sudo systemctl enable --now docker
     sudo usermod -aG docker $USER
-    newgrp docker
+    sg docker -c "echo 'Group changes applied temporarily'"
     log_info "Docker service enabled and current user added to docker group."
     log_info "You may need to log out and back in for group changes to take effect."
 else
