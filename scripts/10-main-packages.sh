@@ -3,6 +3,7 @@
 # Base system configuration and package installation
 source "$(dirname "$0")/../utils/logging.sh"
 
+
 # ========================
 # DNF Packages Installation
 # ========================
@@ -42,14 +43,19 @@ sudo dnf install -y \
     remmina-plugins-rdp \
     remmina-plugins-vnc \
     remmina-plugins-www \
-    remmina-plugins-spirce \
+    remmina-plugins-spice \
     remmina-plugins-secret \
     simplescreenrecorder \
     ansible \
     wine \
     bottles \
-    
-    
+
+# Add VSCodium repository
+sudo rpm --import https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/-/raw/master/pub.gpg
+printf "[gitlab.com_paulcarroty_vscodium_repo]\nname=download.vscodium.com\nbaseurl=https://download.vscodium.com/rpms/\nenabled=1\ngpgcheck=1\nrepo_gpgcheck=1\ngpgkey=https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/-/raw/master/pub.gpg\nmetadata_expire=1h" | sudo tee -a /etc/yum.repos.d/vscodium.repo
+
+log_info "Installing VSCodium..."
+sudo dnf install -y codium
 
 # Adding browser repositories
 log_info "Adding browser repositories..."
@@ -481,8 +487,8 @@ if [ -f "/var/lib/flatpak/exports/share/applications/io.bassi.Amberol.desktop" ]
 fi
 
 # Add Telegram (fixed entry)
-if [ -f "/usr/share/applications/telegram-desktop.desktop" ]; then
-    FAVORITES+=", 'telegram-desktop.desktop'"
+if [ -f "/usr/share/applications/org.telegram.desktop.desktop" ]; then
+    FAVORITES+=", 'org.telegram.desktop.desktop'"
     log_info "Added Telegram to favorites"
 elif [ -f "/var/lib/flatpak/exports/share/applications/org.telegram.desktop.desktop" ]; then
     FAVORITES+=", 'org.telegram.desktop.desktop'"
