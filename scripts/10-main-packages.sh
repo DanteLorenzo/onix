@@ -34,13 +34,13 @@ log_info "Adding browser repositories..."
 curl -fsSL https://repo.librewolf.net/librewolf.repo | pkexec tee /etc/yum.repos.d/librewolf.repo
 
 # Add Brave browser repository and import its signing key
-sudo dnf config-manager addrepo --from-repofile=https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
+sudo dnf config-manager addrepo --overwrite --from-repofile=https://brave-browser-rpm-release.s3.brave.com/brave-browser.repo
 
 # Installing browsers
 log_info "Installing browsers..."
 sudo dnf install -y \
-    librewolf          # Install LibreWolf browser
-    #brave-browser       # Install Brave browser
+    librewolf \         # Install LibreWolf browser
+    brave-browser       # Install Brave browser
 
 
 if [ $? -eq 0 ]; then
