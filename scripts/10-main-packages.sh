@@ -12,7 +12,9 @@ sudo dnf install -y \
     ollama \
     flatpak \
     steam \
-    discord
+    discord \
+    wget \
+    desktop-file-utils
 
 if [ $? -eq 0 ]; then
     log_success "Main packages installation complete."
@@ -143,6 +145,65 @@ else
     log_error "Failed to install Insomnia"
 fi
 
+# =====================
+# Obsidian Installation (Latest AppImage)
+# =====================
+log_info "Installing latest Obsidian version..."
+
+# Create directories
+APP_DIR="$HOME/Applications"
+DESKTOP_DIR="$HOME/.local/share/applications"
+ICON_DIR="$HOME/.local/share/icons/hicolor/256x256/apps"
+mkdir -p "$APP_DIR" "$DESKTOP_DIR" "$ICON_DIR"
+
+# Get latest Obsidian release
+OBSIDIAN_URL=$(curl -s https://api.github.com/repos/obsidianmd/obsidian-releases/releases/latest | 
+    grep -E 'browser_download_url.*AppImage' | 
+    grep -v 'linux-arm' | 
+    cut -d '"' -f 4)
+
+if [ -z "$OBSIDIAN_URL" ]; then
+    log_error "Failed to get latest Obsidian download URL"
+    exit 1
+fi
+
+# Download and install
+OBSIDIAN_FILE="$APP_DIR/Obsidian.AppImage"
+if [ ! -f "$OBSIDIAN_FILE" ] || [ $(stat -c %Y "$OBSIDIAN_FILE") -lt $(date -d '1 week ago' +%s) ]; then
+    log_info "Downloading latest Obsidian..."
+    wget "$OBSIDIAN_URL" -O "$OBSIDIAN_FILE" || {
+        log_error "Failed to download Obsidian"
+        exit 1
+    }
+    chmod +x "$OBSIDIAN_FILE"
+    log_success "Obsidian downloaded and made executable"
+else
+    log_info "Latest Obsidian already installed"
+fi
+
+# Create desktop file
+DESKTOP_FILE="$DESKTOP_DIR/obsidian.desktop"
+cat > "$DESKTOP_FILE" <<EOL
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Obsidian
+Comment=A knowledge base that works on local Markdown files
+Exec=$OBSIDIAN_FILE --no-sandbox
+Icon=obsidian
+Categories=Office;TextEditor;
+Terminal=false
+StartupWMClass=obsidian
+EOL
+
+# Download icon
+if [ ! -f "$ICON_DIR/obsidian.png" ]; then
+    wget https://obsidian.md/images/icon.png -O "$ICON_DIR/obsidian.png" 2>/dev/null || true
+fi
+
+# Update desktop database
+update-desktop-database "$DESKTOP_DIR"
+
 # =================
 # Final Completion
 # =================
@@ -157,6 +218,7 @@ echo "  Docker:   $(docker --version 2>/dev/null || echo 'not available')"
 echo "  Go:       $(go version 2>/dev/null || echo 'not available')"
 echo "  Python:   $(python3 --version 2>/dev/null || echo 'not available')"
 echo "  Rust:     $(rustc --version 2>/dev/null || echo 'not available')"
+echo "  Obsidian: $OBSIDIAN_FILE"
 echo ""
 log_info "Note: After logout/login you can run docker commands without sudo."
 log_info "Note: You may need to start a new shell for PATH changes to take effect."
@@ -165,44 +227,56 @@ log_info "Note: You may need to start a new shell for PATH changes to take effec
 # Favorite Apps Setup
 # ======================
 log_info "Setting favorite apps..."
-FAVORITES="[ "
+FAVORITES="["
+
+# Always include terminal first
+FAVORITES+=" 'org.gnome.Terminal.desktop'"
 
 # Check for Ptyxis
 if [ -f "/usr/share/applications/org.gnome.Ptyxis.desktop" ] || 
    [ -f "/usr/local/share/applications/org.gnome.Ptyxis.desktop" ] ||
    [ -f "/var/lib/flatpak/exports/share/applications/org.gnome.Ptyxis.desktop" ]; then
-    FAVORITES+="'org.gnome.Ptyxis.desktop'"
+    FAVORITES+=", 'org.gnome.Ptyxis.desktop'"
     log_info "Added Ptyxis terminal to favorites"
 fi
 
 # Check for web browsers
-if [ -f "/usr/share/applications/org.mozilla.firefox.desktop" ] || 
-   [ -f "/var/lib/flatpak/exports/share/applications/org.mozilla.firefox.desktop" ]; then
+if [ -f "/usr/share/applications/firefox.desktop" ]; then
+    FAVORITES+=", 'firefox.desktop'"
+    log_info "Added Firefox (DNF) to favorites"
+elif [ -f "/usr/share/applications/org.mozilla.firefox.desktop" ]; then
     FAVORITES+=", 'org.mozilla.firefox.desktop'"
-    log_info "Added Firefox to favorites"
+    log_info "Added Firefox (alternative) to favorites"
+elif [ -f "/var/lib/flatpak/exports/share/applications/org.mozilla.firefox.desktop" ]; then
+    FAVORITES+=", 'org.mozilla.firefox.desktop'"
+    log_info "Added Firefox (Flatpak) to favorites"
 fi
 
-# Check for Discord (DNF installed)
-if [ -f "/usr/share/applications/discord.desktop" ]; then
-    FAVORITES+=", 'discord.desktop'"
-    log_info "Added Discord (DNF) to favorites"
-# Flatpak version
-elif [ -f "/var/lib/flatpak/exports/share/applications/com.discordapp.Discord.desktop" ]; then
-    FAVORITES+=", 'com.discordapp.Discord.desktop'"
-    log_info "Added Discord (Flatpak) to favorites"
-fi
-
-# Check for Steam (DNF installed)
+# Check for Steam
 if [ -f "/usr/share/applications/steam.desktop" ]; then
     FAVORITES+=", 'steam.desktop'"
     log_info "Added Steam (DNF) to favorites"
-# Flatpak version
 elif [ -f "/var/lib/flatpak/exports/share/applications/com.valvesoftware.Steam.desktop" ]; then
     FAVORITES+=", 'com.valvesoftware.Steam.desktop'"
     log_info "Added Steam (Flatpak) to favorites"
 fi
 
-FAVORITES+="]"
+# Check for Discord
+if [ -f "/usr/share/applications/discord.desktop" ]; then
+    FAVORITES+=", 'discord.desktop'"
+    log_info "Added Discord (DNF) to favorites"
+elif [ -f "/var/lib/flatpak/exports/share/applications/com.discordapp.Discord.desktop" ]; then
+    FAVORITES+=", 'com.discordapp.Discord.desktop'"
+    log_info "Added Discord (Flatpak) to favorites"
+fi
+
+# Add Obsidian if installed
+if [ -f "$DESKTOP_FILE" ]; then
+    FAVORITES+=", 'obsidian.desktop'"
+    log_info "Added Obsidian to favorites"
+fi
+
+FAVORITES+=" ]"
 
 # Set favorite apps in GNOME
 gsettings set org.gnome.shell favorite-apps "$FAVORITES"
