@@ -221,20 +221,26 @@ fi
 # =====================
 log_info "Installing Ton Keeper..."
 
-TONKEEPER_RPM_URL="https://github.com/tonkeeper/tonkeeper-web/releases/latest/download/Tonkeeper-$(uname -m).rpm"
-TONKEEPER_TEMP_RPM="/tmp/tonkeeper-latest.rpm"
+# Get latest version info from GitHub API
+TONKEEPER_LATEST=$(curl -s https://api.github.com/repos/tonkeeper/tonkeeper-web/releases/latest | grep -oP '"tag_name": "\Kv\d+\.\d+\.\d+')
+if [ -z "$TONKEEPER_LATEST" ]; then
+    log_error "Failed to get latest Ton Keeper version"
+    exit 1
+fi
 
-# Download latest RPM
-log_info "Downloading latest Ton Keeper RPM..."
+TONKEEPER_RPM_URL="https://github.com/tonkeeper/tonkeeper-web/releases/download/${TONKEEPER_LATEST}/Tonkeeper-${TONKEEPER_LATEST}-1.x86_64.rpm"
+TONKEEPER_TEMP_RPM="/tmp/tonkeeper-${TONKEEPER_LATEST}.rpm"
+
+log_info "Downloading Ton Keeper ${TONKEEPER_LATEST}..."
 wget "$TONKEEPER_RPM_URL" -O "$TONKEEPER_TEMP_RPM" || {
     log_error "Failed to download Ton Keeper RPM"
     exit 1
 }
 
-# Install the RPM
-log_info "Installing Ton Keeper RPM..."
+log_info "Installing Ton Keeper..."
 sudo dnf install -y "$TONKEEPER_TEMP_RPM" || {
     log_error "Failed to install Ton Keeper RPM"
+    rm -f "$TONKEEPER_TEMP_RPM"
     exit 1
 }
 
@@ -243,11 +249,13 @@ rm -f "$TONKEEPER_TEMP_RPM"
 
 # Verify installation
 if [ -f "/usr/share/applications/tonkeeper.desktop" ]; then
-    TONKEEPER_DESKTOP_FILE="/usr/share/applications/tonkeeper.desktop"
-    log_success "Ton Keeper installed successfully"
+    log_success "Ton Keeper ${TONKEEPER_LATEST} installed successfully"
 else
-    log_error "Ton Keeper installation completed but desktop file not found"
-    exit 1
+    log_warning "Ton Keeper installed but desktop file not found in standard location"
+    # Check alternative locations
+    if [ -f "/usr/local/share/applications/tonkeeper.desktop" ]; then
+        log_info "Found desktop file in alternative location"
+    fi
 fi
 
 # =====================
