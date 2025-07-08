@@ -351,8 +351,8 @@ log_info "Installing latest Obsidian version..."
 
 # Create directories
 APP_DIR="$HOME/Applications"
-DESKTOP_DIR="$HOME/.local/share/applications"
-ICON_DIR="$HOME/.local/share/icons/hicolor/256x256/apps"
+DESKTOP_DIR="/usr/share/applications"
+ICON_DIR="/usr/share/icons/hicolor/256x256/apps"
 mkdir -p "$APP_DIR" "$DESKTOP_DIR" "$ICON_DIR"
 
 # Get latest Obsidian version from GitHub API
@@ -401,8 +401,8 @@ OBSIDIAN_LINK="$APP_DIR/Obsidian.AppImage"
 ln -sf "$OBSIDIAN_FILE" "$OBSIDIAN_LINK"
 
 # Create desktop file
-DESKTOP_FILE="$DESKTOP_DIR/obsidian.desktop"
-cat > "$DESKTOP_FILE" <<EOL
+OBSIDIAN_DESKTOP_FILE="$DESKTOP_DIR/obsidian.desktop"
+cat > "$OBSIDIAN_DESKTOP_FILE" <<EOL
 [Desktop Entry]
 Version=1.0
 Type=Application
@@ -441,17 +441,12 @@ log_success "Obsidian ${OBSIDIAN_VERSION} installed successfully (icon installed
 # =================
 log_info "System configuration complete!"
 echo ""
-log_success "Available commands:"
-echo "  Postman:  flatpak run com.getpostman.Postman"
-echo "  Insomnia: flatpak run rest.insomnia.Insomnia"
-echo "  TMUX:     tmux"
-echo "  Ollama:   ollama"
+log_success "Installed versions:"
 echo "  Docker:   $(docker --version 2>/dev/null || echo 'not available')"
 echo "  Go:       $(go version 2>/dev/null || echo 'not available')"
 echo "  Python:   $(python3 --version 2>/dev/null || echo 'not available')"
 echo "  Rust:     $(rustc --version 2>/dev/null || echo 'not available')"
 echo "  Obsidian: $OBSIDIAN_FILE"
-echo "  Zen Browser: $ZEN_FILE"
 echo ""
 log_info "Note: After logout/login you can run docker commands without sudo."
 log_info "Note: You may need to start a new shell for PATH changes to take effect."
