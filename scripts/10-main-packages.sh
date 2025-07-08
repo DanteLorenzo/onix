@@ -221,16 +221,9 @@ fi
 # =====================
 log_info "Installing Zen Browser via Flatpak..."
 
-if flatpak install -y flathub io.github.zen-browser.Zen; then
+if flatpak install -y flathub app.zen_browser.zen; then
     log_success "Zen Browser installed successfully via Flatpak"
     echo "Run with: flatpak run io.github.zen-browser.Zen"
-    
-    # Add to favorites if not already present
-    if ! gsettings get org.gnome.shell favorite-apps | grep -q "io.github.zen-browser.Zen.desktop"; then
-        CURRENT_FAVORITES=$(gsettings get org.gnome.shell favorite-apps | sed 's/]$/, '\''io.github.zen-browser.Zen.desktop'\'']/')
-        gsettings set org.gnome.shell favorite-apps "$CURRENT_FAVORITES"
-        log_info "Added Zen Browser to favorites"
-    fi
 else
     log_error "Failed to install Zen Browser via Flatpak"
 fi
