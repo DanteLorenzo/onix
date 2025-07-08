@@ -39,8 +39,8 @@ sudo dnf config-manager addrepo --from-repofile=https://brave-browser-rpm-releas
 # Installing browsers
 log_info "Installing browsers..."
 sudo dnf install -y \
-    librewolf \         # Install LibreWolf browser
-    brave-browser       # Install Brave browser
+    librewolf          # Install LibreWolf browser
+    #brave-browser       # Install Brave browser
 
 
 if [ $? -eq 0 ]; then
