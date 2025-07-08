@@ -320,11 +320,15 @@ EOL
 ZEN_ICON_INSTALLED=0
 if [ -f "$ZEN_FILE" ]; then
     "$ZEN_FILE" --appimage-extract &>/dev/null
-    if [ -f squashfs-root/usr/share/icons/hicolor/256x256/apps/zen-browser.png ]; then
-        cp squashfs-root/usr/share/icons/hicolor/256x256/apps/zen-browser.png "$ICON_DIR/zen-browser.png" && ZEN_ICON_INSTALLED=1
+    if [ -f squashfs-root/zen.png ]; then
+        cp squashfs-root/zen.png "$ICON_DIR/zen-browser.png" && ZEN_ICON_INSTALLED=1
         log_info "Zen Browser icon extracted from AppImage"
     fi
     rm -rf squashfs-root &>/dev/null
+
+    if [ $ZEN_ICON_INSTALLED -eq 0 ]; then
+        log_info "No icon found in Zen Browser AppImage"
+    fi
 fi
 
 # Update desktop database
