@@ -344,80 +344,84 @@ else
 fi
 
 
-
 # =====================
 # Obsidian Installation (Latest AppImage)
 # =====================
 log_info "Installing latest Obsidian version..."
 
-APP_DIR="/opt/obsidian"
-BIN_LINK="/usr/local/bin/obsidian"
-DESKTOP_FILE="/usr/share/applications/obsidian.desktop"
-ICON_PATH="/usr/share/icons/hicolor/256x256/apps/obsidian.png"
+# Create directories
+APP_DIR="$HOME/Applications"
+DESKTOP_DIR="$HOME/.local/share/applications"
+ICON_DIR="$HOME/.local/share/icons/hicolor/256x256/apps"
+mkdir -p "$APP_DIR" "$DESKTOP_DIR" "$ICON_DIR"
 
-# Create application directory
-sudo mkdir -p "$APP_DIR"
-sudo chown "$USER":"$USER" "$APP_DIR"
-
-# Get latest version
+# Get latest Obsidian version from GitHub API
 log_info "Checking latest Obsidian version..."
 OBSIDIAN_VERSION=$(curl -s https://api.github.com/repos/obsidianmd/obsidian-releases/releases/latest | grep -oP '"tag_name": "\Kv?\d+\.\d+\.\d+')
+if [ -z "$OBSIDIAN_VERSION" ]; then
+    log_error "Failed to get latest Obsidian version"
+    exit 1
+fi
+
+# Remove 'v' prefix if present
 OBSIDIAN_VERSION=${OBSIDIAN_VERSION#v}
 OBSIDIAN_URL="https://github.com/obsidianmd/obsidian-releases/releases/download/v${OBSIDIAN_VERSION}/Obsidian-${OBSIDIAN_VERSION}.AppImage"
-OBSIDIAN_FILE="$APP_DIR/Obsidian-${OBSIDIAN_VERSION}.AppImage"
+OBSIDIAN_FILE="$APP_DIR/Obsidian.AppImage"
 
-# Download if not already present
-if [ ! -f "$OBSIDIAN_FILE" ]; then
+# Download and install
+NEED_DOWNLOAD=1
+if [ -f "$OBSIDIAN_FILE" ]; then
+    CURRENT_VERSION=$("$OBSIDIAN_FILE" --version 2>/dev/null | grep -oP '\d+\.\d+\.\d+')
+    if [ "$CURRENT_VERSION" == "$OBSIDIAN_VERSION" ]; then
+        log_info "Latest Obsidian version ${OBSIDIAN_VERSION} already installed"
+        NEED_DOWNLOAD=0
+    else
+        log_info "Updating Obsidian from ${CURRENT_VERSION} to ${OBSIDIAN_VERSION}"
+    fi
+fi
+
+if [ $NEED_DOWNLOAD -eq 1 ]; then
     log_info "Downloading Obsidian ${OBSIDIAN_VERSION}..."
     wget "$OBSIDIAN_URL" -O "$OBSIDIAN_FILE" || {
         log_error "Failed to download Obsidian"
         exit 1
     }
     chmod +x "$OBSIDIAN_FILE"
-    ln -sf "$OBSIDIAN_FILE" "$APP_DIR/Obsidian.AppImage"
-    sudo ln -sf "$APP_DIR/Obsidian.AppImage" "$BIN_LINK"
-    log_success "Obsidian downloaded, linked, and made executable"
-else
-    log_info "Obsidian ${OBSIDIAN_VERSION} already downloaded"
-    sudo ln -sf "$APP_DIR/Obsidian-${OBSIDIAN_VERSION}.AppImage" "$BIN_LINK"
+    log_success "Obsidian downloaded and made executable"
 fi
 
-# Extract icon from AppImage
-if [ ! -f "$ICON_PATH" ]; then
-    log_info "Extracting icon from AppImage..."
-    "$OBSIDIAN_FILE" --appimage-extract &>/dev/null
-    ICON_SRC="squashfs-root/usr/share/icons/hicolor/256x256/apps/obsidian.png"
-    if [ -f "$ICON_SRC" ]; then
-        sudo mkdir -p "$(dirname "$ICON_PATH")"
-        sudo cp "$ICON_SRC" "$ICON_PATH"
-        log_success "Icon extracted and installed to $ICON_PATH"
-    else
-        log_warning "Icon not found in AppImage"
-    fi
-    rm -rf squashfs-root
-else
-    log_info "Obsidian icon already exists"
-fi
-
-# Create .desktop file
-log_info "Creating .desktop file in /usr/share/applications..."
-sudo tee "$DESKTOP_FILE" > /dev/null <<EOL
+# Create desktop file
+DESKTOP_FILE="$DESKTOP_DIR/obsidian.desktop"
+cat > "$DESKTOP_FILE" <<EOL
 [Desktop Entry]
-Name=Obsidian
-Exec=${BIN_LINK} --no-sandbox
-Icon=obsidian
+Version=1.0
 Type=Application
+Name=Obsidian
+Comment=A knowledge base that works on local Markdown files
+Exec="$OBSIDIAN_FILE" --no-sandbox
+Icon=obsidian
 Categories=Office;TextEditor;
-StartupNotify=true
 Terminal=false
+StartupWMClass=obsidian
 EOL
 
-sudo chmod 644 "$DESKTOP_FILE"
+# Handle icon installation
+ICON_INSTALLED=0
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Update desktop database and icon cache
-log_info "Updating desktop and icon caches..."
-sudo update-desktop-database
-sudo gtk-update-icon-cache -f /usr/share/icons/hicolor
+# Method 1: Extract icon from AppImage
+if [ -f "$OBSIDIAN_FILE" ]; then
+    "$OBSIDIAN_FILE" --appimage-extract &>/dev/null
+    if [ -f squashfs-root/usr/share/icons/hicolor/256x256/apps/obsidian.png ]; then
+        cp squashfs-root/usr/share/icons/hicolor/256x256/apps/obsidian.png "$ICON_DIR/obsidian.png" && ICON_INSTALLED=1
+        log_info "Obsidian icon extracted from AppImage"
+    fi
+    rm -rf squashfs-root &>/dev/null
+fi
+
+
+# Update desktop database
+update-desktop-database "$DESKTOP_DIR"
 
 
 log_success "Obsidian ${OBSIDIAN_VERSION} installed successfully (icon installed: $([ $OBSIDIAN_ICON_INSTALLED -eq 1 ] && echo "yes" || echo "no"))"
