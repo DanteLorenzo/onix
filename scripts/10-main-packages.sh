@@ -11,7 +11,8 @@ sudo dnf install -y \
     tmux \
     ollama \
     flatpak \
-    steam
+    steam \
+    discord
 
 if [ $? -eq 0 ]; then
     log_success "Main packages installation complete."
