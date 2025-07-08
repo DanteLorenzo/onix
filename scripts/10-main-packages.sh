@@ -217,11 +217,17 @@ else
 fi
 
 # =====================
-# Ton Keeper Installation (RPM)
+# Ton Keeper Installation (RPM) - x86_64 only
 # =====================
-log_info "Installing Ton Keeper..."
+log_info "Installing Ton Keeper (x86_64)..."
 
-# Get list of assets from latest release
+# Проверяем архитектуру системы
+if [ "$(uname -m)" != "x86_64" ]; then
+    log_error "This script requires x86_64 architecture. Detected: $(uname -m)"
+    exit 1
+fi
+
+# Получаем список ассетов последнего релиза
 log_info "Fetching latest release info from GitHub..."
 ASSETS_JSON=$(curl -s https://api.github.com/repos/tonkeeper/tonkeeper-web/releases/latest | jq -r '.assets[] | {name: .name, url: .browser_download_url}')
 if [ -z "$ASSETS_JSON" ]; then
@@ -229,27 +235,30 @@ if [ -z "$ASSETS_JSON" ]; then
     exit 1
 fi
 
-# Find RPM package (case insensitive)
-TONKEEPER_RPM_URL=$(echo "$ASSETS_JSON" | jq -r 'select(.name | test("Tonkeeper.*\\.rpm"; "i")) | .url')
+# Ищем именно x86_64 RPM пакет
+TONKEEPER_RPM_URL=$(echo "$ASSETS_JSON" | jq -r 'select(.name | test("Tonkeeper.*x86_64\\.rpm"; "i")) | .url')
 if [ -z "$TONKEEPER_RPM_URL" ]; then
-    log_error "Could not find RPM package in release assets"
+    log_error "Could not find x86_64 RPM package in release assets"
+    log_info "Available assets:"
+    echo "$ASSETS_JSON" | jq -r '.name'
     exit 1
 fi
 
-# Extract version from filename
+# Выводим ссылку для скачивания
+log_info "Download URL for x86_64: $TONKEEPER_RPM_URL"
+
+# Извлекаем версию из имени файла
 TONKEEPER_VERSION=$(echo "$TONKEEPER_RPM_URL" | grep -oP 'Tonkeeper-\K\d+\.\d+\.\d+')
-TONKEEPER_TEMP_RPM="/tmp/tonkeeper-${TONKEEPER_VERSION}.rpm"
+TONKEEPER_TEMP_RPM="/tmp/tonkeeper-${TONKEEPER_VERSION}.x86_64.rpm"
 
-# Print download URL
-log_info "Download URL: $TONKEEPER_RPM_URL"
-log_info "Downloading Ton Keeper ${TONKEEPER_VERSION}..."
-
-# Download with progress bar
+# Скачиваем с прогресс-баром
+log_info "Downloading Ton Keeper ${TONKEEPER_VERSION} for x86_64..."
 wget --show-progress -q "$TONKEEPER_RPM_URL" -O "$TONKEEPER_TEMP_RPM" || {
     log_error "Failed to download Ton Keeper RPM"
     exit 1
 }
 
+# Устанавливаем
 log_info "Installing Ton Keeper..."
 sudo dnf install -y "$TONKEEPER_TEMP_RPM" || {
     log_error "Failed to install Ton Keeper RPM"
@@ -257,15 +266,14 @@ sudo dnf install -y "$TONKEEPER_TEMP_RPM" || {
     exit 1
 }
 
-# Clean up
+# Очистка
 rm -f "$TONKEEPER_TEMP_RPM"
 
-# Verify installation
+# Проверка установки
 if [ -f "/usr/share/applications/tonkeeper.desktop" ]; then
-    log_success "Ton Keeper ${TONKEEPER_VERSION} installed successfully"
+    log_success "Ton Keeper ${TONKEEPER_VERSION} (x86_64) installed successfully"
 else
     log_warning "Ton Keeper installed but desktop file not found in standard location"
-    # Check alternative locations
     if [ -f "/usr/local/share/applications/tonkeeper.desktop" ]; then
         log_info "Found desktop file in alternative location"
     fi
