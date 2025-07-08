@@ -257,6 +257,9 @@ fi
 # =====================
 log_info "Installing Zen Browser (AppImage)..."
 
+# Create directories if they don't exist
+mkdir -p "$APP_DIR" "$DESKTOP_DIR" "$ICON_DIR"
+
 # Get latest Zen Browser version from GitHub API
 log_info "Checking latest Zen Browser version..."
 ZEN_VERSION=$(curl -s https://api.github.com/repos/zen-browser/desktop/releases/latest | grep -oP '"tag_name": "\Kv?\d+\.\d+\.\d+\w*')
@@ -269,6 +272,7 @@ fi
 ZEN_VERSION=${ZEN_VERSION#v}
 ZEN_URL="https://github.com/zen-browser/desktop/releases/download/${ZEN_VERSION}/zen-x86_64.AppImage"
 ZEN_FILE="$APP_DIR/Zen-${ZEN_VERSION}.AppImage"
+ZEN_ICON_PATH="$ICON_DIR/zen-browser.png"
 
 # Download and install
 NEED_DOWNLOAD=1
@@ -276,18 +280,9 @@ if [ -f "$ZEN_FILE" ]; then
     log_info "Latest Zen Browser version ${ZEN_VERSION} already installed"
     NEED_DOWNLOAD=0
 else
-    # Check for older versions
-    for old_file in "$APP_DIR"/Zen-*.AppImage; do
-        if [ -f "$old_file" ] && [ "$old_file" != "$ZEN_FILE" ]; then
-            old_version=$(basename "$old_file" | grep -oP '\d+\.\d+\.\d+\w*')
-            log_info "Found older version ${old_version}, will update to ${ZEN_VERSION}"
-            rm "$old_file"
-            break
-        fi
-    done
-fi
-
-if [ $NEED_DOWNLOAD -eq 1 ]; then
+    # Remove any old versions
+    rm -f "$APP_DIR"/Zen-*.AppImage
+    
     log_info "Downloading Zen Browser ${ZEN_VERSION}..."
     wget "$ZEN_URL" -O "$ZEN_FILE" || {
         log_error "Failed to download Zen Browser"
@@ -301,49 +296,57 @@ fi
 ZEN_LINK="$APP_DIR/Zen.AppImage"
 ln -sf "$ZEN_FILE" "$ZEN_LINK"
 
-# Create desktop file with absolute path to icon
-ZEN_DESKTOP_FILE="$DESKTOP_DIR/zen-browser.desktop"
-ZEN_ICON_PATH="$ICON_DIR/zen-browser.png"
-
-# Handle icon installation
+# Extract icon from AppImage
 ZEN_ICON_INSTALLED=0
 if [ -f "$ZEN_FILE" ]; then
-    # Extract AppImage to get the icon
-    "$ZEN_FILE" --appimage-extract &>/dev/null
+    # First try to extract icon without running the AppImage
+    if "$ZEN_FILE" --appimage-extract >/dev/null 2>&1; then
+        # Check multiple possible icon locations
+        ICON_PATHS=(
+            "squashfs-root/zen.png"
+            "squashfs-root/.DirIcon"
+            "squashfs-root/usr/share/icons/hicolor/256x256/apps/zen.png"
+            "squashfs-root/usr/share/pixmaps/zen.png"
+        )
+        
+        for icon_path in "${ICON_PATHS[@]}"; do
+            if [ -f "$icon_path" ]; then
+                cp "$icon_path" "$ZEN_ICON_PATH" && ZEN_ICON_INSTALLED=1
+                log_info "Zen Browser icon found at: $icon_path"
+                break
+            fi
+        done
+        
+        # Clean up
+        rm -rf squashfs-root
+    fi
     
-    # Check multiple possible icon locations
-    POSSIBLE_ICON_PATHS=(
-        "squashfs-root/zen.png"
-        "squashfs-root/.DirIcon"
-        "squashfs-root/usr/share/icons/hicolor/256x256/apps/zen.png"
-        "squashfs-root/usr/share/pixmaps/zen.png"
-    )
-    
-    for icon_source in "${POSSIBLE_ICON_PATHS[@]}"; do
-        if [ -f "$icon_source" ]; then
-            cp "$icon_source" "$ZEN_ICON_PATH" && ZEN_ICON_INSTALLED=1
-            log_info "Zen Browser icon found at: $icon_source"
-            break
-        fi
-    done
-    
-    # Clean up extracted files
-    rm -rf squashfs-root &>/dev/null
+    # If icon still not found, create a default one
+    if [ $ZEN_ICON_INSTALLED -eq 0 ]; then
+        log_info "Creating default icon for Zen Browser"
+        convert -size 256x256 xc:blue -pointsize 30 -fill white -gravity center -draw "text 0,0 'Zen'" "$ZEN_ICON_PATH"
+        ZEN_ICON_INSTALLED=1
+    fi
 fi
 
-# Create the desktop file with absolute icon path
+# Create desktop file with NO sandbox flag and absolute paths
 cat > "$ZEN_DESKTOP_FILE" <<EOL
 [Desktop Entry]
 Version=1.0
 Type=Application
 Name=Zen Browser
+GenericName=Web Browser
 Comment=A privacy-focused web browser
-Exec="$ZEN_LINK" --no-sandbox
+Exec="$ZEN_LINK" --no-sandbox %U
 Icon=$ZEN_ICON_PATH
 Categories=Network;WebBrowser;
 Terminal=false
 StartupWMClass=zen-browser
+MimeType=text/html;text/xml;application/xhtml+xml;x-scheme-handler/http;x-scheme-handler/https;
 EOL
+
+# Make desktop file executable
+chmod +x "$ZEN_DESKTOP_FILE"
 
 # Update desktop database
 update-desktop-database "$DESKTOP_DIR"
