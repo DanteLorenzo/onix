@@ -267,7 +267,7 @@ fi
 
 # Remove 'v' prefix if present
 ZEN_VERSION=${ZEN_VERSION#v}
-ZEN_URL="https://github.com/zen-browser/desktop/releases/download/v${ZEN_VERSION}/zen-x86_64.AppImage"
+ZEN_URL="https://github.com/zen-browser/desktop/releases/download/${ZEN_VERSION}/zen-x86_64.AppImage"
 ZEN_FILE="$APP_DIR/Zen-${ZEN_VERSION}.AppImage"
 
 # Download and install
