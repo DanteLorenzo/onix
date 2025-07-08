@@ -231,7 +231,7 @@ fi
 # =====================
 # Ton Keeper Installation (RPM) - x86_64
 # =====================
-log_info "Installing Ton Keeper (x86_64)..."
+log_info "Checking Ton Keeper installation..."
 
 # Verify system architecture
 if [ "$(uname -m)" != "x86_64" ]; then
@@ -239,8 +239,49 @@ if [ "$(uname -m)" != "x86_64" ]; then
     exit 1
 fi
 
-# Get latest release assets from GitHub
+# Check if Ton Keeper is already installed
+CURRENT_TONKEEPER_VERSION=$(rpm -q Tonkeeper --queryformat '%{VERSION}' 2>/dev/null)
+
+# Get latest release info from GitHub
 log_info "Fetching latest release info from GitHub..."
+LATEST_TONKEEPER_VERSION=$(curl -s https://api.github.com/repos/tonkeeper/tonkeeper-web/releases/latest | grep -oP '"tag_name": "\Kv?\d+\.\d+\.\d+')
+LATEST_TONKEEPER_VERSION=${LATEST_TONKEEPER_VERSION#v}  # Remove 'v' prefix if present
+
+if [ -z "$LATEST_TONKEEPER_VERSION" ]; then
+    log_error "Failed to get latest Ton Keeper version"
+    exit 1
+fi
+
+# Compare versions if already installed
+if [ -n "$CURRENT_TONKEEPER_VERSION" ]; then
+    log_info "Current Ton Keeper version: $CURRENT_TONKEEPER_VERSION"
+    log_info "Latest available version: $LATEST_TONKEEPER_VERSION"
+    
+    # Function to compare version numbers
+    version_compare() {
+        [ "$1" = "$2" ] && return 0
+        local IFS=.
+        local i ver1=($1) ver2=($2)
+        for ((i=${#ver1[@]}; i<${#ver2[@]}; i++)); do ver1[i]=0; done
+        for ((i=0; i<${#ver1[@]}; i++)); do
+            if [[ -z ${ver2[i]} ]]; then ver2[i]=0; fi
+            if ((10#${ver1[i]} > 10#${ver2[i]})); then return 1; fi
+            if ((10#${ver1[i]} < 10#${ver2[i]})); then return 2; fi
+        done
+        return 0
+    }
+    
+    version_compare "$CURRENT_TONKEEPER_VERSION" "$LATEST_TONKEEPER_VERSION"
+    case $? in
+        0) log_success "Latest Ton Keeper version already installed"; exit 0 ;;
+        1) log_info "Current version is newer than latest release (unexpected)"; exit 0 ;;
+        2) log_info "Newer version available, will update" ;;
+    esac
+else
+    log_info "Ton Keeper not installed, will install latest version"
+fi
+
+# Get latest release assets from GitHub
 ASSETS_JSON=$(curl -s https://api.github.com/repos/tonkeeper/tonkeeper-web/releases/latest | jq -r '.assets[] | {name: .name, url: .browser_download_url}')
 if [ -z "$ASSETS_JSON" ]; then
     log_error "Failed to get Ton Keeper release assets"
@@ -259,12 +300,10 @@ fi
 # Display download URL
 log_info "Download URL for x86_64: $TONKEEPER_RPM_URL"
 
-# Extract version from filename
-TONKEEPER_VERSION=$(echo "$TONKEEPER_RPM_URL" | grep -oP 'Tonkeeper-\K\d+\.\d+\.\d+')
-TONKEEPER_TEMP_RPM="/tmp/tonkeeper-${TONKEEPER_VERSION}.x86_64.rpm"
+TONKEEPER_TEMP_RPM="/tmp/tonkeeper-${LATEST_TONKEEPER_VERSION}.x86_64.rpm"
 
 # Download with progress bar
-log_info "Downloading Ton Keeper ${TONKEEPER_VERSION} for x86_64..."
+log_info "Downloading Ton Keeper ${LATEST_TONKEEPER_VERSION} for x86_64..."
 wget --show-progress -q "$TONKEEPER_RPM_URL" -O "$TONKEEPER_TEMP_RPM" || {
     log_error "Failed to download Ton Keeper RPM"
     exit 1
@@ -283,7 +322,7 @@ rm -f "$TONKEEPER_TEMP_RPM"
 
 # Verify installation
 if [ -f "/usr/share/applications/tonkeeper.desktop" ]; then
-    log_success "Ton Keeper ${TONKEEPER_VERSION} (x86_64) installed successfully"
+    log_success "Ton Keeper ${LATEST_TONKEEPER_VERSION} (x86_64) installed successfully"
 else
     log_warning "Ton Keeper installed but desktop file not found in standard location"
     if [ -f "/usr/local/share/applications/tonkeeper.desktop" ]; then
