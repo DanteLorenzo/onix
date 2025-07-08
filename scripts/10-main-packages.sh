@@ -62,12 +62,18 @@ sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf ${LATEST_GO_VERSION}.li
 
 rm ${LATEST_GO_VERSION}.linux-amd64.tar.gz
 
-# Добавляем в PATH только если еще не добавлено
-if ! grep -q '/usr/local/go/bin' ~/.bashrc; then
-    echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.bashrc
-fi
+# Добавляем в PATH в несколько мест для надежности
+GO_PATH_EXPORT='export PATH=$PATH:/usr/local/go/bin'
 
-source ~/.bashrc
+# Для текущей сессии
+export PATH=$PATH:/usr/local/go/bin
+
+# Для будущих сессий
+for rcfile in ~/.bashrc ~/.profile ~/.zshrc; do
+    if [ -f "$rcfile" ] && ! grep -q "$GO_PATH_EXPORT" "$rcfile"; then
+        echo "$GO_PATH_EXPORT" >> "$rcfile"
+    fi
+done
 
 if go version; then
     log_success "Go installed successfully: $(go version)"
