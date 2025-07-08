@@ -222,6 +222,7 @@ fi
 log_info "Installing Ton Keeper..."
 
 # Get list of assets from latest release
+log_info "Fetching latest release info from GitHub..."
 ASSETS_JSON=$(curl -s https://api.github.com/repos/tonkeeper/tonkeeper-web/releases/latest | jq -r '.assets[] | {name: .name, url: .browser_download_url}')
 if [ -z "$ASSETS_JSON" ]; then
     log_error "Failed to get Ton Keeper release assets"
@@ -239,8 +240,12 @@ fi
 TONKEEPER_VERSION=$(echo "$TONKEEPER_RPM_URL" | grep -oP 'Tonkeeper-\K\d+\.\d+\.\d+')
 TONKEEPER_TEMP_RPM="/tmp/tonkeeper-${TONKEEPER_VERSION}.rpm"
 
+# Print download URL
+log_info "Download URL: $TONKEEPER_RPM_URL"
 log_info "Downloading Ton Keeper ${TONKEEPER_VERSION}..."
-wget "$TONKEEPER_RPM_URL" -O "$TONKEEPER_TEMP_RPM" || {
+
+# Download with progress bar
+wget --show-progress -q "$TONKEEPER_RPM_URL" -O "$TONKEEPER_TEMP_RPM" || {
     log_error "Failed to download Ton Keeper RPM"
     exit 1
 }
