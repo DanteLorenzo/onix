@@ -429,4 +429,11 @@ FAVORITES+=" ]"
 gsettings set org.gnome.shell favorite-apps "$FAVORITES"
 log_success "Favorite apps configured: $FAVORITES"
 
+# ======================
+# Remove Unnecessary Packages
+# ======================
+log_info "Removing unnecessary GNOME packages..."
+sudo dnf remove -y gnome-tour gnome-maps
+log_success "Unnecessary packages removed"
+
 exit 0
