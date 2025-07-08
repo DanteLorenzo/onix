@@ -172,7 +172,8 @@ OBSIDIAN_FILE="$APP_DIR/Obsidian.AppImage"
 # Download and install
 NEED_DOWNLOAD=1
 if [ -f "$OBSIDIAN_FILE" ]; then
-    CURRENT_VERSION=$("$OBSIDIAN_FILE" --version 2>/dev/null | grep -oP '\d+\.\d+\.\d+')
+    # Check version without running the AppImage
+    CURRENT_VERSION=$(strings "$OBSIDIAN_FILE" | grep -oP 'Obsidian-\d+\.\d+\.\d+' | head -1 | cut -d'-' -f2)
     if [ "$CURRENT_VERSION" == "$OBSIDIAN_VERSION" ]; then
         log_info "Latest Obsidian version ${OBSIDIAN_VERSION} already installed"
         NEED_DOWNLOAD=0
@@ -220,23 +221,6 @@ if [ -f "$OBSIDIAN_FILE" ]; then
     rm -rf squashfs-root &>/dev/null
 fi
 
-# Method 2: Check local project icons directory
-if [ $ICON_INSTALLED -eq 0 ]; then
-    ICON_SOURCE="$SCRIPT_DIR/../configs/icons/obsidian-icon.png"
-    if [ -f "$ICON_SOURCE" ]; then
-        cp "$ICON_SOURCE" "$ICON_DIR/obsidian.png" && ICON_INSTALLED=1
-        log_info "Obsidian icon copied from project directory"
-    fi
-fi
-
-# Method 3: Download from GitHub
-if [ $ICON_INSTALLED -eq 0 ]; then
-    GH_ICON_URL="https://raw.githubusercontent.com/obsidianmd/obsidian-releases/master/images/obsidian.png"
-    if wget "$GH_ICON_URL" -O "$ICON_DIR/obsidian.png" &>/dev/null; then
-        ICON_INSTALLED=1
-        log_info "Obsidian icon downloaded from GitHub"
-    fi
-fi
 
 # Update desktop database
 update-desktop-database "$DESKTOP_DIR"
