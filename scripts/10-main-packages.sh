@@ -167,24 +167,24 @@ fi
 # Remove 'v' prefix if present
 OBSIDIAN_VERSION=${OBSIDIAN_VERSION#v}
 OBSIDIAN_URL="https://github.com/obsidianmd/obsidian-releases/releases/download/v${OBSIDIAN_VERSION}/Obsidian-${OBSIDIAN_VERSION}.AppImage"
-OBSIDIAN_FILE="$APP_DIR/Obsidian.AppImage"
+OBSIDIAN_FILE="$APP_DIR/Obsidian-${OBSIDIAN_VERSION}.AppImage"  # Сохраняем с версией в имени файла
 
 # Download and install
 NEED_DOWNLOAD=1
 if [ -f "$OBSIDIAN_FILE" ]; then
-    # Check version by extracting AppImage metadata
-    CURRENT_VERSION=$(dd if="$OBSIDIAN_FILE" bs=1 skip=20 count=20 2>/dev/null | strings | grep -oP 'Obsidian-\d+\.\d+\.\d+' | head -1 | cut -d'-' -f2)
-    
-    if [ -n "$CURRENT_VERSION" ]; then
-        if [ "$CURRENT_VERSION" == "$OBSIDIAN_VERSION" ]; then
-            log_info "Latest Obsidian version ${OBSIDIAN_VERSION} already installed"
-            NEED_DOWNLOAD=0
-        else
-            log_info "Updating Obsidian from ${CURRENT_VERSION} to ${OBSIDIAN_VERSION}"
+    # Версия уже содержится в имени файла
+    log_info "Latest Obsidian version ${OBSIDIAN_VERSION} already installed"
+    NEED_DOWNLOAD=0
+else
+    # Проверим, есть ли другие версии Obsidian
+    for old_file in "$APP_DIR"/Obsidian-*.AppImage; do
+        if [ -f "$old_file" ] && [ "$old_file" != "$OBSIDIAN_FILE" ]; then
+            old_version=$(basename "$old_file" | grep -oP '\d+\.\d+\.\d+')
+            log_info "Found older version ${old_version}, will update to ${OBSIDIAN_VERSION}"
+            rm "$old_file"
+            break
         fi
-    else
-        log_warning "Could not determine current Obsidian version, will reinstall"
-    fi
+    done
 fi
 
 if [ $NEED_DOWNLOAD -eq 1 ]; then
@@ -197,6 +197,10 @@ if [ $NEED_DOWNLOAD -eq 1 ]; then
     log_success "Obsidian downloaded and made executable"
 fi
 
+# Создаем симлинк без версии для удобства
+OBSIDIAN_LINK="$APP_DIR/Obsidian.AppImage"
+ln -sf "$OBSIDIAN_FILE" "$OBSIDIAN_LINK"
+
 # Create desktop file
 DESKTOP_FILE="$DESKTOP_DIR/obsidian.desktop"
 cat > "$DESKTOP_FILE" <<EOL
@@ -205,7 +209,7 @@ Version=1.0
 Type=Application
 Name=Obsidian
 Comment=A knowledge base that works on local Markdown files
-Exec="$OBSIDIAN_FILE" --no-sandbox
+Exec="$OBSIDIAN_LINK" --no-sandbox
 Icon=obsidian
 Categories=Office;TextEditor;
 Terminal=false
