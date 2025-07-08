@@ -228,24 +228,24 @@ else
     log_error "Failed to install Zen Browser via Flatpak"
 fi
 
-# =====================
-# Ton Keeper Installation (RPM) - x86_64
-# =====================
+# =============================
+# Ton Keeper Installation (RPM)
+# =============================
 log_info "Checking Ton Keeper installation..."
 
-# Проверка архитектуры
+# Ensure system architecture is x86_64
 if [ "$(uname -m)" != "x86_64" ]; then
     log_error "This script requires x86_64 architecture. Detected: $(uname -m)"
     exit 1
 fi
 
-# Проверка текущей установленной версии
+# Get currently installed Ton Keeper version, if any
 CURRENT_TONKEEPER_VERSION=$(rpm -q Tonkeeper --queryformat '%{VERSION}' 2>/dev/null)
 
-# Получение последней версии с GitHub
+# Fetch the latest version from GitHub
 log_info "Fetching latest release info from GitHub..."
 LATEST_TONKEEPER_VERSION=$(curl -s https://api.github.com/repos/tonkeeper/tonkeeper-web/releases/latest | grep -oP '"tag_name": "\Kv?\d+\.\d+\.\d+')
-LATEST_TONKEEPER_VERSION=${LATEST_TONKEEPER_VERSION#v}
+LATEST_TONKEEPER_VERSION=${LATEST_TONKEEPER_VERSION#v}  # remove leading "v" if present
 
 if [ -z "$LATEST_TONKEEPER_VERSION" ]; then
     log_error "Failed to get latest Ton Keeper version"
@@ -254,11 +254,12 @@ fi
 
 NEED_TONKEEPER_INSTALL=1
 
+# Compare installed version with latest available
 if [ -n "$CURRENT_TONKEEPER_VERSION" ]; then
     log_info "Current Ton Keeper version: $CURRENT_TONKEEPER_VERSION"
     log_info "Latest available version: $LATEST_TONKEEPER_VERSION"
 
-    # Функция сравнения версий
+    # Version comparison function
     version_compare() {
         [ "$1" = "$2" ] && return 0
         local IFS=.
@@ -272,6 +273,7 @@ if [ -n "$CURRENT_TONKEEPER_VERSION" ]; then
         return 0
     }
 
+    # Call comparison and check result
     version_compare "$CURRENT_TONKEEPER_VERSION" "$LATEST_TONKEEPER_VERSION"
     cmp_result=$?
 
@@ -281,19 +283,21 @@ if [ -n "$CURRENT_TONKEEPER_VERSION" ]; then
             NEED_TONKEEPER_INSTALL=0
             ;;
         1)
-            log_info "Installed version is newer than the latest GitHub release"
+            log_info "Installed version is newer than latest GitHub release"
             NEED_TONKEEPER_INSTALL=0
             ;;
         2)
-            log_info "A newer version is available; updating..."
+            log_info "Newer version available; proceeding with update..."
             ;;
     esac
 else
-    log_info "Ton Keeper not installed, will install latest version"
+    log_info "Ton Keeper not installed; proceeding with installation..."
 fi
 
+# Proceed only if installation or update is required
 if [ $NEED_TONKEEPER_INSTALL -eq 1 ]; then
     log_info "Fetching Ton Keeper release assets..."
+
     ASSETS_JSON=$(curl -s https://api.github.com/repos/tonkeeper/tonkeeper-web/releases/latest | jq -r '.assets[] | {name: .name, url: .browser_download_url}')
 
     if [ -z "$ASSETS_JSON" ]; then
@@ -301,6 +305,7 @@ if [ $NEED_TONKEEPER_INSTALL -eq 1 ]; then
         exit 1
     fi
 
+    # Extract URL for x86_64 RPM file
     TONKEEPER_RPM_URL=$(echo "$ASSETS_JSON" | jq -r 'select(.name | test("Tonkeeper.*x86_64\\.rpm"; "i")) | .url')
     if [ -z "$TONKEEPER_RPM_URL" ]; then
         log_error "Could not find x86_64 RPM package in release assets"
@@ -308,14 +313,17 @@ if [ $NEED_TONKEEPER_INSTALL -eq 1 ]; then
     fi
 
     log_info "Download URL for x86_64 RPM: $TONKEEPER_RPM_URL"
+
     TONKEEPER_TEMP_RPM="/tmp/tonkeeper-${LATEST_TONKEEPER_VERSION}.x86_64.rpm"
 
+    # Download the RPM package
     log_info "Downloading Ton Keeper ${LATEST_TONKEEPER_VERSION}..."
     wget --show-progress -q "$TONKEEPER_RPM_URL" -O "$TONKEEPER_TEMP_RPM" || {
         log_error "Failed to download Ton Keeper RPM"
         exit 1
     }
 
+    # Install the RPM package
     log_info "Installing Ton Keeper..."
     sudo dnf install -y "$TONKEEPER_TEMP_RPM" || {
         log_error "Failed to install Ton Keeper"
@@ -323,16 +331,19 @@ if [ $NEED_TONKEEPER_INSTALL -eq 1 ]; then
         exit 1
     }
 
+    # Clean up
     rm -f "$TONKEEPER_TEMP_RPM"
 
+    # Check for .desktop file
     if [ -f "/usr/share/applications/Tonkeeper.desktop" ]; then
-        log_success "Ton Keeper ${LATEST_TONKEEPER_VERSION} (x86_64) installed successfully"
+        log_success "Ton Keeper ${LATEST_TONKEEPER_VERSION} installed successfully"
     else
-        log_warning "Ton Keeper installed, but .desktop file not found in /usr/share/applications"
+        log_warning "Ton Keeper installed, but .desktop file not found in expected location"
     fi
 else
     log_info "Skipping Ton Keeper installation as no update is needed"
 fi
+
 
 
 # =====================
@@ -340,13 +351,14 @@ fi
 # =====================
 log_info "Installing latest Obsidian version..."
 
-APP_DIR="$HOME/Applications"
-DESKTOP_DIR="$HOME/.local/share/applications"
-ICON_DIR="$HOME/.local/share/icons/hicolor/256x256/apps"
-mkdir -p "$APP_DIR" "$DESKTOP_DIR" "$ICON_DIR"
+APP_DIR="/opt/obsidian"
+BIN_LINK="/usr/local/bin/obsidian"
+DESKTOP_FILE="/usr/share/applications/obsidian.desktop"
+ICON_PATH="/usr/share/icons/hicolor/256x256/apps/obsidian.png"
 
-OBSIDIAN_DESKTOP_FILE="$DESKTOP_DIR/obsidian.desktop"
-OBSIDIAN_LINK="$APP_DIR/Obsidian.AppImage"
+# Create application directory
+sudo mkdir -p "$APP_DIR"
+sudo chown "$USER":"$USER" "$APP_DIR"
 
 # Get latest version
 log_info "Checking latest Obsidian version..."
@@ -355,61 +367,61 @@ OBSIDIAN_VERSION=${OBSIDIAN_VERSION#v}
 OBSIDIAN_URL="https://github.com/obsidianmd/obsidian-releases/releases/download/v${OBSIDIAN_VERSION}/Obsidian-${OBSIDIAN_VERSION}.AppImage"
 OBSIDIAN_FILE="$APP_DIR/Obsidian-${OBSIDIAN_VERSION}.AppImage"
 
-# Determine if download is needed
-NEED_DOWNLOAD=1
-if [ -f "$OBSIDIAN_FILE" ]; then
-    log_info "Latest Obsidian version ${OBSIDIAN_VERSION} already present"
-    NEED_DOWNLOAD=0
-else
-    # Remove older versions
-    for old_file in "$APP_DIR"/Obsidian-*.AppImage; do
-        [ "$old_file" != "$OBSIDIAN_FILE" ] && rm -f "$old_file"
-    done
-fi
-
-# Download if needed
-if [ $NEED_DOWNLOAD -eq 1 ]; then
+# Download if not already present
+if [ ! -f "$OBSIDIAN_FILE" ]; then
     log_info "Downloading Obsidian ${OBSIDIAN_VERSION}..."
     wget "$OBSIDIAN_URL" -O "$OBSIDIAN_FILE" || {
         log_error "Failed to download Obsidian"
         exit 1
     }
     chmod +x "$OBSIDIAN_FILE"
-    ln -sf "$OBSIDIAN_FILE" "$OBSIDIAN_LINK"
-    log_success "Obsidian downloaded and linked"
+    ln -sf "$OBSIDIAN_FILE" "$APP_DIR/Obsidian.AppImage"
+    sudo ln -sf "$APP_DIR/Obsidian.AppImage" "$BIN_LINK"
+    log_success "Obsidian downloaded, linked, and made executable"
+else
+    log_info "Obsidian ${OBSIDIAN_VERSION} already downloaded"
+    sudo ln -sf "$APP_DIR/Obsidian-${OBSIDIAN_VERSION}.AppImage" "$BIN_LINK"
 fi
 
-# Always (re)generate .desktop file if missing
-if [ ! -f "$OBSIDIAN_DESKTOP_FILE" ]; then
-    log_info "Creating desktop entry for Obsidian..."
-    cat > "$OBSIDIAN_DESKTOP_FILE" <<EOL
-[Desktop Entry]
-Version=1.0
-Type=Application
-Name=Obsidian
-Comment=A knowledge base that works on local Markdown files
-Exec="${OBSIDIAN_LINK}" --no-sandbox
-Icon=obsidian
-Categories=Office;TextEditor;
-Terminal=false
-StartupWMClass=obsidian
-EOL
-fi
-
-# Extract icon if missing
-OBSIDIAN_ICON="$ICON_DIR/obsidian.png"
-if [ ! -f "$OBSIDIAN_ICON" ]; then
+# Extract icon from AppImage
+if [ ! -f "$ICON_PATH" ]; then
     log_info "Extracting icon from AppImage..."
     "$OBSIDIAN_FILE" --appimage-extract &>/dev/null
-    ICON_SOURCE="squashfs-root/usr/share/icons/hicolor/256x256/apps/obsidian.png"
-    if [ -f "$ICON_SOURCE" ]; then
-        cp "$ICON_SOURCE" "$OBSIDIAN_ICON"
-        log_success "Icon extracted and installed"
+    ICON_SRC="squashfs-root/usr/share/icons/hicolor/256x256/apps/obsidian.png"
+    if [ -f "$ICON_SRC" ]; then
+        sudo mkdir -p "$(dirname "$ICON_PATH")"
+        sudo cp "$ICON_SRC" "$ICON_PATH"
+        log_success "Icon extracted and installed to $ICON_PATH"
     else
-        log_warning "Icon not found in extracted AppImage"
+        log_warning "Icon not found in AppImage"
     fi
     rm -rf squashfs-root
+else
+    log_info "Obsidian icon already exists"
 fi
+
+# Create .desktop file
+log_info "Creating .desktop file in /usr/share/applications..."
+sudo tee "$DESKTOP_FILE" > /dev/null <<EOL
+[Desktop Entry]
+Name=Obsidian
+Exec=${BIN_LINK} --no-sandbox
+Icon=obsidian
+Type=Application
+Categories=Office;TextEditor;
+StartupNotify=true
+Terminal=false
+EOL
+
+sudo chmod 644 "$DESKTOP_FILE"
+
+# Update desktop database and icon cache
+log_info "Updating desktop and icon caches..."
+sudo update-desktop-database
+sudo gtk-update-icon-cache -f /usr/share/icons/hicolor
+
+log_success "Obsidian ${OBSIDIAN_VERSION} installed and integrated into system"
+
 
 
 log_success "Obsidian ${OBSIDIAN_VERSION} installed successfully (icon installed: $([ $OBSIDIAN_ICON_INSTALLED -eq 1 ] && echo "yes" || echo "no"))"
