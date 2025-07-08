@@ -48,7 +48,6 @@ sudo dnf install -y \
     simplescreenrecorder \
     ansible \
     wine \
-    bottles \
 
 # Add VSCodium repository
 sudo rpm --import https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/-/raw/master/pub.gpg
@@ -419,9 +418,6 @@ sudo chmod 644 "$DESKTOP_FILE"
 log_info "Updating desktop and icon caches..."
 sudo update-desktop-database
 sudo gtk-update-icon-cache -f /usr/share/icons/hicolor
-
-log_success "Obsidian ${OBSIDIAN_VERSION} installed and integrated into system"
-
 
 
 log_success "Obsidian ${OBSIDIAN_VERSION} installed successfully (icon installed: $([ $OBSIDIAN_ICON_INSTALLED -eq 1 ] && echo "yes" || echo "no"))"
