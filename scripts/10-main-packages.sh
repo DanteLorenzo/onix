@@ -24,7 +24,7 @@ sudo dnf install -y \
     gobuster \
     wireshark \
     podman \
-    wireguard \
+    wireguard-tools \
     dnf-plugins-core
 
 # Adding browser repositories
@@ -41,7 +41,6 @@ log_info "Installing browsers..."
 sudo dnf install -y \
     librewolf \
     brave-browser
-
 
 if [ $? -eq 0 ]; then
     log_success "Main packages installation complete."
@@ -194,16 +193,15 @@ fi
 # Remove 'v' prefix if present
 OBSIDIAN_VERSION=${OBSIDIAN_VERSION#v}
 OBSIDIAN_URL="https://github.com/obsidianmd/obsidian-releases/releases/download/v${OBSIDIAN_VERSION}/Obsidian-${OBSIDIAN_VERSION}.AppImage"
-OBSIDIAN_FILE="$APP_DIR/Obsidian-${OBSIDIAN_VERSION}.AppImage"  # Сохраняем с версией в имени файла
+OBSIDIAN_FILE="$APP_DIR/Obsidian-${OBSIDIAN_VERSION}.AppImage"
 
 # Download and install
 NEED_DOWNLOAD=1
 if [ -f "$OBSIDIAN_FILE" ]; then
-    # Версия уже содержится в имени файла
     log_info "Latest Obsidian version ${OBSIDIAN_VERSION} already installed"
     NEED_DOWNLOAD=0
 else
-    # Проверим, есть ли другие версии Obsidian
+    # Check for older versions
     for old_file in "$APP_DIR"/Obsidian-*.AppImage; do
         if [ -f "$old_file" ] && [ "$old_file" != "$OBSIDIAN_FILE" ]; then
             old_version=$(basename "$old_file" | grep -oP '\d+\.\d+\.\d+')
@@ -224,13 +222,13 @@ if [ $NEED_DOWNLOAD -eq 1 ]; then
     log_success "Obsidian downloaded and made executable"
 fi
 
-# Создаем симлинк без версии для удобства
+# Create symlink for easier access
 OBSIDIAN_LINK="$APP_DIR/Obsidian.AppImage"
 ln -sf "$OBSIDIAN_FILE" "$OBSIDIAN_LINK"
 
 # Create desktop file
-DESKTOP_FILE="$DESKTOP_DIR/obsidian.desktop"
-cat > "$DESKTOP_FILE" <<EOL
+OBSIDIAN_DESKTOP_FILE="$DESKTOP_DIR/obsidian.desktop"
+cat > "$OBSIDIAN_DESKTOP_FILE" <<EOL
 [Desktop Entry]
 Version=1.0
 Type=Application
@@ -244,25 +242,95 @@ StartupWMClass=obsidian
 EOL
 
 # Handle icon installation
-ICON_INSTALLED=0
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
-# Method 1: Extract icon from AppImage
+OBSIDIAN_ICON_INSTALLED=0
 if [ -f "$OBSIDIAN_FILE" ]; then
     "$OBSIDIAN_FILE" --appimage-extract &>/dev/null
     if [ -f squashfs-root/usr/share/icons/hicolor/256x256/apps/obsidian.png ]; then
-        cp squashfs-root/usr/share/icons/hicolor/256x256/apps/obsidian.png "$ICON_DIR/obsidian.png" && ICON_INSTALLED=1
+        cp squashfs-root/usr/share/icons/hicolor/256x256/apps/obsidian.png "$ICON_DIR/obsidian.png" && OBSIDIAN_ICON_INSTALLED=1
         log_info "Obsidian icon extracted from AppImage"
     fi
     rm -rf squashfs-root &>/dev/null
 fi
 
+# =====================
+# Zen Browser Installation (AppImage)
+# =====================
+log_info "Installing Zen Browser (AppImage)..."
+
+# Get latest Zen Browser version from GitHub API
+log_info "Checking latest Zen Browser version..."
+ZEN_VERSION=$(curl -s https://api.github.com/repos/zen-browser/zen/releases/latest | grep -oP '"tag_name": "\Kv?\d+\.\d+\.\d+')
+if [ -z "$ZEN_VERSION" ]; then
+    log_error "Failed to get latest Zen Browser version"
+    exit 1
+fi
+
+# Remove 'v' prefix if present
+ZEN_VERSION=${ZEN_VERSION#v}
+ZEN_URL="https://github.com/zen-browser/zen/releases/download/v${ZEN_VERSION}/Zen-${ZEN_VERSION}.AppImage"
+ZEN_FILE="$APP_DIR/Zen-${ZEN_VERSION}.AppImage"
+
+# Download and install
+NEED_DOWNLOAD=1
+if [ -f "$ZEN_FILE" ]; then
+    log_info "Latest Zen Browser version ${ZEN_VERSION} already installed"
+    NEED_DOWNLOAD=0
+else
+    # Check for older versions
+    for old_file in "$APP_DIR"/Zen-*.AppImage; do
+        if [ -f "$old_file" ] && [ "$old_file" != "$ZEN_FILE" ]; then
+            old_version=$(basename "$old_file" | grep -oP '\d+\.\d+\.\d+')
+            log_info "Found older version ${old_version}, will update to ${ZEN_VERSION}"
+            rm "$old_file"
+            break
+        fi
+    done
+fi
+
+if [ $NEED_DOWNLOAD -eq 1 ]; then
+    log_info "Downloading Zen Browser ${ZEN_VERSION}..."
+    wget "$ZEN_URL" -O "$ZEN_FILE" || {
+        log_error "Failed to download Zen Browser"
+        exit 1
+    }
+    chmod +x "$ZEN_FILE"
+    log_success "Zen Browser downloaded and made executable"
+fi
+
+# Create symlink for easier access
+ZEN_LINK="$APP_DIR/Zen.AppImage"
+ln -sf "$ZEN_FILE" "$ZEN_LINK"
+
+# Create desktop file
+ZEN_DESKTOP_FILE="$DESKTOP_DIR/zen-browser.desktop"
+cat > "$ZEN_DESKTOP_FILE" <<EOL
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=Zen Browser
+Comment=A privacy-focused web browser
+Exec="$ZEN_LINK" --no-sandbox
+Icon=zen-browser
+Categories=Network;WebBrowser;
+Terminal=false
+StartupWMClass=zen-browser
+EOL
+
+# Handle icon installation
+ZEN_ICON_INSTALLED=0
+if [ -f "$ZEN_FILE" ]; then
+    "$ZEN_FILE" --appimage-extract &>/dev/null
+    if [ -f squashfs-root/usr/share/icons/hicolor/256x256/apps/zen-browser.png ]; then
+        cp squashfs-root/usr/share/icons/hicolor/256x256/apps/zen-browser.png "$ICON_DIR/zen-browser.png" && ZEN_ICON_INSTALLED=1
+        log_info "Zen Browser icon extracted from AppImage"
+    fi
+    rm -rf squashfs-root &>/dev/null
+fi
 
 # Update desktop database
 update-desktop-database "$DESKTOP_DIR"
-log_success "Obsidian ${OBSIDIAN_VERSION} installed successfully (icon installed: $([ $ICON_INSTALLED -eq 1 ] && echo "yes" || echo "no"))"
-
-
+log_success "Zen Browser ${ZEN_VERSION} installed successfully (icon installed: $([ $ZEN_ICON_INSTALLED -eq 1 ] && echo "yes" || echo "no"))"
+log_success "Obsidian ${OBSIDIAN_VERSION} installed successfully (icon installed: $([ $OBSIDIAN_ICON_INSTALLED -eq 1 ] && echo "yes" || echo "no"))"
 
 # =================
 # Final Completion
@@ -279,6 +347,7 @@ echo "  Go:       $(go version 2>/dev/null || echo 'not available')"
 echo "  Python:   $(python3 --version 2>/dev/null || echo 'not available')"
 echo "  Rust:     $(rustc --version 2>/dev/null || echo 'not available')"
 echo "  Obsidian: $OBSIDIAN_FILE"
+echo "  Zen Browser: $ZEN_FILE"
 echo ""
 log_info "Note: After logout/login you can run docker commands without sudo."
 log_info "Note: You may need to start a new shell for PATH changes to take effect."
@@ -301,18 +370,18 @@ if [ -f "/usr/share/applications/org.gnome.Ptyxis.desktop" ] ||
 fi
 
 # Add Obsidian if installed
-if [ -f "$DESKTOP_FILE" ]; then
+if [ -f "$OBSIDIAN_DESKTOP_FILE" ]; then
     FAVORITES+=", 'obsidian.desktop'"
     log_info "Added Obsidian to favorites"
 fi
 
-# Check for Zen browser (replacing Firefox check)
-if [ -f "/usr/share/applications/zen-browser.desktop" ]; then
+# Add Zen Browser if installed
+if [ -f "$ZEN_DESKTOP_FILE" ]; then
     FAVORITES+=", 'zen-browser.desktop'"
-    log_info "Added Zen browser to favorites"
+    log_info "Added Zen Browser to favorites"
 fi
 
-# Check for LibreWolf browser (replacing Firefox alternative check)
+# Check for LibreWolf browser
 if [ -f "/usr/share/applications/librewolf.desktop" ]; then
     FAVORITES+=", 'librewolf.desktop'"
     log_info "Added LibreWolf browser to favorites"
