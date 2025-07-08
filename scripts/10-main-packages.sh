@@ -259,7 +259,7 @@ log_info "Installing Zen Browser (AppImage)..."
 
 # Get latest Zen Browser version from GitHub API
 log_info "Checking latest Zen Browser version..."
-ZEN_VERSION=$(curl -s https://api.github.com/repos/zen-browser/zen/releases/latest | grep -oP '"tag_name": "\Kv?\d+\.\d+\.\d+')
+ZEN_VERSION=$(curl -s https://api.github.com/repos/zen-browser/desktop/releases/latest | grep -oP '"tag_name": "\Kv?\d+\.\d+\.\d+\w*')
 if [ -z "$ZEN_VERSION" ]; then
     log_error "Failed to get latest Zen Browser version"
     exit 1
@@ -267,7 +267,7 @@ fi
 
 # Remove 'v' prefix if present
 ZEN_VERSION=${ZEN_VERSION#v}
-ZEN_URL="https://github.com/zen-browser/zen/releases/download/v${ZEN_VERSION}/Zen-${ZEN_VERSION}.AppImage"
+ZEN_URL="https://github.com/zen-browser/desktop/releases/download/v${ZEN_VERSION}/zen-x86_64.AppImage"
 ZEN_FILE="$APP_DIR/Zen-${ZEN_VERSION}.AppImage"
 
 # Download and install
@@ -279,7 +279,7 @@ else
     # Check for older versions
     for old_file in "$APP_DIR"/Zen-*.AppImage; do
         if [ -f "$old_file" ] && [ "$old_file" != "$ZEN_FILE" ]; then
-            old_version=$(basename "$old_file" | grep -oP '\d+\.\d+\.\d+')
+            old_version=$(basename "$old_file" | grep -oP '\d+\.\d+\.\d+\w*')
             log_info "Found older version ${old_version}, will update to ${ZEN_VERSION}"
             rm "$old_file"
             break
