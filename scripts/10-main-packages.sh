@@ -196,22 +196,49 @@ Terminal=false
 StartupWMClass=obsidian
 EOL
 
-# Copy icon from project directory
+# Handle icon installation - multiple fallback methods
+ICON_INSTALLED=0
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ICON_SOURCE="$SCRIPT_DIR/../configs/icons/obsidian-icon.png"
 
+# Method 1: Check local project icons directory
+ICON_SOURCE="$SCRIPT_DIR/../configs/icons/obsidian-icon.png"
 if [ -f "$ICON_SOURCE" ]; then
-    cp "$ICON_SOURCE" "$ICON_DIR/obsidian.png"
+    cp "$ICON_SOURCE" "$ICON_DIR/obsidian.png" && ICON_INSTALLED=1
     log_info "Obsidian icon copied from project directory"
-else
-    # Fallback to downloading icon if not found in project
-    wget https://obsidian.md/images/icon.png -O "$ICON_DIR/obsidian.png" 2>/dev/null || true
-    log_info "Used fallback method to get Obsidian icon"
+fi
+
+# Method 2: Check if icon exists in AppImage
+if [ $ICON_INSTALLED -eq 0 ] && [ -f "$OBSIDIAN_FILE" ]; then
+    "$OBSIDIAN_FILE" --appimage-extract &>/dev/null
+    if [ -f squashfs-root/usr/share/icons/hicolor/256x256/apps/obsidian.png ]; then
+        cp squashfs-root/usr/share/icons/hicolor/256x256/apps/obsidian.png "$ICON_DIR/obsidian.png" && ICON_INSTALLED=1
+        log_info "Obsidian icon extracted from AppImage"
+    fi
+    rm -rf squashfs-root &>/dev/null
+fi
+
+# Method 3: Download from GitHub
+if [ $ICON_INSTALLED -eq 0 ]; then
+    GH_ICON_URL="https://raw.githubusercontent.com/obsidianmd/obsidian-releases/master/images/obsidian.png"
+    if wget "$GH_ICON_URL" -O "$ICON_DIR/obsidian.png" &>/dev/null; then
+        ICON_INSTALLED=1
+        log_info "Obsidian icon downloaded from GitHub"
+    fi
+fi
+
+# Method 4: Final fallback to official site
+if [ $ICON_INSTALLED -eq 0 ]; then
+    if wget "https://obsidian.md/images/icon.png" -O "$ICON_DIR/obsidian.png" &>/dev/null; then
+        ICON_INSTALLED=1
+        log_info "Obsidian icon downloaded from official site"
+    else
+        log_warning "Failed to install Obsidian icon - will use default icon"
+    fi
 fi
 
 # Update desktop database
 update-desktop-database "$DESKTOP_DIR"
-log_success "Obsidian ${OBSIDIAN_VERSION} installed successfully"
+log_success "Obsidian ${OBSIDIAN_VERSION} installed successfully (icon installed: $([ $ICON_INSTALLED -eq 1 ] && echo "yes" || echo "no")"
 
 
 # =================
