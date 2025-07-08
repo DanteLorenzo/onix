@@ -37,6 +37,18 @@ sudo dnf install -y \
     hping3 \
     hwinfo \
     nload \
+    openvpn \
+    remmina \
+    remmina-plugins-rdp \
+    remmina-plugins-vnc \
+    remmina-plugins-www \
+    remmina-plugins-spirce \
+    remmina-plugins-secret \
+    simplescreenrecorder \
+    ansible \
+    wine \
+    bottles \
+    
     
 
 # Adding browser repositories
@@ -423,6 +435,12 @@ if [ -f "$ZEN_DESKTOP_FILE" ]; then
     log_info "Added Zen Browser to favorites"
 fi
 
+# Check for Brave browser
+if [ -f "/usr/share/applications/brave-browser.desktop" ]; then
+    FAVORITES+=", 'brave-browser.desktop'"
+    log_info "Added Brave browser to favorites"
+fi
+
 # Check for LibreWolf browser
 if [ -f "/usr/share/applications/librewolf.desktop" ]; then
     FAVORITES+=", 'librewolf.desktop'"
@@ -462,7 +480,7 @@ if [ -f "/var/lib/flatpak/exports/share/applications/io.bassi.Amberol.desktop" ]
     log_info "Added Amberol to favorites"
 fi
 
-# Add Telegram
+# Add Telegram (fixed entry)
 if [ -f "/usr/share/applications/telegram-desktop.desktop" ]; then
     FAVORITES+=", 'telegram-desktop.desktop'"
     log_info "Added Telegram to favorites"
