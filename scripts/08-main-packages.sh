@@ -578,6 +578,18 @@ if [ -f "/var/lib/flatpak/exports/share/applications/com.getpostman.Postman.desk
     log_info "Added Postman to favorites"
 fi
 
+# Add Whaler
+if [ -f "/var/lib/flatpak/exports/share/applications/com.github.sdv43.whaler.desktop" ]; then
+    FAVORITES+=", 'com.github.sdv43.whaler.desktop'"
+    log_info "Added Whaler to favorites"
+fi
+
+# Add Pods
+if [ -f "/var/lib/flatpak/exports/share/applications/com.github.marhkb.Pods.desktop" ]; then
+    FAVORITES+=", 'com.github.marhkb.Pods.desktop'"
+    log_info "Added Pods to favorites"
+fi
+
 # Add Boxes
 if [ -f "/usr/share/applications/org.gnome.Boxes.desktop" ]; then
     FAVORITES+=", 'org.gnome.Boxes.desktop'"
@@ -648,6 +660,11 @@ elif [ -f "/var/lib/flatpak/exports/share/applications/com.discordapp.Discord.de
     log_info "Added Discord (Flatpak) to favorites"
 fi
 
+# Add Outline Client
+if [ -f "/var/lib/flatpak/exports/share/applications/org.getoutline.OutlineClient.desktop" ]; then
+    FAVORITES+=", 'org.getoutline.OutlineClient.desktop'"
+    log_info "Added Outline Client to favorites"
+fi
 
 # Add Deluge
 if [ -f "/usr/share/applications/deluge.desktop" ]; then
