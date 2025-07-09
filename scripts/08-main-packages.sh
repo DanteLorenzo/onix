@@ -47,7 +47,8 @@ sudo dnf install -y \
     remmina-plugins-secret \
     simplescreenrecorder \
     ansible \
-    VirtualBox 
+    VirtualBox \
+    timeshift
 
 
 # Add VSCodium repository
