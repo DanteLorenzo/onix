@@ -47,7 +47,8 @@ sudo dnf install -y \
     remmina-plugins-secret \
     simplescreenrecorder \
     ansible \
-    wine \
+    VirtualBox 
+
 
 # Add VSCodium repository
 sudo rpm --import https://gitlab.com/paulcarroty/vscodium-deb-rpm-repo/-/raw/master/pub.gpg
@@ -225,6 +226,46 @@ if flatpak install -y flathub app.zen_browser.zen; then
     echo "Run with: flatpak run io.github.zen-browser.Zen"
 else
     log_error "Failed to install Zen Browser via Flatpak"
+fi
+
+# =====================
+# Whaler Installation (Flatpak)
+# =====================
+if flatpak install -y flathub com.github.sdv43.whaler; then
+    log_success "Whaler installed successfully"
+    echo "Run with: flatpak run com.github.sdv43.whaler"
+else
+    log_error "Failed to install Whaler"
+fi
+
+# =====================
+# Pods Installation (Flatpak)
+# =====================
+if flatpak install -y flathub com.github.marhkb.Pods; then
+    log_success "Pods installed successfully"
+    echo "Run with: flatpak run com.github.marhkb.Pods"
+else
+    log_error "Failed to install Pods"
+fi
+
+# =====================
+# Install Outline Manager
+# =====================
+if flatpak install -y flathub org.getoutline.OutlineManager; then
+    log_success "Outline Manager installed successfully"
+    echo "Run with: flatpak run org.getoutline.OutlineManager"
+else
+    log_error "Failed to install Outline Manager"
+fi
+
+# =====================
+# Install Outline Client
+# =====================
+if flatpak install -y flathub org.getoutline.OutlineClient; then
+    log_success "Outline Client installed successfully"
+    echo "Run with: flatpak run org.getoutline.OutlineClient"
+else
+    log_error "Failed to install Outline Client"
 fi
 
 # =============================
@@ -432,9 +473,59 @@ fi
 
 # Update desktop database
 update-desktop-database "$DESKTOP_DIR"
-
-
 log_success "Obsidian ${OBSIDIAN_VERSION} installed successfully (icon installed: $([ $OBSIDIAN_ICON_INSTALLED -eq 1 ] && echo "yes" || echo "no"))"
+
+
+# =============================
+# DBeaver Installation (RPM)
+# =============================
+# DBeaver is already installed in the main DNF section
+log_info "Checking DBeaver installation..."
+if dbeaver-ce --version &>/dev/null; then
+    log_success "DBeaver is already installed: $(dbeaver-ce --version 2>/dev/null | head -n1)"
+else
+    log_info "Installing DBeaver..."
+    sudo dnf install -y dbeaver-ce
+    if [ $? -eq 0 ]; then
+        log_success "DBeaver installed successfully"
+    else
+        log_error "Failed to install DBeaver"
+    fi
+fi
+
+# =============================
+# Cursor Installation (RPM)
+# =============================
+log_info "Installing Cursor..."
+sudo rpm --import https://download.cursor.sh/linux/signing-key.public
+sudo sh -c 'echo -e "[cursor]\nname=Cursor\nbaseurl=https://download.cursor.sh/linux/rpm\nenabled=1\ngpgcheck=1\ngpgkey=https://download.cursor.sh/linux/signing-key.public" > /etc/yum.repos.d/cursor.repo'
+sudo dnf install -y cursor
+
+if [ $? -eq 0 ]; then
+    log_success "Cursor installed successfully"
+else
+    log_error "Failed to install Cursor"
+fi
+
+# =============================
+# Dolphin Anty Installation (RPM)
+# =============================
+log_info "Installing Dolphin Anty..."
+DOLPHIN_ANTY_URL="https://dolphin-anty.com/download.php?get-linux=true"
+DOLPHIN_ANTY_TEMP="/tmp/dolphin-anty.rpm"
+
+wget -O "$DOLPHIN_ANTY_TEMP" "$DOLPHIN_ANTY_URL"
+if [ $? -eq 0 ]; then
+    sudo dnf install -y "$DOLPHIN_ANTY_TEMP"
+    if [ $? -eq 0 ]; then
+        log_success "Dolphin Anty installed successfully"
+    else
+        log_error "Failed to install Dolphin Anty RPM"
+    fi
+    rm -f "$DOLPHIN_ANTY_TEMP"
+else
+    log_error "Failed to download Dolphin Anty"
+fi
 
 # =================
 # Final Completion
@@ -484,6 +575,18 @@ fi
 if [ -f "/var/lib/flatpak/exports/share/applications/com.getpostman.Postman.desktop" ]; then
     FAVORITES+=", 'com.getpostman.Postman.desktop'"
     log_info "Added Postman to favorites"
+fi
+
+# Add Boxes
+if [ -f "/usr/share/applications/org.gnome.Boxes.desktop" ]; then
+    FAVORITES+=", 'org.gnome.Boxes.desktop'"
+    log_info "Added Boxes to favorites"
+fi
+
+# Add Virtualbox
+if [ -f "/usr/share/applications/virtualbox.desktop" ]; then
+    FAVORITES+=", 'virtualbox.desktop'"
+    log_info "Added Virtualbox to favorites"
 fi
 
 # Add KeePassXC
